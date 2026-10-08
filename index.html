@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="description" content="A modern browser workspace for Luau developers, with local projects and official Luau Playground execution." />
+  <link rel="icon" type="image/svg+xml" href="./public/favicon.svg" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  <title>Luau Developer Playground — v0.1</title>
+</head>
+<body data-theme="dark">
+  <div id="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">{ }</div><div class="brand-name"><strong>Luau<span>Forge</span></strong><small>DEVELOPER PLAYGROUND <em>v0.1</em></small></div></div>
+      <div class="top-center"><span class="online-dot"></span><span>LOCAL WORKSPACE</span><span class="head-sep">/</span><strong id="project-title">My Workspace</strong></div>
+      <div class="top-actions"><button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">◐</button><a class="icon-btn external" href="https://luau.org/" target="_blank" rel="noopener noreferrer" title="Luau documentation" aria-label="Luau documentation">↗</a><button id="export-btn" class="quiet-btn"><span>⇩</span> Export</button><button id="run-btn" class="primary-btn"><span>▶</span> Run code <kbd>Ctrl ↵</kbd></button></div>
+    </header>
+    <div class="workspace">
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header"><span class="eyebrow">EXPLORER</span><div><button id="add-file" class="tiny-btn" title="New file" aria-label="New file">＋</button><button id="import-btn" class="tiny-btn" title="Import file or project" aria-label="Import file or project">⇧</button></div></div>
+        <div class="project-label"><span class="project-glyph">◈</span> <span id="project-folder">MY WORKSPACE</span><button id="rename-project" title="Rename workspace" aria-label="Rename workspace">✎</button></div>
+        <nav id="file-tree" class="file-tree" aria-label="Project files"></nav>
+        <div class="sidebar-subhead">QUICK START</div>
+        <div class="template-list"><button data-template="basic" class="template">⌘ <span>New script</span></button><button data-template="module" class="template">⬡ <span>Module template</span></button><button data-template="type" class="template">◇ <span>Type example</span></button><button data-template="benchmark" class="template">◷ <span>Benchmark template</span></button></div>
+        <div class="sidebar-footer"><div class="avatar">LF</div><div><strong>Local workspace</strong><small>Autosaved in browser</small></div><span class="checkmark">✓</span></div>
+      </aside>
+      <main class="center">
+        <div class="crumbbar"><button id="sidebar-toggle" class="icon-btn secondary" title="Toggle explorer" aria-label="Toggle explorer">☰</button><span>workspace</span><span class="chevron">›</span><span id="breadcrumb-file">main.luau</span><div class="crumb-right"><span class="status-pill"><span class="green-dot"></span> Luau</span><span id="save-status">Saved</span></div></div>
+        <div class="editor-tabs" id="editor-tabs" role="tablist"></div>
+        <div class="editor-toolbar"><div class="left-tools"><span class="tool-label">SOURCE EDITOR</span><span class="editor-tag">LU</span><span class="editor-tag">UTF-8</span></div><div class="right-tools"><button id="rename-file" class="toolbar-btn">Rename</button><button id="delete-file" class="toolbar-btn danger-text">Delete</button><div class="vert-rule"></div><button id="wrap-toggle" class="toolbar-btn" title="Toggle word wrap">Wrap: off</button><button id="download-file" class="toolbar-btn">↓ File</button></div></div>
+        <section class="editor-section" aria-label="Luau source editor"><div id="line-gutter" class="line-gutter" aria-hidden="true"></div><div class="code-area"><pre id="syntax-layer" aria-hidden="true"><code id="syntax-code"></code></pre><textarea id="code-input" autocomplete="off" autocapitalize="off" spellcheck="false" wrap="off" aria-label="Luau code editor" placeholder="-- Start writing Luau code..."></textarea></div></section>
+        <div class="info-bar"><div><span id="cursor-position">Ln 1, Col 1</span><span class="info-dot">•</span><span id="line-count">1 lines</span><span class="info-dot">•</span><span id="file-size">0 B</span></div><div><span class="keyboard-hint">Tab → 4 spaces</span><span class="info-dot">•</span><span>Luau</span></div></div>
+        <section class="output-area"><div class="output-top"><div class="output-heading"><span class="terminal-icon">▤</span> OUTPUT <span id="output-indicator" class="output-state">READY</span></div><div class="output-actions"><button id="clear-console" class="toolbar-btn">Clear</button><button id="expand-runner" class="toolbar-btn" title="Open execution panel">Open runner ↗</button></div></div><div id="console-content" class="console-content"><p class="system-line"><span>›</span> LuauForge ready. Choose <b>Run code</b> to launch the official Luau runtime.</p><p class="muted-line">Source is saved locally in this browser. Nothing is sent to a custom server.</p></div></section>
+      </main>
+      <aside class="inspector"><div class="inspector-title">WORKSPACE <span>↗</span></div><div class="panel-box"><div class="panel-icon">⟡</div><div class="panel-heading">Your local project</div><div class="panel-subtitle">Files are stored on this device. Import, edit and run supported Luau code in your browser.</div><div class="panel-stats"><div><span>FILES</span><strong id="stat-files">3</strong></div><div><span>LINES</span><strong id="stat-lines">20</strong></div><div><span>SIZE</span><strong id="stat-size">1 KB</strong></div></div></div><div class="setting-group"><div class="setting-heading">COMPILER SETTINGS</div><label for="mode-select">Type checking mode</label><select id="mode-select"><option value="strict">Strict</option><option value="nonstrict">Nonstrict</option><option value="nocheck">No check</option></select><label for="optimization-select">Optimization</label><select id="optimization-select"><option value="0">O0 — Debug</option><option value="1">O1 — Balanced</option><option value="2">O2 — Optimized</option></select></div><div class="inspector-callout"><span>↗</span><div><strong>Official Luau engine</strong><p>Compilation, execution and type diagnostics run in the embedded Luau Playground, not this editor.</p><a href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Visit official playground ↗</a></div></div><div class="inspector-bottom">Developed for Luau creators <span>v0.1.0</span></div></aside>
+    </div>
+    <div class="mobile-bar"><button id="mobile-files">☰ Files</button><button id="mobile-run">▶ Run</button><button id="mobile-export">⇩ Export</button></div>
+  </div>
+  <div id="runner-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="runner-title"><div class="runner-dialog"><div class="runner-head"><div><span class="eyebrow">OFFICIAL WEBASSEMBLY ENGINE</span><h2 id="runner-title">Run & analyze Luau</h2></div><div class="runner-buttons"><a id="runner-external" class="quiet-btn" href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Open in new tab ↗</a><button id="runner-close" class="icon-btn" aria-label="Close runner">✕</button></div></div><div class="runner-notice">This embedded editor runs in <strong>play.luau.org</strong>. It cannot access Roblox services. You can run, view output, and inspect type errors there. Changes inside the embedded editor do not automatically sync back.</div><div id="runner-frame-container" class="runner-frame-container"></div></div></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <input type="file" id="import-input" hidden accept=".lua,.luau,.json,text/plain,application/json" multiple />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js" defer></script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
