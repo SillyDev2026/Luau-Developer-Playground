@@ -19,6 +19,7 @@ const luau = new LuauRuntime();
 let outputView = 'console';
 let checkSequence = 0;
 let executing = false;
+let executionToken = 0;
 const openedTabs = new Set([project.active]);
 const collapsedFolders = new Set();
 const editor = $('code-input');
@@ -88,7 +89,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.3`;
+  document.title = `${project.active} — LuauForge v0.3.1`;
 }
 
 function button(label, css, fn, title = '') {
@@ -433,6 +434,7 @@ function setExecuting(value) {
 async function runLocal() {
   if (executing) return;
   setOutputView('console');
+  const token = ++executionToken;
   setExecuting(true);
   consoleMessage(`▶ Running ${project.active} with Luau WASM…`, 'notice-line');
   try {
@@ -447,12 +449,14 @@ async function runLocal() {
     if (result.success) consoleMessage(`✓ Completed in ${elapsed.toFixed(2)} ms (browser WASM).`, 'system-line');
     else if (!result.error) consoleMessage('Execution did not complete successfully.', 'error-line');
   } catch (error) {
+    if (error.message === 'Execution stopped') return;
     consoleMessage(`Runtime: ${error.message}`, 'error-line');
     toast(`Luau runtime: ${error.message}`, true);
-  } finally { setExecuting(false); }
+  } finally { if (executionToken === token) setExecuting(false); }
 }
 function stopLocal() {
   if (!executing) return;
+  executionToken++;
   luau.stop();
   setExecuting(false);
   consoleMessage('■ Execution stopped. Analyzer remains available.', 'notice-line');
@@ -741,4 +745,4 @@ editorSection.addEventListener('drop', async event => { event.preventDefault(); 
 
 renderAll();
 setOutputView('console');
-consoleMessage('LuauForge v0.3 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+consoleMessage('LuauForge v0.3.1 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

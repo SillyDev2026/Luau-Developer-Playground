@@ -1,3 +1,13 @@
+# Changelog
+
+## 0.3.1 — WebAssembly deployment and runtime repair
+
+- Fixed the GitHub Pages missing Luau module error by serving WASM assets at project-root `/wasm/` instead of `/public/wasm/`.
+- Added asset preflight checks, readable errors, release version cache busting, and stronger CI verification.
+- Fixed worker termination/retry and stale execution status races.
+- Updated Pages setup instructions; requires **GitHub Actions** deployment source rather than branch publishing.
+- Added reproducible WASM packaging tests and error/restart regression coverage.
+
 ## v0.3.0 — WebAssembly engine
 
 - Added native browser Luau WASM execution with a dedicated stoppable worker.
@@ -6,7 +16,6 @@
 - Added stop button, keyboard shortcuts, and updated mobile output layout.
 - Kept official Playground fallback and v0.2 local storage compatibility.
 
-# Changelog
 
 ## 0.2.0 — Workspace and responsive layout overhaul
 

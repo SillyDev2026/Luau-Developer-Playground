@@ -26,3 +26,14 @@ test('deployment publishes dist folder', async () => {
   assert.match(yaml, /path: dist/);
   assert.match(yaml, /npm test/);
 });
+
+
+test('build uses public root paths, not nested /public assets', async () => {
+  const build = await read('scripts/build.mjs');
+  const worker = await read('src/wasm-worker.js');
+  assert.match(build, /for \(const entry of await readdir/);
+  assert.match(worker, /\.\.\/wasm\/luau\.wasm/);
+  assert.match(worker, /\.\.\/wasm\/luau-module\.js/);
+  assert.match(await read('index.html'), /href="\.\/favicon\.svg"/);
+  assert.doesNotMatch(worker, /import\(['"]\.\.\/public/);
+});

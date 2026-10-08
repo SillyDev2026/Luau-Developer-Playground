@@ -5,6 +5,7 @@ export class LuauRuntime {
     this.workerFactory = workerFactory;
     this.timeoutMs = timeoutMs;
     this.executing = false;
+    this.runGeneration = 0;
     this.counter = 0;
     this.execution = null;
     this.analysis = null;
@@ -22,7 +23,11 @@ export class LuauRuntime {
       if (data.type === 'error') pending.reject(new Error(data.error));
       else pending.resolve(data);
     };
-    worker.onerror = event => this.reset(kind, event.message || 'Luau worker crashed');
+    worker.onerror = event => {
+      event.preventDefault?.();
+      this.reset(kind, `Luau ${kind} worker failed: ${event.message || 'script could not load'}`);
+    };
+    worker.onmessageerror = () => this.reset(kind, `Luau ${kind} worker sent an unreadable message`);
     this[kind] = state;
     return state;
   }
@@ -33,7 +38,7 @@ export class LuauRuntime {
       const timer = setTimeout(() => this.reset(kind, `${type} timed out after ${timeout}ms`), timeout);
       state.pending.set(id, { resolve, reject, timer });
       try { state.worker.postMessage({ id, type, ...payload }); }
-      catch (error) { clearTimeout(timer); state.pending.delete(id); reject(error); }
+      catch (error) { clearTimeout(timer); state.pending.delete(id); this.reset(kind, error.message); }
     });
   }
   reset(kind, reason = 'Execution stopped') {
@@ -47,10 +52,11 @@ export class LuauRuntime {
     }
     state.pending.clear();
   }
-  stop() { this.reset('execution', 'Execution stopped'); this.executing = false; }
+  stop() { this.runGeneration++; this.reset('execution', 'Execution stopped'); this.executing = false; }
   async run(project) {
     if (this.executing) throw new Error('An execution is already running');
     this.executing = true;
+    const generation = ++this.runGeneration;
     try {
       // Initialization (WASM load/compile) can be longer than a normal execution.
       if (!this.execution) await this.request('execution', 'init', {}, 60000);
@@ -58,7 +64,11 @@ export class LuauRuntime {
         code: project.files[project.active], files: project.files, mode: project.mode
       });
       return { result, elapsed };
-    } finally { this.executing = false; }
+    } finally { if (this.runGeneration === generation) this.executing = false; }
+  }
+  async health() {
+    const { result } = await this.request('analysis', 'health', {}, 60000);
+    return result;
   }
   async diagnostics(project) {
     const { result, elapsed } = await this.request('analysis', 'diagnostics', {

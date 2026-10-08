@@ -51,7 +51,44 @@ test('output renders native Luau text and fallback structured values', () => {
 test('runtime worker targets local same-origin asset URLs', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/wasm-worker.js', import.meta.url), 'utf8');
-  assert.match(source, /public\/wasm\/luau\.wasm/);
-  assert.match(source, /public\/wasm\/luau-module\.js/);
+  assert.match(source, /\.\.\/wasm\/luau\.wasm/);
+  assert.match(source, /\.\.\/wasm\/luau-module\.js/);
   assert.doesNotMatch(source, /play\.luau\.org/);
+});
+
+
+test('missing published asset yields an actionable GitHub Pages error', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('../src/wasm-worker.js', import.meta.url), 'utf8');
+  assert.match(source, /GitHub Settings → Pages/);
+  assert.match(source, /response\.ok/);
+  assert.match(source, /assetResponse\(loaderUrl/);
+});
+
+test('worker initialization errors can be retried with a fresh worker', async () => {
+  let created = 0;
+  class RecoveringWorker extends FakeWorker {
+    constructor() { super(); created++; }
+    postMessage(message) {
+      if (created === 1 && message.type === 'init') queueMicrotask(() => this.onmessage({ data: { id: message.id, type: 'error', error: 'Luau loader missing' } }));
+      else super.postMessage(message);
+    }
+  }
+  const runtime = new LuauRuntime({ workerFactory: () => new RecoveringWorker() });
+  await assert.rejects(runtime.run(project), /Luau loader missing/);
+  // The user can retry after resetting the failing worker.
+  runtime.stop();
+  const { result } = await runtime.run(project);
+  assert.equal(result.output, 'ok');
+  runtime.dispose();
+});
+
+test('a stopped run cannot clear the running flag of the next run', async () => {
+  const runtime = new LuauRuntime({ workerFactory: () => new FakeWorker() });
+  const stopped = runtime.run(project);
+  runtime.stop();
+  await assert.rejects(stopped, /stopped/);
+  const { result } = await runtime.run(project);
+  assert.equal(result.output, 'ok');
+  runtime.dispose();
 });

@@ -1,112 +1,67 @@
-# LuauForge — Luau Developer Playground v0.3.0
+# LuauForge v0.3.1 — Luau Developer Playground
 
-A dependency-free, responsive, GitHub Pages-compatible Luau development workspace with real Luau compilation and execution through the **official Luau Playground**.
+A mobile-friendly, multi-file Luau editor with self-hosted **Luau WebAssembly** execution, type checking, diagnostics, bytecode inspection, snapshots, and local autosave. Hosted as a static GitHub Pages site at:
 
-> **Runtime boundary:** LuauForge edits and stores code locally. Selecting **Run** opens the official Luau Playground in an embedded iframe with code preloaded through its compressed share format. Compiler/type-check output appears inside that embedded site, **not** inside LuauForge's separate status console. Roblox APIs such as `game`, `workspace`, and DataStoreService cannot run in the standalone Luau engine.
+https://sillydev2026.github.io/Luau-Developer-Playground/
 
-## What's new in v0.3
+## v0.3.1 runtime/deployment fix
 
-- Responsive layout tuned for desktop, tablet, narrow phones and short displays
-- Drag-to-resize explorer and output panel (also keyboard accessible); size preferences are saved
-- Adjust editor font size 11–22px; reset layout sizes
-- Mobile file explorer and settings drawer with click-away overlay
-- Find and replace (current file), case-sensitive toggle, previous/next matches, replace all
-- Quick commands and file navigation palette; Ctrl/Cmd+P
-- Go to line; Ctrl/Cmd+G
-- Local project snapshots, capped at six recovery points, with restore/delete
-- Filter explorer files and collapse folders
-- Multiline indent/outdent with Tab / Shift+Tab
-- New Roblox ModuleScript template (Studio-only execution)
-- Drag/drop .lua/.luau/workspace JSON into the editor
-- Copy current source; guard editor against storage file size limits
-- v0.1 save migration, fixes for lost cursor position on settings changes and deleted tabs
+- Fixed a broken deployment path: the old site looked for `public/wasm/luau-module.js`, which can be missing when Pages publishes the branch rather than the Actions artifact. The build now flattens `public/` into `dist/` (same convention as Vite) and loads `wasm/luau-module.js` and `wasm/luau.wasm` relative to the worker's project URL.
+- Added versioned asset URLs, preflight validation and actionable HTTP/HTML errors when a Pages deployment is incomplete.
+- The build and CI **fail** if the matching Lua module loader or WASM engine is absent, instead of deploying a broken site.
+- Fixed execution worker retry/termination state and avoided an older stopped run clearing the status of a newer one.
+- Preserved the v0.1/v0.2 project storage format, file browser, search, mobile layout, snapshots and official Playground fallback.
 
-## Core features
+## IMPORTANT: GitHub Pages source setting
 
-- Syntax-highlighted multi-file Luau editor, named folders and tabs
-- Strict / Nonstrict / Nocheck and compiler optimization O0/O1/O2 settings passed to the official runner
-- Automatic browser-local saves, project JSON import/export, single-file download
-- Dark/light themes, responsive mobile interface and keyboard shortcuts
-- GitHub Actions checks and GitHub Pages deployment
+In your repo, visit **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**, **not** `Deploy from a branch`.
 
-## Development
+The successful `Test and deploy GitHub Pages` job creates a complete artifact, including the 4.7 MB Luau WASM engine. GitHub's older automatic `pages build and deployment` job may also run when the site is set to deploy from a branch. A branch deployment does not contain the WASM assets (they are intentionally downloaded in Actions and not committed), so it can overwrite the functional site with a page that fails at runtime. Switching the source to GitHub Actions is necessary and cannot be fixed by JavaScript alone.
 
-No npm install or external packages are needed to edit, run tests or create the static build.
+After changing Source, visit the **Actions** tab, rerun **Test and deploy GitHub Pages**, then hard-refresh the website. To verify the correct release, both of these URLs must return the actual file rather than a 404 or HTML page:
+
+- `https://sillydev2026.github.io/Luau-Developer-Playground/wasm/luau-module.js`
+- `https://sillydev2026.github.io/Luau-Developer-Playground/wasm/luau.wasm`
+
+## Run locally
+
+Requires Node.js 22 or later (built-in fetch) and internet access the first time to obtain the pinned assets.
 
 ```bash
+npm run fetch:wasm
 npm run dev
+```
+
+Visit `http://localhost:4173/`. For a complete production build:
+
+```bash
 npm run check
+npm run smoke:wasm
 ```
 
-Open http://localhost:4173/ for local development.
+`npm run check` includes 37+ unit/contract tests, syntax checks, production build and WASM packaging verification. `npm run smoke:wasm` executes a real Luau program and verifies type diagnostics and bytecode.
 
-## Deploy
+The runtime assets are pinned to official `luau-lang/playground` commit `e232f443148728fe5b8e714f1796aaa676287df7`. The `scripts/fetch-wasm.mjs` script downloads the matching Emscripten loader and engine. They are intentionally excluded from the Git source via `.gitignore`, but packaged into `dist/` by GitHub Actions.
 
-The GitHub Actions workflow builds and deploys the `dist/` directory to GitHub Pages from `main`.
+## Workspace features
 
-1. Go to **Settings → Pages** in the repository.
-2. Set **Build and deployment** source to **GitHub Actions**.
-3. Push to `main`; check the Actions status.
-4. Open https://sillydev2026.github.io/Luau-Developer-Playground/ when deployment finishes.
+- Lua/Luau editor with highlighting, tabs, file-tree folders and import/export.
+- Execution via a dedicated Web Worker, with Stop button for runaway scripts.
+- Independent analysis worker for Luau errors, type diagnostics and bytecode viewing, selectable strictness and O0/O1/O2.
+- Local snapshots, autosave, file search and find/replace, resizing and dark/light themes.
+- Responsive layout for phone, tablet and desktop.
+- Optional official Luau Playground share/embed runner.
 
-All static asset links are relative, so hosting in a repository subpath works without Vite.
+This WebAssembly engine is a standalone Luau VM, **not Roblox Studio**. Roblox APIs such as `game`, `workspace`, `Players` and `DataStoreService` are not present. Browser timings are not directly comparable to Luau performance inside Roblox Studio.
 
-## Keyboard shortcuts
+## Privacy
 
-| Shortcut | Action |
-| --- | --- |
-| Ctrl/Cmd + Enter | Open official Luau runner |
-| Ctrl/Cmd + S | Save locally |
-| Ctrl/Cmd + F | Find / replace |
-| Ctrl/Cmd + P | Commands & file search |
-| Ctrl/Cmd + G | Go to line |
-| Tab / Shift+Tab | Indent / outdent source |
-| Escape | Close dialogs/drawers/search |
-| `/` outside text fields | Focus explorer filter |
+Source code edited in LuauForge stays in the browser for local execution. Local projects use `localStorage`; clearing browser data may delete them. Export workspaces frequently. Opening the optional hosted Playground will send the shared source through its URL. Never put secrets in code you intend to share.
 
-## Storage and privacy
+## Layout
 
-- Files, layout preferences, and snapshots use your browser's `localStorage`. This isn't cloud sync; data can be lost when clearing browser storage. **Export a JSON backup regularly.**
-- v0.1 saves under `luau-dev-playground:v1` are loaded and migrated to `v2` upon saving. Original v1 data is retained.
-- Projects have size/file limits. Import validates files and rejects invalid/malformed projects. A failed import doesn't replace the working project.
-- The official runner needs an internet connection. The LZ-String codec is currently loaded from cdnjs. The editor works offline after assets are cached by the browser, but no offline execution is promised.
-- Running code passes the project's source in the official Playground share URL, which that page can read. **Never place secrets in scripts intended for sharing or external execution.**
-- The embedded official runner is a cross-origin iframe and LuauForge cannot capture or control its execution results. No independent WASM engine is included in v0.3.
-
-## Source layout
-
-```text
-index.html                   Accessible responsive UI
-src/main.js                  Editor, controls, panes, commands and runner integration
-src/styles.css               Layout, themes and responsive styling
-src/store.js                 Versioned validated project and migration
-src/editor-utils.js          Find, replace, line navigation and indentation
-src/snapshots.js             Local recovery point management
-src/highlight.js             Safe presentation-only Luau lexer
-src/runner.js                Official Luau Playground compressed-share integration
-scripts/build.mjs            Dependency-free production build
-scripts/serve.mjs            Local dev server
-.github/workflows/           GitHub Actions tests / Pages deploy
-public/                      Brand assets
-tests/                       Node unit and build tests
-```
-
-## Later versions
-
-Standalone Luau WASM engine, in-editor type diagnostics, richer file search, IndexedDB project storage, and GitHub synchronization are separate future work. They are not described as v0.3 features.
-
-## v0.3 WebAssembly runtime
-
-- Run Luau source directly in the browser: **Run code** / **Ctrl+Enter**.
-- Stop an infinite loop using **Stop**; execution is confined to a dedicated worker.
-- Check syntax and Luau types with **Check** / **Ctrl+Shift+B** and click diagnostics to navigate.
-- Inspect compiler bytecode at optimization levels O0, O1 and O2.
-- Multiple files are registered for Luau module resolution; Roblox services aren't implemented.
-- Separate analysis and execution workers preserve responsiveness while running code.
-- The official hosted Playground remains an optional fallback.
-
-### Runtime asset provenance
-
-The WASM binary and matching Emscripten wrapper are from official `luau-lang/playground`, pinned at commit `e232f443148728fe5b8e714f1796aaa676287df7`. They are fetched during GitHub Actions before packaging a fully static GitHub Pages release. They are **not** committed as source blobs. Run `npm run fetch:wasm` locally (requires network) before `npm run dev` for local WASM execution. No CDN is required at runtime for the built-in WASM path. See official upstream MIT license.
-
-A native Luau WebAssembly benchmark does not represent Roblox Studio runtime throughput. Scripts needing the Roblox data model must run inside Studio.
+- `src/` — editor, storage, workers, runtime client
+- `public/` — static assets and fetched WebAssembly engine (WASM files ignored by Git)
+- `scripts/` — build, fetch, verify, local server and real Luau smoke tests
+- `tests/` — unit tests and static deploy/worker contracts
+- `.github/workflows/` — CI and GitHub Pages release pipeline

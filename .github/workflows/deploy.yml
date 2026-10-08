@@ -22,6 +22,7 @@ jobs:
       - run: npm run fetch:wasm
       - run: npm run smoke:wasm
       - run: npm run build
+      - run: node scripts/verify-dist.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
