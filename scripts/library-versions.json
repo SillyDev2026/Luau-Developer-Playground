@@ -1,0 +1,20 @@
+{
+  "FastNum": {
+    "repository": "SillyDev2026/FastNum",
+    "commit": "a0aaadfea53acffad52a80ae415a7f8c158f8b64",
+    "path": "FastNum.lua",
+    "version": "2.9.5"
+  },
+  "NanoNum": {
+    "repository": "SillyDev2026/NanoNum",
+    "commit": "ec1be02abfef2ff49f3f32e5b7ddb80e8ade5331",
+    "path": "NanoNum.lua",
+    "version": "2.4.10"
+  },
+  "OmegaNum": {
+    "repository": "SillyDev2026/OmegaNumV2",
+    "commit": "30855ae27374493bdafe12a4f62269575c2a6916",
+    "path": "OmegaNum.lua",
+    "version": "2.4.0"
+  }
+}

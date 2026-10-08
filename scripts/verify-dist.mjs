@@ -18,6 +18,10 @@ assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 assert.match(glue, /export default createLuauModule/);
 assert.equal(binary.subarray(0, 4).toString('hex'), '0061736d');
 assert.ok(binary.length > 1_000_000);
+for(const [name,minSize] of [['FastNum.lua',90000],['NanoNum.lua',300000],['OmegaNum.lua',70000]]) {
+  const code = await readFile(join(out,'libraries',name),'utf8');
+  assert.ok(code.length > minSize,`Missing or truncated bundled library: ${name}`);
+}
 await stat(join(out, 'favicon.svg'));
 assert.equal((await readFile(join(root, 'public/wasm/luau.wasm'))).length, binary.length);
 console.log(`GitHub Pages distribution verified: ${binary.length} WASM bytes; valid loader and relative URLs`);

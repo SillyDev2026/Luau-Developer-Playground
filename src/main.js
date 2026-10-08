@@ -5,6 +5,7 @@ import { findMatches, replaceAllLiteral, positionForLine, currentLineAndColumn, 
 import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from './snapshots.js';
 import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js';
 import { summarizeSamples } from './module-bundle.js';
+import { BUILTIN_LIBRARIES, builtinById } from './builtin-libraries.js';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -91,7 +92,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.3.1`;
+  document.title = `${project.active} — LuauForge v0.3.4`;
 }
 
 function button(label, css, fn, title = '') {
@@ -468,7 +469,7 @@ async function runLocal() {
 async function benchmarkModule() {
   if (executing) return;
   const target = $('benchmark-module').value;
-  if (!target || !Object.hasOwn(project.files, target)) { toast('Select a module in Workspace settings to benchmark.', true); return; }
+  if (!target || !(target.startsWith('@') ? builtinById(target.slice(1)) : Object.hasOwn(project.files, target))) { toast('Select a valid module to benchmark.', true); return; }
   const token = ++executionToken;
   setOutputView('console');
   setExecuting(true);
@@ -488,11 +489,81 @@ async function benchmarkModule() {
     }
   } finally { if (executionToken === token) setExecuting(false); }
 }
+function renderBuiltinCatalog() {
+  const container = $('builtin-catalog');
+  container.replaceChildren();
+  for (const lib of BUILTIN_LIBRARIES) {
+    const item = document.createElement('div');
+    item.className = 'builtin-catalog-item';
+    const heading = document.createElement('div');
+    heading.className = 'builtin-catalog-heading';
+    const name = document.createElement('strong');
+    name.textContent = lib.label;
+    const version = document.createElement('span');
+    version.textContent = `v${lib.version}`;
+    heading.append(name, version);
+    const summary = document.createElement('p');
+    summary.textContent = lib.description;
+    const actions = document.createElement('div');
+    actions.className = 'builtin-catalog-actions';
+    actions.append(
+      button('Example', 'tiny-btn', () => createBuiltinExample(lib.id), `Create ${lib.label} example`),
+      button('API', 'tiny-btn', () => openBuiltinDocs(lib.id), `View ${lib.label} APIs`),
+    );
+    item.append(heading, summary, actions);
+    container.append(item);
+  }
+}
+function createBuiltinExample(id) {
+  const lib = builtinById(id);
+  if (!lib) return;
+  const path = `examples/${id}.luau`;
+  if (Object.hasOwn(project.files, path)) { enterFile(path); toast(`Opened existing ${path}.`); return; }
+  try {
+    updateProject(addFile(project, path, lib.example));
+    closeDrawer();
+    toast(`Created ${path}. Run it with Ctrl+Enter.`);
+  } catch (error) { toast(error.message, true); }
+}
+function openBuiltinDocs(id) {
+  const lib = builtinById(id);
+  if (!lib) return;
+  $('builtin-title').textContent = `${lib.label} API — v${lib.version}`;
+  $('builtin-summary').textContent = lib.description;
+  $('builtin-repository').href = lib.repository;
+  $('builtin-require').textContent = `local ${lib.local} = require("@${lib.id}")`;
+  const list = $('builtin-methods');
+  list.replaceChildren();
+  for (const category of lib.categories) {
+    const group = document.createElement('section');
+    const title = document.createElement('h3');
+    title.textContent = category.name;
+    group.append(title);
+    for (const method of category.methods) {
+      const row = button(`${lib.local}.${method}`, 'builtin-api-method', () => {
+        insertAtCursor(`${lib.local}.${method.slice(0, method.indexOf('('))}(`);
+        closeModal('builtin-modal');
+      }, 'Insert method name in editor');
+      group.append(row);
+    }
+    list.append(group);
+  }
+  $('builtin-create-example').onclick = () => { closeModal('builtin-modal'); createBuiltinExample(id); };
+  $('builtin-insert-require').onclick = () => { closeModal('builtin-modal'); insertAtCursor(`local ${lib.local} = require("@${lib.id}")\n`); editor.focus(); };
+  $('builtin-inspect').onclick = () => {
+    closeModal('builtin-modal');
+    const code = `local ${lib.local} = require("@${lib.id}")\nlocal methods = {}\nfor name, value in pairs(${lib.local}) do\n    if type(value) == "function" then table.insert(methods, name) end\nend\ntable.sort(methods)\nfor _, name in ipairs(methods) do print(name) end\n`;
+    const path = `examples/${id}-api.luau`;
+    if (Object.hasOwn(project.files, path)) { enterFile(path); toast('API inspector already exists.'); return; }
+    try { updateProject(addFile(project, path, code)); closeDrawer(); } catch (error) { toast(error.message, true); }
+  };
+  openModal('builtin-modal', 'builtin-create-example');
+}
 function renderBenchmarkModules() {
   const select = $('benchmark-module');
   const before = select.value;
   const options = Object.keys(project.files).filter(name => !/^(main|examples\/benchmark)\.luau$/i.test(name));
-  const names = options.length ? options : Object.keys(project.files).filter(name => name !== project.active);
+  const names = [...BUILTIN_LIBRARIES.map(lib => `@${lib.id}`), ...(options.length ? options : Object.keys(project.files).filter(name => name !== project.active))];
   select.replaceChildren();
   for (const name of names) {
     const option = document.createElement('option');
@@ -715,6 +786,7 @@ wireResizer($('output-resizer'), 'y', height => {
 
 $('add-file').addEventListener('click', () => askNewFile());
 document.querySelectorAll('[data-template]').forEach(item => item.addEventListener('click', () => askNewFile(item.dataset.template)));
+renderBuiltinCatalog();
 $('file-filter').addEventListener('input', renderFiles);
 $('rename-file').addEventListener('click', renameActive);
 $('delete-file').addEventListener('click', deleteActive);
@@ -766,7 +838,8 @@ $('command-open').addEventListener('click', openCommands);
 $('command-input').addEventListener('input', event => buildCommands(event.target.value));
 $('command-input').addEventListener('keydown', event => { if (event.key === 'Enter' && commandItems.length) { event.preventDefault(); const item = commandItems[0]; closeModal('command-modal'); item.action(); } });
 $('find-input').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); stepFind(event.shiftKey ? -1 : 1); } });
-for (const id of ['runner-modal', 'command-modal', 'snapshot-modal']) $(id).addEventListener('click', event => { if (event.target === $(id)) closeModal(id); });
+$('builtin-close').addEventListener('click', () => closeModal('builtin-modal'));
+for (const id of ['runner-modal', 'command-modal', 'snapshot-modal', 'builtin-modal']) $(id).addEventListener('click', event => { if (event.target === $(id)) closeModal(id); });
 
 document.addEventListener('keydown', event => {
   const cmd = event.ctrlKey || event.metaKey;
@@ -797,4 +870,4 @@ editorSection.addEventListener('drop', async event => { event.preventDefault(); 
 renderAll();
 setOutputView('console');
 renderBenchmarkModules();
-consoleMessage('LuauForge v0.3.3 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+consoleMessage('LuauForge v0.3.4 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

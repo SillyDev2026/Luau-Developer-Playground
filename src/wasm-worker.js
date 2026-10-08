@@ -2,7 +2,7 @@
 // The /public source folder is flattened to the site root by scripts/build.mjs.
 // Resolve relative to this worker to support GitHub Pages project subdirectories.
 import { bundleProject, extractRequireTimings } from './module-bundle.js';
-export const RUNTIME_VERSION = '0.3.3';
+export const RUNTIME_VERSION = '0.3.4';
 // A Pages Actions artifact contains /wasm/*, whereas Jekyll branch publishing
 // preserves public/wasm/*. Detect the actual layout rather than guessing.
 const RUNTIME_LOCATIONS = [
@@ -79,7 +79,7 @@ function register(module, files, execution) {
   }
 }
 self.onmessage = async event => {
-  const { id, type, code = '', files = {}, active = 'main.luau', mode = 'strict', optimization = 1, modulePath } = event.data;
+  const { id, type, code = '', files = {}, active = 'main.luau', mode = 'strict', optimization = 1, modulePath, displayName = modulePath } = event.data;
   try {
     if (type === 'health') {
       await loadRuntime();
@@ -123,7 +123,7 @@ self.onmessage = async event => {
         if (targeted.length !== 2) throw new Error(`Module ${modulePath} did not produce both cold and cached measurements.`);
         samples.push({ coldMs: targeted[0].milliseconds, cachedMs: targeted[1].milliseconds });
       }
-      result = { module: modulePath, samples, runtime: 'Luau WASM VM os.clock (CPU time)', roundCount: samples.length };
+      result = { module: displayName, samples, runtime: 'Luau WASM VM os.clock (CPU time)', roundCount: samples.length };
     } else throw new Error(`Unknown engine command: ${type}`);
     self.postMessage({ id, type, result, elapsed: performance.now() - started });
   } catch (error) {

@@ -1,3 +1,4 @@
+import { loadBuiltinsForProject, builtinPath, builtinId } from "./builtin-libraries.js";
 // Manages two independent Luau VM instances. Stopping a run never kills the
 // analysis worker. All source code stays in the browser.
 export class LuauRuntime {
@@ -59,9 +60,11 @@ export class LuauRuntime {
     const generation = ++this.runGeneration;
     try {
       // Initialization (WASM load/compile) can be longer than a normal execution.
+      const ready = await loadBuiltinsForProject(project);
+      if (this.runGeneration !== generation) throw new Error('Execution stopped');
       if (!this.execution) await this.request('execution', 'init', {}, 60000);
       const { result, elapsed } = await this.request('execution', 'execute', {
-        code: project.files[project.active], files: project.files, active: project.active, mode: project.mode
+        code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode
       });
       return { result, elapsed };
     } finally { if (this.runGeneration === generation) this.executing = false; }
@@ -71,7 +74,12 @@ export class LuauRuntime {
     this.executing = true;
     const generation = ++this.runGeneration;
     try {
-      const { result } = await this.request('execution', 'benchmarkModule', { files: project.files, active: project.active, mode: project.mode, modulePath }, 120000);
+      const special = builtinId(modulePath);
+      const extra = special ? { ...project, files: { ...project.files, '__lf_bench_loader.luau': `local library = require(\"@${special}\")` } } : project;
+      const ready = await loadBuiltinsForProject(extra);
+      if (this.runGeneration !== generation) throw new Error('Execution stopped');
+      const path = special ? builtinPath(special) : modulePath;
+      const { result } = await this.request('execution', 'benchmarkModule', { files: ready.files, active: ready.active, mode: ready.mode, modulePath: path, displayName: special ? `@${special}` : modulePath }, 120000);
       return result;
     } finally { if (this.runGeneration === generation) this.executing = false; }
   }
@@ -80,8 +88,9 @@ export class LuauRuntime {
     return result;
   }
   async diagnostics(project) {
+    const ready = await loadBuiltinsForProject(project);
     const { result, elapsed } = await this.request('analysis', 'diagnostics', {
-      code: project.files[project.active], files: project.files, active: project.active, mode: project.mode
+      code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode
     }, 60000);
     return { diagnostics: Array.isArray(result.diagnostics) ? result.diagnostics : [], elapsed };
   }
@@ -92,8 +101,9 @@ export class LuauRuntime {
     return { result, elapsed };
   }
   async autocomplete(project, line, col) {
+    const ready = await loadBuiltinsForProject(project);
     const { result } = await this.request('analysis', 'autocomplete', {
-      code: project.files[project.active], files: project.files, active: project.active, mode: project.mode, line, col
+      code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode, line, col
     }, 60000);
     return Array.isArray(result.items) ? result.items : [];
   }

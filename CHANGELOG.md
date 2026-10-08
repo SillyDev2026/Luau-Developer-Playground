@@ -1,3 +1,19 @@
+## v0.3.4 — Built-in number libraries
+
+- Added first-party library catalog for FastNum v2.9.5, NanoNum v2.4.10 and OmegaNumV2 v2.4.0.
+- Added library API browser, quick import, one-click runnable examples and runtime export inspection.
+- Added `require("@FastNum")`, `require("@NanoNum")`, `require("@OmegaNum")` through virtual workspace modules.
+- Included built-ins in cold-load/cached require benchmarking inside Luau WASM, excluding frontend timings.
+- Added strict Pages build verification for all three source libraries and real WASM integration smoke tests.
+- Added browser-only OmegaNum JSONEncode adapter; original source remains untouched.
+
+## v0.3.3 — Module tests and Luau VM benchmarks
+- Fixed folder-based relative module loading with flattened synthetic module registration.
+- Supported nested relative requires, module cache, `.lua`/`.luau` paths, and `init.luau`.
+- Added Luau `os.clock()` measurements around each direct `require()` call; timing and cached/cold reporting appear in Output.
+- Added 12-run module benchmark panel that measures cold loads and cached lookups inside fresh Luau states.
+- Added true WASM integration tests for multi-module execution.
+
 ## v0.3.2 — 2026-10-08
 
 - Fix browser WASM import failure under the GitHub Pages Jekyll branch deployment.

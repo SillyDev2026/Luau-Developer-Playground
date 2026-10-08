@@ -1,3 +1,62 @@
+# LuauForge v0.3.4 — Built-in FastNum, NanoNum and OmegaNum
+
+LuauForge comes with three **real, pinned, user-owned big-number libraries**, which load directly from the published website in the Luau WASM environment (never copied into localStorage or your personal project).
+
+| Library | Import | Source release | Example |
+| --- | --- | --- | --- |
+| FastNum / FastME | `local FastME = require("@FastNum")` | FastNum 2.9.5 | `FastME.toString(FastME.add(FastME.fromNumber(2), FastME.fromNumber(3)))` |
+| NanoNum | `local NanoNum = require("@NanoNum")` | NanoNum 2.4.10 | `NanoNum.formatScientific(NanoNum.fromString("1e1000"))` |
+| OmegaNum | `local OmegaNum = require("@OmegaNum")` | OmegaNumV2 2.4.0 | `OmegaNum.toDisplay(OmegaNum.fromString("1e1000"))` |
+
+Select one of the modules in the built-in library panel. **Example** creates a runnable workspace script without overwriting existing files. **API** shows categorized example signatures and lets you insert code, see source, or generate a script that inspects the actual exported function names. The **Bench require** dropdown includes all three built-ins and benchmarks inside the Luau VM using `os.clock()`, not frontend request timing.
+
+## Implementation details
+
+- Libraries are served from `public/libraries/*.lua`, flattened to `libraries/*.lua` in GitHub Actions deployments. The loader handles either GitHub Pages publishing layout.
+- Sources are pinned at the upstream release revisions recorded in `scripts/library-versions.json`, and original Lua source is preserved in the checked-in assets.
+- Prebuilt code is loaded on demand only when an example or a workspace script imports it. It is kept in a non-persistent virtual module namespace outside the 200 KB user-file limit. Dependency bundling maps `require("@FastNum")` into the WASM's flat module filesystem automatically; no Roblox `Instance` is required.
+- Current OmegaNum requires `game:GetService("HttpService")` for JSON serialization. A narrowly-scoped `HttpService:JSONEncode` compatibility adapter runs in the browser VM, but **the original upstream OmegaNum source is never modified**.
+- Scripts depending on actual Roblox services still require Roblox Studio. These library tests run in browser WebAssembly, not Roblox's native server.
+- Each benchmark uses fresh Luau VM states for cold module loads and the same VM state's `require` cache for hot lookups, with 12 samples. It excludes web download and frontend rendering but is **not** equivalent to native Roblox server timing.
+
+## Verify
+
+```bash
+npm test
+npm run fetch:wasm
+npm run smoke:libraries
+npm run check
+```
+
+# LuauForge v0.3.3 — Module Test & VM Profiling
+
+The workspace now supports **real multi-file module execution** even though the pinned official Playground WASM runtime supports only flat module filenames. LuauForge maps relative workspace imports to unique engine-compatible module identifiers while preserving require caching.
+
+Example project:
+
+`src/main.luau`:
+```luau
+local Math = require("./modules/Math.luau")
+print(Math.add(20, 22))
+local Again = require("./modules/Math.luau")
+print(Math == Again)
+```
+
+`src/modules/Math.luau`:
+```luau
+local Math = {}
+function Math.add(a: number, b: number): number
+    return a + b
+end
+return Math
+```
+
+Click **Run** for output, and **Bench require** after selecting a module in Workspace settings to measure its first load and cached require. Each of the 12 samples runs in a fresh Luau VM state; the module load time is measured using Luau's own `os.clock()` and excludes frontend render or network time. Nested require calls are included in the parent's loading cost. Each run resets the module cache; repeated requires inside one run use cached module exports.
+
+**Scope:** These are browser-hosted Luau VM timings, **not Roblox backend/server timings**. GitHub Pages cannot host a server. For authentic Roblox server benchmarks, execute an equivalent test inside a Roblox Studio server or a separately hosted trusted backend.
+
+Supported: relative literal module imports (`./` and `../`), directory `init.luau` fallback, `.lua`/`.luau` modules, nested modules, cycle errors from native Luau, and module cache. Limitations: dynamic/computed require expressions, Roblox `Instance`/ModuleScript references, `@alias` imports, and require expressions in backtick interpolation aren't transformed. Errors for missing and ambiguous modules are raised before execution. For typechecker diagnostics after a rewritten require, the column may differ from the original source.
+
 # LuauForge v0.3.2 — WASM deployment repair
 
 **Important:** GitHub Pages supports an Actions artifact and a branch/Jekyll source, but the two build layouts place WASM files at different paths. v0.3.2 resolves both automatically. The Pages deployment workflow pins and commits official Luau Playground JS and WASM runtime assets into `public/wasm/`, so a Jekyll branch deployment has a usable runtime. The custom Actions build also publishes copies at `wasm/`.

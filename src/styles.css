@@ -351,3 +351,25 @@ button:hover:not(:disabled) { transition:background-color .14s ease,color .14s e
 #benchmark-module { width:100%; min-width:0; }
 #benchmark-module-btn { color:var(--accent); }
 #benchmark-module-btn:disabled { opacity:.45; }
+
+/* v0.3.4: Built-in library catalog, API explorer (responsive, overflow-safe). */
+.builtin-catalog{display:flex;flex-direction:column;gap:9px;padding:0 6px 8px}
+.builtin-catalog-item{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:10px;min-width:0}
+.builtin-catalog-heading{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:12px}
+.builtin-catalog-heading span{font-size:10px;color:var(--muted);flex-shrink:0}
+.builtin-catalog-item p{margin:7px 0;color:var(--muted);font-size:10px;line-height:1.45}
+.builtin-catalog-actions{display:flex;gap:7px}
+.builtin-catalog-actions button{flex:1;min-height:30px;width:auto;border:1px solid var(--line);border-radius:6px}
+.builtin-dialog{width:min(760px,96vw);max-height:min(90dvh,900px);overflow-y:auto;background:var(--shell);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 20px 60px #0006}
+.builtin-dialog .runner-head{padding:0 0 10px}
+.builtin-summary{font-size:13px;color:var(--secondary);line-height:1.5}
+.builtin-require{padding:14px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;overflow:auto;font-size:12px;white-space:pre}
+.builtin-dialog-actions{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.builtin-dialog-actions .quiet-btn,.builtin-dialog-actions .primary-btn{min-height:38px;white-space:normal}
+.builtin-methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px}
+.builtin-methods section{padding:10px;background:var(--panel2);border-radius:9px;min-width:0}
+.builtin-methods h3{margin:0 0 8px;font-size:12px}
+.builtin-api-method{display:block;width:100%;text-align:left;color:var(--secondary);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;background:transparent;border:0;border-radius:4px;padding:7px 5px;overflow-wrap:anywhere}
+.builtin-api-method:hover,.builtin-api-method:focus-visible{background:var(--line);color:var(--text)}
+.builtin-footer-note{font-size:11px;color:var(--muted);line-height:1.45}
+@media(max-width:650px){.builtin-dialog{width:100vw;height:100dvh;max-height:100dvh;border-radius:0;padding:14px;}.builtin-dialog-actions{flex-direction:column}.builtin-dialog-actions button,.builtin-dialog-actions a{width:100%;justify-content:center;}}

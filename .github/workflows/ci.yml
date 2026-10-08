@@ -16,3 +16,4 @@ jobs:
       - run: npm run build
       - run: npm run check
       - run: npm run smoke:wasm
+      - run: npm run smoke:libraries

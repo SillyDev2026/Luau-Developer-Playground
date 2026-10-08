@@ -1,3 +1,4 @@
+import { builtinId, builtinPath } from "./builtin-libraries.js";
 // The pinned official Playground WASM resolver supports a flat filesystem only.
 // Resolve workspace-relative require literals and assign unique, flat Luau VM keys.
 export const REQUIRE_METRIC_MARKER = '__LUAUFORGE_REQUIRE_TIMING_V1__';
@@ -70,6 +71,12 @@ function findRequires(source) {
   return found;
 }
 export function resolveModule(importer, requested, files) {
+  const builtin = builtinId(requested);
+  if (builtin) {
+    const virtual = builtinPath(builtin);
+    if (!Object.hasOwn(files, virtual)) throw new Error(`Missing built-in library ${requested}. The library must be loaded before the script runs.`);
+    return virtual;
+  }
   if (typeof requested !== 'string' || !requested.startsWith('./') && !requested.startsWith('../')) {
     throw new Error(`Unsupported require(${JSON.stringify(requested)}) in ${importer}. Use a relative path such as require("./modules/Math.luau").`);
   }
