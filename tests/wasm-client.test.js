@@ -61,7 +61,7 @@ test('missing published asset yields an actionable GitHub Pages error', async ()
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/wasm-worker.js', import.meta.url), 'utf8');
   assert.match(source, /GitHub Pages deployment/);
-  assert.match(source, /response\.ok/);
+  assert.match(source, /res\.ok/);
   assert.match(source, /fetchAsset\(loaderUrl/);
 });
 
