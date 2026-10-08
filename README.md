@@ -1,6 +1,6 @@
-# LuauForge v0.3.2 WASM deployment repair
+# LuauForge v0.3.2 — WASM deployment repair
 
-LuauForge now resolves WASM assets from either `wasm/` (GitHub Actions Pages artifact) or `public/wasm/` (Jekyll branch deployment). The deploy workflow commits the pinned official binary and JS loader to the repository so branch hosting can serve the runtime. Use a hard reload after updating.
+**Important:** GitHub Pages supports an Actions artifact and a branch/Jekyll source, but the two build layouts place WASM files at different paths. v0.3.2 resolves both automatically. The Pages deployment workflow pins and commits official Luau Playground JS and WASM runtime assets into `public/wasm/`, so a Jekyll branch deployment has a usable runtime. The custom Actions build also publishes copies at `wasm/`.
 
 # LuauForge v0.3.1 — Luau Developer Playground
 

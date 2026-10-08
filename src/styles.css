@@ -345,3 +345,9 @@ button:hover:not(:disabled) { transition:background-color .14s ease,color .14s e
  .output-actions .toolbar-btn { font-size:9px;padding:4px 5px; }
  .output-top { gap:3px; }
 }
+
+/* Module profiling controls — allow the output toolbar to scroll on narrow displays. */
+.output-actions { min-width:0; overflow-x:auto; scrollbar-width:thin; }
+#benchmark-module { width:100%; min-width:0; }
+#benchmark-module-btn { color:var(--accent); }
+#benchmark-module-btn:disabled { opacity:.45; }

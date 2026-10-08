@@ -1,9 +1,10 @@
 ## v0.3.2 — 2026-10-08
 
-- Repair Pages/Jekyll runtime mismatch by committing pinned Luau WASM assets to the branch.
-- Support both root `wasm/` and `public/wasm/` runtime locations.
-- Validate binary and loader before dynamic import; improve error messages.
-- Cache-bust the main editor module and Web Worker on release.
+- Fix browser WASM import failure under the GitHub Pages Jekyll branch deployment.
+- Resolve runtime files from both `/wasm/` and `/public/wasm/`, always validating JS glue and WebAssembly magic/size before importing.
+- Pin and commit official WebAssembly assets from GitHub Actions to make source-based Pages hosting reliable.
+- Cache-bust the editor and worker modules when deploying a new version.
+- Add regression tests for both publishing layouts and the runtime asset synchronization workflow.
 
 # Changelog
 

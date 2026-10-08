@@ -7,6 +7,20 @@ export const TOTAL_SIZE_LIMIT = 900_000;
 export const DEFAULT_FILES = Object.freeze({
   'main.luau': `--!strict\n-- Welcome to LuauForge v0.3\n\nlocal function greet(name: string): string\n    return \`Hello, {name}!\`\nend\n\nprint(greet("Developer"))\n\nlocal sum = 0\nfor i = 1, 10 do\n    sum += i\nend\nprint("Sum:", sum)\n`,
   'examples/types.luau': `--!strict\ntype Point = { x: number, y: number }\n\nlocal function distance(point: Point): number\n    return math.sqrt(point.x ^ 2 + point.y ^ 2)\nend\n\nprint(distance({ x = 3, y = 4 }))\n`,
+  'modules/Math.luau': `--!strict
+local Math = {}
+function Math.add(a: number, b: number): number
+    return a + b
+end
+return Math
+`,
+  'examples/module-test.luau': `--!strict
+-- Run this file to test a real ModuleScript-style library in the Luau VM.
+local Math = require("../modules/Math.luau")
+print("Math.add:", Math.add(20, 22))
+local Again = require("../modules/Math.luau")
+print("Module cached:", Again == Math)
+`,
   'examples/benchmark.luau': `--!strict\n-- Browser execution timings differ from Roblox Studio.\nlocal iterations = 100000\nlocal startTime = os.clock()\nlocal total = 0\nfor i = 1, iterations do\n    total += i\nend\nprint("Total:", total)\nprint("Elapsed seconds:", os.clock() - startTime)\n`,
 });
 

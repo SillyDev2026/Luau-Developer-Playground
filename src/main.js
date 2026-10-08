@@ -4,6 +4,7 @@ import { buildPlaygroundURL } from './runner.js';
 import { findMatches, replaceAllLiteral, positionForLine, currentLineAndColumn, indentSelection } from './editor-utils.js';
 import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from './snapshots.js';
 import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js';
+import { summarizeSamples } from './module-bundle.js';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -72,6 +73,7 @@ function updateProject(next, options = {}) {
     if (changed) openedTabs.add(project.active);
     markPending();
     renderAll(options);
+    renderBenchmarkModules();
   } catch (error) { toast(error.message, true); }
 }
 
@@ -429,6 +431,7 @@ function setExecuting(value) {
   $('run-btn').disabled = value;
   $('stop-btn').disabled = !value;
   $('mobile-run').disabled = value;
+  $('benchmark-module-btn').disabled = value;
   $('output-indicator').textContent = value ? 'RUNNING' : 'READY';
 }
 async function runLocal() {
@@ -445,6 +448,14 @@ async function runLocal() {
       for (const line of output.slice(0, 50000).split('\n')) consoleMessage(line);
       if (output.length > 50000) consoleMessage('Output truncated to 50 KB.', 'notice-line');
     }
+    if (result.requireTimings?.length) {
+      const seen = new Set();
+      for (const item of result.requireTimings) {
+        const cached = seen.has(item.module);
+        seen.add(item.module);
+        consoleMessage(`↳ require ${item.module} — ${item.milliseconds.toFixed(4)} ms (${cached ? 'cached' : 'first load'}, Luau VM CPU)`, 'notice-line');
+      }
+    }
     if (result.error) consoleMessage(`Error: ${result.error}`, 'error-line');
     if (result.success) consoleMessage(`✓ Completed in ${elapsed.toFixed(2)} ms (browser WASM).`, 'system-line');
     else if (!result.error) consoleMessage('Execution did not complete successfully.', 'error-line');
@@ -453,6 +464,44 @@ async function runLocal() {
     consoleMessage(`Runtime: ${error.message}`, 'error-line');
     toast(`Luau runtime: ${error.message}`, true);
   } finally { if (executionToken === token) setExecuting(false); }
+}
+async function benchmarkModule() {
+  if (executing) return;
+  const target = $('benchmark-module').value;
+  if (!target || !Object.hasOwn(project.files, target)) { toast('Select a module in Workspace settings to benchmark.', true); return; }
+  const token = ++executionToken;
+  setOutputView('console');
+  setExecuting(true);
+  consoleMessage(`⚡ Benchmarking require(${target}) in Luau WASM (12 fresh VMs)…`, 'notice-line');
+  try {
+    const result = await luau.benchmarkModule({ ...project, files: { ...project.files } }, target);
+    const cold = summarizeSamples(result.samples.map(x => x.coldMs));
+    const cached = summarizeSamples(result.samples.map(x => x.cachedMs));
+    const fmt = value => value === null ? 'n/a' : `${value.toFixed(4)} ms`;
+    consoleMessage(`✓ ${result.module} — ${cold.samples} cold loads; first require median: ${fmt(cold.medianMs)} (min ${fmt(cold.minMs)}, max ${fmt(cold.maxMs)})`, 'system-line');
+    consoleMessage(`↳ Cached require median: ${fmt(cached.medianMs)} (min ${fmt(cached.minMs)}, max ${fmt(cached.maxMs)})`, 'system-line');
+    consoleMessage(`Clock: ${result.runtime}. Excludes frontend rendering and network; not a Roblox server benchmark.`, 'notice-line');
+  } catch (error) {
+    if (error.message !== 'Execution stopped') {
+      consoleMessage(`Benchmark: ${error.message}`, 'error-line');
+      toast(error.message, true);
+    }
+  } finally { if (executionToken === token) setExecuting(false); }
+}
+function renderBenchmarkModules() {
+  const select = $('benchmark-module');
+  const before = select.value;
+  const options = Object.keys(project.files).filter(name => !/^(main|examples\/benchmark)\.luau$/i.test(name));
+  const names = options.length ? options : Object.keys(project.files).filter(name => name !== project.active);
+  select.replaceChildren();
+  for (const name of names) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.append(option);
+  }
+  if (names.includes(before)) select.value = before;
+  select.disabled = !names.length;
 }
 function stopLocal() {
   if (!executing) return;
@@ -600,6 +649,7 @@ function buildCommands(query = '') {
     { label: 'Stop Luau execution', action: stopLocal },
     { label: 'Check Luau types', action: checkLocal },
     { label: 'Inspect Luau bytecode', action: showBytecode },
+    { label: 'Benchmark module require using Luau VM', action: benchmarkModule },
     { label: 'Open official Playground', action: showRunner },
     { label: 'New Luau file', action: () => askNewFile() },
     { label: 'Find and replace', action: showSearch },
@@ -692,6 +742,7 @@ $('inspector-close').addEventListener('click', () => matchMedia('(max-width: 119
 $('drawer-overlay').addEventListener('click', closeDrawer);
 window.addEventListener('resize', updateDrawer);
 $('run-btn').addEventListener('click', runLocal);
+$('benchmark-module-btn').addEventListener('click', benchmarkModule);
 $('mobile-run').addEventListener('click', runLocal);
 $('expand-runner').addEventListener('click', showRunner);
 $('runner-close').addEventListener('click', () => closeModal('runner-modal'));
@@ -745,4 +796,5 @@ editorSection.addEventListener('drop', async event => { event.preventDefault(); 
 
 renderAll();
 setOutputView('console');
-consoleMessage('LuauForge v0.3.1 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+renderBenchmarkModules();
+consoleMessage('LuauForge v0.3.3 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

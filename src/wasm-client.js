@@ -1,7 +1,7 @@
 // Manages two independent Luau VM instances. Stopping a run never kills the
 // analysis worker. All source code stays in the browser.
 export class LuauRuntime {
-  constructor({ workerFactory = () => new Worker(new URL('./wasm-worker.js?v=0.3.2', import.meta.url), { type: 'module' }), timeoutMs = 8000 } = {}) {
+  constructor({ workerFactory = () => new Worker(new URL('./wasm-worker.js?v=0.3.3', import.meta.url), { type: 'module' }), timeoutMs = 8000 } = {}) {
     this.workerFactory = workerFactory;
     this.timeoutMs = timeoutMs;
     this.executing = false;
@@ -61,9 +61,18 @@ export class LuauRuntime {
       // Initialization (WASM load/compile) can be longer than a normal execution.
       if (!this.execution) await this.request('execution', 'init', {}, 60000);
       const { result, elapsed } = await this.request('execution', 'execute', {
-        code: project.files[project.active], files: project.files, mode: project.mode
+        code: project.files[project.active], files: project.files, active: project.active, mode: project.mode
       });
       return { result, elapsed };
+    } finally { if (this.runGeneration === generation) this.executing = false; }
+  }
+  async benchmarkModule(project, modulePath) {
+    if (this.executing) throw new Error('A script is already running');
+    this.executing = true;
+    const generation = ++this.runGeneration;
+    try {
+      const { result } = await this.request('execution', 'benchmarkModule', { files: project.files, active: project.active, mode: project.mode, modulePath }, 120000);
+      return result;
     } finally { if (this.runGeneration === generation) this.executing = false; }
   }
   async health() {
@@ -72,7 +81,7 @@ export class LuauRuntime {
   }
   async diagnostics(project) {
     const { result, elapsed } = await this.request('analysis', 'diagnostics', {
-      code: project.files[project.active], files: project.files, mode: project.mode
+      code: project.files[project.active], files: project.files, active: project.active, mode: project.mode
     }, 60000);
     return { diagnostics: Array.isArray(result.diagnostics) ? result.diagnostics : [], elapsed };
   }
@@ -84,7 +93,7 @@ export class LuauRuntime {
   }
   async autocomplete(project, line, col) {
     const { result } = await this.request('analysis', 'autocomplete', {
-      code: project.files[project.active], files: project.files, mode: project.mode, line, col
+      code: project.files[project.active], files: project.files, active: project.active, mode: project.mode, line, col
     }, 60000);
     return Array.isArray(result.items) ? result.items : [];
   }
