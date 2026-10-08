@@ -128,3 +128,7 @@ Source code edited in LuauForge stays in the browser for local execution. Local 
 - `scripts/` — build, fetch, verify, local server and real Luau smoke tests
 - `tests/` — unit tests and static deploy/worker contracts
 - `.github/workflows/` — CI and GitHub Pages release pipeline
+
+## AutoRequire (v0.3.5)
+
+Type `/Fast`, `/Nano`, `/Omega`, or `/Math` on a new line in LuauForge. Choose a fuzzy-matched suggestion with Enter, Tab, or tap. The editor inserts an explicit `local FastME = require("@FastNum")` or relative file import. Existing imports are reused, and name collisions receive a numerical suffix. Type `FastME.` to complete documented API method names. Built-in catalog **Import** buttons also create imports. The toggle in Workspace settings is saved locally. Execution remains inside Luau WASM rather than Roblox Studio.

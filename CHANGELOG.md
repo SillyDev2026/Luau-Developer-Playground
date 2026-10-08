@@ -1,3 +1,8 @@
+## v0.3.5 — AutoRequire plugin-style editor commands
+- Added `/`-triggered fuzzy module suggestions, smart deduplication and relative paths.
+- Added Enter/Tab/touch completion, method suggestions, catalog Import and persisted toggle.
+- Preserved per-execution Luau WASM module caching and existing module benchmarks.
+
 ## v0.3.4 — Built-in number libraries
 
 - Added first-party library catalog for FastNum v2.9.5, NanoNum v2.4.10 and OmegaNumV2 v2.4.0.

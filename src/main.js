@@ -6,6 +6,7 @@ import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from '
 import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js?v=0.3.4';
 import { summarizeSamples } from './module-bundle.js';
 import { BUILTIN_LIBRARIES, builtinById } from './builtin-libraries.js';
+import { mountAutoRequire } from './auto-require.js';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -92,7 +93,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.3.4`;
+  document.title = `${project.active} — LuauForge v0.3.5`;
 }
 
 function button(label, css, fn, title = '') {
@@ -870,4 +871,5 @@ editorSection.addEventListener('drop', async event => { event.preventDefault(); 
 renderAll();
 setOutputView('console');
 renderBenchmarkModules();
-consoleMessage('LuauForge v0.3.4 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+mountAutoRequire({editor,getProject:()=>project,notify:toast});
+consoleMessage('LuauForge v0.3.5 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
