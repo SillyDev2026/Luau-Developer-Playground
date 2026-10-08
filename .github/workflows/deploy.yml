@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -20,6 +20,17 @@ jobs:
           node-version: '22'
       - run: npm test
       - run: npm run fetch:wasm
+      # Persist the WASM runtime to main so branch/Jekyll Pages hosting
+      # can serve public/wasm/, even when it overwrites the Actions site.
+      - name: Commit pinned runtime assets if missing
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/wasm/luau-module.js public/wasm/luau.wasm
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: synchronize pinned Luau WASM browser assets"
+            git push origin HEAD:main
+          fi
       - run: npm run smoke:wasm
       - run: npm run build
       - run: node scripts/verify-dist.mjs

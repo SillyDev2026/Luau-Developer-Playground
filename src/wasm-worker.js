@@ -1,46 +1,55 @@
 // Dedicated workers keep Luau runs stoppable and type checking independent.
 // The /public source folder is flattened to the site root by scripts/build.mjs.
 // Resolve relative to this worker to support GitHub Pages project subdirectories.
-export const RUNTIME_VERSION = '0.3.1';
-const wasmUrl = new URL(`../wasm/luau.wasm?v=${RUNTIME_VERSION}`, import.meta.url);
-const loaderUrl = new URL(`../wasm/luau-module.js?v=${RUNTIME_VERSION}`, import.meta.url);
+export const RUNTIME_VERSION = '0.3.2';
+// GitHub Pages Actions builds publish /wasm, Jekyll branch builds publish
+// /public/wasm. Locate and validate the matching pinned runtime assets.
+const RUNTIME_LOCATIONS = [
+  new URL('../wasm/', import.meta.url),
+  new URL('../public/wasm/', import.meta.url)
+];
 let runtimePromise;
 
-async function assetResponse(url, description) {
-  let response;
-  try {
-    response = await fetch(url, { cache: 'no-store' });
-  } catch (error) {
-    throw new Error(`Unable to load ${description} (${url.pathname}). Check your connection. ${error.message}`);
+async function fetchAsset(url, label) {
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`${label} HTTP ${res.status} at ${url.pathname}`);
+  if ((res.headers.get('content-type') || '').includes('text/html')) {
+    throw new Error(`${label} was replaced by HTML at ${url.pathname}`);
   }
-  if (!response.ok) {
-    throw new Error(`${description} missing (HTTP ${response.status}) at ${url.pathname}. In GitHub Settings → Pages, select GitHub Actions as the publishing source, then redeploy.`);
+  return res;
+}
+
+async function locateRuntime() {
+  const failures = [];
+  for (const base of RUNTIME_LOCATIONS) {
+    const loaderUrl = new URL(`luau-module.js?v=${RUNTIME_VERSION}`, base);
+    const wasmUrl = new URL(`luau.wasm?v=${RUNTIME_VERSION}`, base);
+    try {
+      const [js, wasm] = await Promise.all([
+        fetchAsset(loaderUrl, 'Luau loader'),
+        fetchAsset(wasmUrl, 'Luau WebAssembly engine')
+      ]);
+      const [script, buffer] = await Promise.all([js.text(), wasm.arrayBuffer()]);
+      if (!script.includes('createLuauModule') || !script.includes('export default')) throw new Error('Invalid Luau loader');
+      const magic = new Uint8Array(buffer.slice(0, 4));
+      if (buffer.byteLength < 1000000 || magic.join(',') !== '0,97,115,109') throw new Error('Invalid Luau WASM');
+      return { loaderUrl, wasmBytes: buffer };
+    } catch (error) {
+      failures.push(error instanceof Error ? error.message : String(error));
+    }
   }
-  const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('text/html')) {
-    throw new Error(`${description} was replaced by an HTML page at ${url.pathname}. Verify GitHub Pages is publishing the Actions build.`);
-  }
-  return response;
+  throw new Error(`Luau WASM files are missing from the published GitHub Pages deployment. ${failures.join(' | ')}. Check Settings → Pages and ensure the pinned public/wasm files are committed.`);
 }
 
 async function loadRuntime() {
   if (!runtimePromise) runtimePromise = (async () => {
-    // Check the actual published JS file before import() so a 404 becomes an
-    // actionable message instead of an unhelpful browser module-import error.
-    const [loaderResponse, wasmResponse] = await Promise.all([
-      assetResponse(loaderUrl, 'Luau JavaScript loader'),
-      assetResponse(wasmUrl, 'Luau WebAssembly engine')
-    ]);
-    const jsText = await loaderResponse.text();
-    if (!jsText.includes('createLuauModule')) throw new Error('Luau JavaScript loader is invalid. Redeploy GitHub Pages.');
-    const wasmBytes = await wasmResponse.arrayBuffer();
-    if (wasmBytes.byteLength < 1_000_000) throw new Error('Luau WebAssembly engine is incomplete. Redeploy GitHub Pages.');
+    const { loaderUrl, wasmBytes } = await locateRuntime();
     const compiled = await WebAssembly.compile(wasmBytes);
     let createLuauModule;
     try {
       ({ default: createLuauModule } = await import(loaderUrl.href));
     } catch (error) {
-      throw new Error(`Luau loader import failed at ${loaderUrl.pathname}: ${error.message}. Ensure Pages uses the GitHub Actions build.`);
+      throw new Error(`Luau JavaScript module import failed at ${loaderUrl.pathname}: ${error.message}`);
     }
     return createLuauModule({ instantiateWasm(imports, successCallback) {
       WebAssembly.instantiate(compiled, imports).then(successCallback).catch(error => {

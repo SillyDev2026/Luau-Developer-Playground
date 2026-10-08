@@ -9,8 +9,9 @@ const worker = await readFile(join(out, 'src/wasm-worker.js'), 'utf8');
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(worker, /\.\.\/wasm\/luau-module\.js/);
-assert.match(worker, /\.\.\/wasm\/luau\.wasm/);
+assert.match(worker, /new URL\('\.\.\/wasm\/'/);
+assert.match(worker, /new URL\('\.\.\/public\/wasm\/'/);
+
 assert.match(glue, /export default createLuauModule/);
 assert.equal(binary.subarray(0, 4).toString('hex'), '0061736d');
 assert.ok(binary.length > 1_000_000);

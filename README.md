@@ -1,3 +1,7 @@
+# LuauForge v0.3.2 WASM deployment repair
+
+LuauForge now resolves WASM assets from either `wasm/` (GitHub Actions Pages artifact) or `public/wasm/` (Jekyll branch deployment). The deploy workflow commits the pinned official binary and JS loader to the repository so branch hosting can serve the runtime. Use a hard reload after updating.
+
 # LuauForge v0.3.1 — Luau Developer Playground
 
 A mobile-friendly, multi-file Luau editor with self-hosted **Luau WebAssembly** execution, type checking, diagnostics, bytecode inspection, snapshots, and local autosave. Hosted as a static GitHub Pages site at:

@@ -51,8 +51,8 @@ test('output renders native Luau text and fallback structured values', () => {
 test('runtime worker targets local same-origin asset URLs', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/wasm-worker.js', import.meta.url), 'utf8');
-  assert.match(source, /\.\.\/wasm\/luau\.wasm/);
-  assert.match(source, /\.\.\/wasm\/luau-module\.js/);
+  assert.match(source, /new URL\('\.\.\/wasm\/'/);
+  assert.match(source, /new URL\('\.\.\/public\/wasm\/'/);
   assert.doesNotMatch(source, /play\.luau\.org/);
 });
 
@@ -60,9 +60,9 @@ test('runtime worker targets local same-origin asset URLs', async () => {
 test('missing published asset yields an actionable GitHub Pages error', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/wasm-worker.js', import.meta.url), 'utf8');
-  assert.match(source, /GitHub Settings → Pages/);
+  assert.match(source, /GitHub Pages deployment/);
   assert.match(source, /response\.ok/);
-  assert.match(source, /assetResponse\(loaderUrl/);
+  assert.match(source, /fetchAsset\(loaderUrl/);
 });
 
 test('worker initialization errors can be retried with a fresh worker', async () => {

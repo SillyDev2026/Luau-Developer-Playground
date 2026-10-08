@@ -3,6 +3,4 @@ dist/
 .DS_Store
 *.log
 
-# Pinned upstream WebAssembly assets downloaded during CI
-public/wasm/luau.wasm
-public/wasm/luau-module.js
+# Runtime assets are tracked for branch/Jekyll Pages deployment.

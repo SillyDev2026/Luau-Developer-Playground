@@ -1,3 +1,10 @@
+## v0.3.2 — 2026-10-08
+
+- Repair Pages/Jekyll runtime mismatch by committing pinned Luau WASM assets to the branch.
+- Support both root `wasm/` and `public/wasm/` runtime locations.
+- Validate binary and loader before dynamic import; improve error messages.
+- Cache-bust the main editor module and Web Worker on release.
+
 # Changelog
 
 ## 0.3.1 — WebAssembly deployment and runtime repair

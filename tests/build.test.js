@@ -7,7 +7,7 @@ const read = async name => readFile(new URL(name, root), 'utf8');
 
 test('entrypoint references local assets with relative paths', async () => {
   const html = await read('index.html');
-  assert.match(html, /src="\.\/src\/main\.js"/);
+  assert.match(html, /src="\.\/src\/main\.js\?v=0\.3\.2"/);
   assert.match(html, /href="\.\/src\/styles\.css"/);
   assert.match(html, /src="https:\/\/cdnjs\.cloudflare\.com/);
   assert.doesNotMatch(html, /src="\/src\//);
@@ -32,8 +32,14 @@ test('build uses public root paths, not nested /public assets', async () => {
   const build = await read('scripts/build.mjs');
   const worker = await read('src/wasm-worker.js');
   assert.match(build, /for \(const entry of await readdir/);
-  assert.match(worker, /\.\.\/wasm\/luau\.wasm/);
-  assert.match(worker, /\.\.\/wasm\/luau-module\.js/);
+  assert.match(worker, /new URL\('\.\.\/wasm\/'/);
+  assert.match(worker, /new URL\('\.\.\/public\/wasm\/'/);
   assert.match(await read('index.html'), /href="\.\/favicon\.svg"/);
   assert.doesNotMatch(worker, /import\(['"]\.\.\/public/);
+});
+
+test('Pages publishing workflow checks runtime into the branch', async () => {
+  const yaml = await read('.github/workflows/deploy.yml');
+  assert.match(yaml, /contents: write/);
+  assert.match(yaml, /git add public\/wasm\/luau-module\.js public\/wasm\/luau\.wasm/);
 });
