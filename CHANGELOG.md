@@ -1,3 +1,11 @@
+## v0.3.0 — WebAssembly engine
+
+- Added native browser Luau WASM execution with a dedicated stoppable worker.
+- Added Luau type checking, navigable diagnostics, and bytecode inspection.
+- Pinned WASM provenance and automatic download in GitHub Pages CI.
+- Added stop button, keyboard shortcuts, and updated mobile output layout.
+- Kept official Playground fallback and v0.2 local storage compatibility.
+
 # Changelog
 
 ## 0.2.0 — Workspace and responsive layout overhaul
@@ -17,7 +25,3 @@
 ## 0.1.0 — Initial release
 
 - Multi-file editor, syntax highlighting, local autosave, templates, import/export, themes and official Playground runner integration.
-
-### 0.2.0 patch refinement
-- Replaced per-character suffix slicing in syntax highlighting with sticky-regex scanning to reduce allocation churn on longer scripts.
-- Corrected first-match navigation in the Find panel.

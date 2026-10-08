@@ -3,6 +3,7 @@ import { highlightLuau } from './highlight.js';
 import { buildPlaygroundURL } from './runner.js';
 import { findMatches, replaceAllLiteral, positionForLine, currentLineAndColumn, indentSelection } from './editor-utils.js';
 import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from './snapshots.js';
+import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -14,6 +15,10 @@ let commandItems = [];
 let mobileDrawer = '';
 let activeModal = '';
 let previousFocus = null;
+const luau = new LuauRuntime();
+let outputView = 'console';
+let checkSequence = 0;
+let executing = false;
 const openedTabs = new Set([project.active]);
 const collapsedFolders = new Set();
 const editor = $('code-input');
@@ -83,7 +88,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.2`;
+  document.title = `${project.active} — LuauForge v0.3`;
 }
 
 function button(label, css, fn, title = '') {
@@ -404,9 +409,94 @@ function showRunner() {
   iframe.referrerPolicy = 'no-referrer';
   iframe.allow = 'clipboard-write';
   holder.append(iframe);
-  $('output-indicator').textContent = 'RUNNER';
+  $('output-indicator').textContent = 'OFFICIAL';
   consoleMessage(`Opened ${project.active} in the official Playground. Execution output stays in that window.`);
   openModal('runner-modal', 'runner-close');
+}
+
+
+function setOutputView(next) {
+  outputView = next;
+  $('console-content').hidden = next !== 'console';
+  $('diagnostics-list').hidden = next !== 'diagnostics';
+  $('bytecode-view').hidden = next !== 'bytecode';
+  $('diagnostics-btn').classList.toggle('selected-tool', next === 'diagnostics');
+  $('bytecode-btn').classList.toggle('selected-tool', next === 'bytecode');
+}
+function setExecuting(value) {
+  executing = value;
+  $('run-btn').disabled = value;
+  $('stop-btn').disabled = !value;
+  $('mobile-run').disabled = value;
+  $('output-indicator').textContent = value ? 'RUNNING' : 'READY';
+}
+async function runLocal() {
+  if (executing) return;
+  setOutputView('console');
+  setExecuting(true);
+  consoleMessage(`▶ Running ${project.active} with Luau WASM…`, 'notice-line');
+  try {
+    const current = project;
+    const { result, elapsed } = await luau.run(current);
+    if (result.output || result.prints) {
+      const output = renderOutput(result);
+      for (const line of output.slice(0, 50000).split('\n')) consoleMessage(line);
+      if (output.length > 50000) consoleMessage('Output truncated to 50 KB.', 'notice-line');
+    }
+    if (result.error) consoleMessage(`Error: ${result.error}`, 'error-line');
+    if (result.success) consoleMessage(`✓ Completed in ${elapsed.toFixed(2)} ms (browser WASM).`, 'system-line');
+    else if (!result.error) consoleMessage('Execution did not complete successfully.', 'error-line');
+  } catch (error) {
+    consoleMessage(`Runtime: ${error.message}`, 'error-line');
+    toast(`Luau runtime: ${error.message}`, true);
+  } finally { setExecuting(false); }
+}
+function stopLocal() {
+  if (!executing) return;
+  luau.stop();
+  setExecuting(false);
+  consoleMessage('■ Execution stopped. Analyzer remains available.', 'notice-line');
+}
+async function checkLocal() {
+  const serial = ++checkSequence;
+  const active = project.active;
+  const snapshot = { ...project, files: { ...project.files } };
+  setOutputView('diagnostics');
+  const list = $('diagnostics-list');
+  list.replaceChildren();
+  list.append('Checking Luau types…');
+  try {
+    const { diagnostics, elapsed } = await luau.diagnostics(snapshot);
+    if (serial !== checkSequence || active !== project.active) return;
+    list.replaceChildren();
+    const relevant = normalizeDiagnostics(diagnostics).filter(item => item.module === 'main' || item.module === active || !item.module);
+    $('output-indicator').textContent = `${relevant.filter(item => item.severity === 'error').length} ERRORS`;
+    if (!relevant.length) list.append(`✓ No diagnostics (${elapsed.toFixed(1)} ms)`);
+    for (const item of relevant.slice(0, 150)) {
+      const row = button(`${item.severity.toUpperCase()} · ${item.line}:${item.column} · ${item.message}`, `diagnostic-row ${item.severity}`, () => {
+        const position = positionForLine(editor.value, item.line) + item.column - 1;
+        editor.focus();
+        editor.setSelectionRange(position, position);
+        editor.scrollTop = Math.max(0, (item.line - 5) * project.fontSize * 1.78);
+      });
+      list.append(row);
+    }
+  } catch (error) {
+    if (serial !== checkSequence) return;
+    list.replaceChildren();
+    list.append(`Analysis error: ${error.message}`);
+    toast(error.message, true);
+  }
+}
+async function showBytecode() {
+  setOutputView('bytecode');
+  const pane = $('bytecode-view');
+  pane.textContent = 'Compiling bytecode…';
+  try {
+    const { result, elapsed } = await luau.bytecode(project);
+    pane.textContent = result.bytecode || result.error || JSON.stringify(result, null, 2);
+    $('output-indicator').textContent = `O${project.optimization} · ${elapsed.toFixed(0)} MS`;
+  } catch (error) { pane.textContent = `Bytecode error: ${error.message}`; toast(error.message, true); }
 }
 
 function showSearch() {
@@ -502,7 +592,11 @@ function openSnapshots() { renderSnapshots(); openModal('snapshot-modal', 'creat
 
 function buildCommands(query = '') {
   const commands = [
-    { label: 'Run code in official Playground', action: showRunner },
+    { label: 'Run Luau in browser WebAssembly', action: runLocal },
+    { label: 'Stop Luau execution', action: stopLocal },
+    { label: 'Check Luau types', action: checkLocal },
+    { label: 'Inspect Luau bytecode', action: showBytecode },
+    { label: 'Open official Playground', action: showRunner },
     { label: 'New Luau file', action: () => askNewFile() },
     { label: 'Find and replace', action: showSearch },
     { label: 'Go to line', action: goToLine },
@@ -577,7 +671,10 @@ $('export-btn').addEventListener('click', exportProject);
 $('mobile-export').addEventListener('click', exportProject);
 $('import-btn').addEventListener('click', () => $('import-input').click());
 $('import-input').addEventListener('change', async event => { await importFiles([...event.target.files]); event.target.value = ''; });
-$('clear-console').addEventListener('click', () => { $('console-content').replaceChildren(); consoleMessage('Console cleared.'); });
+$('clear-console').addEventListener('click', () => { $('console-content').replaceChildren(); $('diagnostics-list').replaceChildren(); $('bytecode-view').textContent = ''; setOutputView('console'); consoleMessage('Console cleared.'); });
+$('stop-btn').addEventListener('click', stopLocal);
+$('diagnostics-btn').addEventListener('click', checkLocal);
+$('bytecode-btn').addEventListener('click', showBytecode);
 $('mode-select').addEventListener('change', event => updateProject({ ...project, mode: event.target.value }));
 $('optimization-select').addEventListener('change', event => updateProject({ ...project, optimization: Number(event.target.value) }));
 $('wrap-toggle').addEventListener('click', () => updateProject({ ...project, wordWrap: !project.wordWrap }));
@@ -590,8 +687,8 @@ $('mobile-settings').addEventListener('click', toggleInspector);
 $('inspector-close').addEventListener('click', () => matchMedia('(max-width: 1199px)').matches ? closeDrawer() : updateProject({ ...project, inspectorOpen: false }));
 $('drawer-overlay').addEventListener('click', closeDrawer);
 window.addEventListener('resize', updateDrawer);
-$('run-btn').addEventListener('click', showRunner);
-$('mobile-run').addEventListener('click', showRunner);
+$('run-btn').addEventListener('click', runLocal);
+$('mobile-run').addEventListener('click', runLocal);
 $('expand-runner').addEventListener('click', showRunner);
 $('runner-close').addEventListener('click', () => closeModal('runner-modal'));
 $('snapshot-btn').addEventListener('click', openSnapshots);
@@ -620,7 +717,8 @@ document.addEventListener('keydown', event => {
   const cmd = event.ctrlKey || event.metaKey;
   const key = event.key.toLowerCase();
   if (cmd && key === 's') { event.preventDefault(); if (persist()) toast('Workspace saved locally.'); }
-  else if (cmd && event.key === 'Enter') { event.preventDefault(); showRunner(); }
+  else if (cmd && event.key === 'Enter') { event.preventDefault(); runLocal(); }
+  else if (cmd && event.shiftKey && key === 'b') { event.preventDefault(); checkLocal(); }
   else if (cmd && key === 'f') { event.preventDefault(); showSearch(); }
   else if (cmd && key === 'p') { event.preventDefault(); openCommands(); }
   else if (cmd && key === 'g') { event.preventDefault(); goToLine(); }
@@ -631,7 +729,7 @@ document.addEventListener('keydown', event => {
     else closeDrawer();
   }
 });
-window.addEventListener('pagehide', () => { if (saveTimer) persist(); });
+window.addEventListener('pagehide', () => { if (saveTimer) persist(); luau.dispose(); });
 window.addEventListener('storage', event => { if ([STORAGE_KEY, LEGACY_STORAGE_KEY].includes(event.key)) toast('Workspace changed in another tab. Export changes before reloading.', true); });
 
 let dragCounter = 0;
@@ -642,4 +740,5 @@ editorSection.addEventListener('dragleave', () => { dragCounter--; if (dragCount
 editorSection.addEventListener('drop', async event => { event.preventDefault(); dragCounter = 0; $('drop-indicator').classList.add('hidden'); await importFiles([...event.dataTransfer.files]); });
 
 renderAll();
-consoleMessage('LuauForge v0.2 loaded. Files are autosaved locally; Ctrl+Enter opens the official runner.');
+setOutputView('console');
+consoleMessage('LuauForge v0.3 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

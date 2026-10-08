@@ -1,10 +1,10 @@
-# LuauForge — Luau Developer Playground v0.2.0
+# LuauForge — Luau Developer Playground v0.3.0
 
 A dependency-free, responsive, GitHub Pages-compatible Luau development workspace with real Luau compilation and execution through the **official Luau Playground**.
 
 > **Runtime boundary:** LuauForge edits and stores code locally. Selecting **Run** opens the official Luau Playground in an embedded iframe with code preloaded through its compressed share format. Compiler/type-check output appears inside that embedded site, **not** inside LuauForge's separate status console. Roblox APIs such as `game`, `workspace`, and DataStoreService cannot run in the standalone Luau engine.
 
-## What's new in v0.2
+## What's new in v0.3
 
 - Responsive layout tuned for desktop, tablet, narrow phones and short displays
 - Drag-to-resize explorer and output panel (also keyboard accessible); size preferences are saved
@@ -71,7 +71,7 @@ All static asset links are relative, so hosting in a repository subpath works wi
 - Projects have size/file limits. Import validates files and rejects invalid/malformed projects. A failed import doesn't replace the working project.
 - The official runner needs an internet connection. The LZ-String codec is currently loaded from cdnjs. The editor works offline after assets are cached by the browser, but no offline execution is promised.
 - Running code passes the project's source in the official Playground share URL, which that page can read. **Never place secrets in scripts intended for sharing or external execution.**
-- The embedded official runner is a cross-origin iframe and LuauForge cannot capture or control its execution results. No independent WASM engine is included in v0.2.
+- The embedded official runner is a cross-origin iframe and LuauForge cannot capture or control its execution results. No independent WASM engine is included in v0.3.
 
 ## Source layout
 
@@ -93,4 +93,20 @@ tests/                       Node unit and build tests
 
 ## Later versions
 
-Standalone Luau WASM engine, in-editor type diagnostics, richer file search, IndexedDB project storage, and GitHub synchronization are separate future work. They are not described as v0.2 features.
+Standalone Luau WASM engine, in-editor type diagnostics, richer file search, IndexedDB project storage, and GitHub synchronization are separate future work. They are not described as v0.3 features.
+
+## v0.3 WebAssembly runtime
+
+- Run Luau source directly in the browser: **Run code** / **Ctrl+Enter**.
+- Stop an infinite loop using **Stop**; execution is confined to a dedicated worker.
+- Check syntax and Luau types with **Check** / **Ctrl+Shift+B** and click diagnostics to navigate.
+- Inspect compiler bytecode at optimization levels O0, O1 and O2.
+- Multiple files are registered for Luau module resolution; Roblox services aren't implemented.
+- Separate analysis and execution workers preserve responsiveness while running code.
+- The official hosted Playground remains an optional fallback.
+
+### Runtime asset provenance
+
+The WASM binary and matching Emscripten wrapper are from official `luau-lang/playground`, pinned at commit `e232f443148728fe5b8e714f1796aaa676287df7`. They are fetched during GitHub Actions before packaging a fully static GitHub Pages release. They are **not** committed as source blobs. Run `npm run fetch:wasm` locally (requires network) before `npm run dev` for local WASM execution. No CDN is required at runtime for the built-in WASM path. See official upstream MIT license.
+
+A native Luau WebAssembly benchmark does not represent Roblox Studio runtime throughput. Scripts needing the Roblox data model must run inside Studio.

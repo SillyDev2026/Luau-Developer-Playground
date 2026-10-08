@@ -324,3 +324,24 @@ button:hover:not(:disabled) { transition:background-color .14s ease,color .14s e
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after {scroll-behavior:auto!important;transition-duration:0s!important;animation-duration:0s!important;}
 }
+
+/* v0.3 native compiler output and desktop/mobile action sizing */
+.output-area { min-height:105px; }
+.output-actions { align-items:center; flex-wrap:wrap;gap:5px; }
+.output-actions .toolbar-btn { padding:6px 8px; white-space:nowrap; }
+.stop-btn { color:#ff939c !important; border-color:#c85b6b70 !important; }
+.stop-btn:disabled, button:disabled { opacity:.42; cursor:not-allowed; }
+.output-state { white-space:nowrap; }
+.selected-tool { background:var(--accent2) !important;color:var(--accent) !important; }
+.diagnostics-list, .bytecode-view { flex:1;min-height:0;overflow:auto;padding:13px 18px;font:12px/1.65 'JetBrains Mono',monospace;color:var(--secondary);margin:0;white-space:pre-wrap; }
+.diagnostics-list[hidden],.bytecode-view[hidden],.console-content[hidden] { display:none !important; }
+.diagnostic-row { display:block;width:100%;font:inherit;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px;color:var(--secondary);cursor:pointer;white-space:normal;overflow-wrap:anywhere; }
+.diagnostic-row.error { color:#ff9aa7; }.diagnostic-row.warning { color:#f0c07f; }
+.diagnostic-row:hover { background:var(--hover); }
+.output-top { flex-wrap:wrap;min-height:48px;height:auto;padding-block:5px;gap:5px; }
+@media (max-width:650px) {
+ .top-actions { gap:5px; }
+ .top-actions .stop-btn { padding:8px 7px;font-size:10px; }
+ .output-actions .toolbar-btn { font-size:9px;padding:4px 5px; }
+ .output-top { gap:3px; }
+}

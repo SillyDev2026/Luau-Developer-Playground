@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#0c111c" />
-  <meta name="description" content="LuauForge v0.2: a responsive multi-file Luau editor with project snapshots, find and replace, and official Luau Playground execution." />
+  <meta name="description" content="LuauForge v0.3: a responsive multi-file Luau editor with project snapshots, find and replace, and built-in Luau WebAssembly execution." />
   <link rel="icon" type="image/svg+xml" href="./public/favicon.svg" />
   <link rel="stylesheet" href="./src/styles.css" />
-  <title>LuauForge v0.2 — Developer Playground</title>
+  <title>LuauForge v0.3 — Developer Playground</title>
 </head>
 <body data-theme="dark">
   <div id="app">
     <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-hidden="true">{ }</div><div class="brand-name"><strong>Luau<span>Forge</span></strong><small>DEVELOPER PLAYGROUND <em>v0.2</em></small></div></div>
+      <div class="brand"><div class="brand-mark" aria-hidden="true">{ }</div><div class="brand-name"><strong>Luau<span>Forge</span></strong><small>DEVELOPER PLAYGROUND <em>v0.3</em></small></div></div>
       <div class="top-center"><span class="online-dot"></span><span>LOCAL WORKSPACE</span><span class="head-sep">/</span><strong id="project-title">My Workspace</strong></div>
       <div class="top-actions">
         <button id="command-open" class="quiet-btn command-open" title="Command palette (Ctrl+P)">⌕ <span>Quick actions</span> <kbd>Ctrl P</kbd></button>
@@ -21,7 +21,7 @@
         <button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
         <a class="icon-btn external" href="https://luau.org/" target="_blank" rel="noopener noreferrer" title="Luau documentation" aria-label="Luau documentation">↗</a>
         <button id="export-btn" class="quiet-btn export-top"><span>⇩</span> Export</button>
-        <button id="run-btn" class="primary-btn"><span>▶</span> <span class="run-label">Run code</span> <kbd>Ctrl ↵</kbd></button>
+        <button id="stop-btn" class="quiet-btn stop-btn" disabled title="Stop Luau execution">■ Stop</button><button id="run-btn" class="primary-btn"><span>▶</span> <span class="run-label">Run code</span> <kbd>Ctrl ↵</kbd></button>
       </div>
     </header>
     <div id="drawer-overlay" class="drawer-overlay hidden"></div>
@@ -61,12 +61,12 @@
         <section class="editor-section" aria-label="Luau source editor"><div id="line-gutter" class="line-gutter" aria-hidden="true"></div><div class="code-area"><pre id="syntax-layer" aria-hidden="true"><code id="syntax-code"></code></pre><textarea id="code-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" wrap="off" aria-label="Luau code editor" placeholder="-- Start writing Luau code..."></textarea></div><div id="drop-indicator" class="drop-indicator hidden">Drop .lua, .luau, or workspace .json files to import</div></section>
         <div class="info-bar"><div><button id="go-line" class="status-button" title="Go to line (Ctrl+G)"><span id="cursor-position">Ln 1, Col 1</span></button><span class="info-dot">•</span><span id="line-count">1 line</span><span class="info-dot">•</span><span id="file-size">0 B</span></div><div><span class="keyboard-hint">Tab → 4 spaces</span><span class="info-dot">•</span><span id="font-readout">13px</span><span class="info-dot">•</span><span>Luau</span></div></div>
         <div id="output-resizer" class="output-resizer" role="separator" aria-label="Resize output panel" aria-orientation="horizontal" tabindex="0"><span></span></div>
-        <section class="output-area"><div class="output-top"><div class="output-heading"><span class="terminal-icon">▤</span> OUTPUT <span id="output-indicator" class="output-state">READY</span></div><div class="output-actions"><button id="snapshot-btn" class="toolbar-btn">◷ Snapshots</button><button id="clear-console" class="toolbar-btn">Clear</button><button id="expand-runner" class="toolbar-btn" title="Open execution panel">Open runner ↗</button></div></div><div id="console-content" class="console-content" role="log" aria-live="polite"></div></section>
+        <section class="output-area"><div class="output-top"><div class="output-heading"><span class="terminal-icon">▤</span> OUTPUT <span id="output-indicator" class="output-state">READY</span></div><div class="output-actions"><button id="diagnostics-btn" class="toolbar-btn" title="Check types (Ctrl+Shift+B)">✓ Check</button><button id="bytecode-btn" class="toolbar-btn" title="Compile and inspect bytecode">⌘ Bytecode</button><button id="snapshot-btn" class="toolbar-btn">◷ Snapshots</button><button id="clear-console" class="toolbar-btn">Clear</button><button id="expand-runner" class="toolbar-btn" title="Open official Playground fallback">Official ↗</button></div></div><div id="console-content" class="console-content" role="log" aria-live="polite"></div><div class="diagnostics-list" id="diagnostics-list" aria-label="Compiler diagnostics" hidden></div><pre class="bytecode-view" id="bytecode-view" aria-label="Compiler bytecode" hidden></pre></section>
       </main>
       <aside id="inspector" class="inspector" aria-label="Workspace settings"><div class="inspector-title">WORKSPACE <button id="inspector-close" class="tiny-btn" title="Close inspector" aria-label="Close inspector">✕</button></div><div class="panel-box"><div class="panel-icon">⟡</div><div class="panel-heading">Your local project</div><div class="panel-subtitle">Your files, preferences and snapshots stay on this device until exported.</div><div class="panel-stats"><div><span>FILES</span><strong id="stat-files">3</strong></div><div><span>LINES</span><strong id="stat-lines">20</strong></div><div><span>SIZE</span><strong id="stat-size">1 KB</strong></div></div></div>
         <div class="setting-group"><div class="setting-heading">COMPILER SETTINGS</div><label for="mode-select">Type checking mode</label><select id="mode-select"><option value="strict">Strict</option><option value="nonstrict">Nonstrict</option><option value="nocheck">No check</option></select><label for="optimization-select">Optimization</label><select id="optimization-select"><option value="0">O0 — Debug</option><option value="1">O1 — Balanced</option><option value="2">O2 — Optimized</option></select></div>
         <div class="setting-group"><div class="setting-heading">EDITOR APPEARANCE</div><label>Text size</label><div class="font-controls"><button id="font-minus" type="button" aria-label="Decrease editor font size">−</button><strong id="font-size-label">13 px</strong><button id="font-plus" type="button" aria-label="Increase editor font size">＋</button></div><button id="reset-layout" class="quiet-btn layout-reset">↺ Reset layout sizes</button></div>
-        <div class="inspector-callout"><span>↗</span><div><strong>Official Luau engine</strong><p>Compilation, execution and type diagnostics run in the official embedded Playground, not this editor.</p><a href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Visit official playground ↗</a></div></div><div class="inspector-bottom">Developed for Luau creators <span>v0.2.0</span></div>
+        <div class="inspector-callout"><span>⟡</span><div><strong>Built-in Luau WebAssembly</strong><p>Run and analyze Luau directly in this workspace. Stop kills only the execution worker. The official Playground remains an optional fallback. Roblox services require Studio.</p><a href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Visit official playground ↗</a></div></div><div class="inspector-bottom">Developed for Luau creators <span>v0.3.0</span></div>
       </aside>
     </div>
     <div class="mobile-bar"><button id="mobile-files">☰<span> Files</span></button><button id="mobile-find">⌕<span> Find</span></button><button id="mobile-run">▶<span> Run</span></button><button id="mobile-settings">☷<span> Settings</span></button><button id="mobile-export">⇩<span> Export</span></button></div>
