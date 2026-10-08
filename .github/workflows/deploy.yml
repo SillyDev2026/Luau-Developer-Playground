@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm run fetch:wasm
+      - run: npm run build
       - run: npm test
       # Persist the WASM runtime to main so branch/Jekyll Pages hosting
       # can serve public/wasm/, even when it overwrites the Actions site.
@@ -32,7 +33,6 @@ jobs:
             git push origin HEAD:main
           fi
       - run: npm run smoke:wasm
-      - run: npm run build
       - run: node scripts/verify-dist.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
