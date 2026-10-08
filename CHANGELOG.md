@@ -1,9 +1,19 @@
 # Changelog
 
-## v0.1.0 — Initial implementation
+## 0.2.0 — Workspace and responsive layout overhaul
 
-- Added responsive Luau editor and project explorer
-- Added browser-local multi-file workspaces, JSON import/export, templates
-- Added official Luau Playground embedded execution and analysis integration
-- Added theme and compiler preferences, line numbers and syntax coloring
-- Added static Pages deployment with automatic tests
+- Rebalanced desktop, tablet, phone, and short-screen layout; improved positioning and size of controls, tabs, toolbar, and output.
+- Resizable sidebar and output panel with saved sizes and keyboard-accessible handles.
+- Added editor font scaling, layout reset, settings drawer, and more usable mobile navigation.
+- Added in-file find and replace, replace-all, go-to-line, and quick command/file palette.
+- Added project snapshots with restoration and a six-snapshot retention limit.
+- Added explorer file filtering, collapsible folders, multi-line indent/outdent, copy, Roblox ModuleScript template, and drag/drop import.
+- Migrates existing v0.1 browser saves automatically, without discarding older storage.
+- Preserves cursor and scroll on settings changes; guards edits against file-size overflow; validates multi-file imports before committing changes.
+- Fixed deleted-tab cleanup, folder visibility, and word-wrap gutter alignment.
+- Expanded automated validation and build checks.
+- The official Luau Playground remains the runtime; this is not a standalone WASM VM and the console cannot capture iframe output.
+
+## 0.1.0 — Initial release
+
+- Multi-file editor, syntax highlighting, local autosave, templates, import/export, themes and official Playground runner integration.
