@@ -419,7 +419,7 @@ function closeSearch() { $('search-panel').classList.add('hidden'); editor.focus
 function updateFindResults(selectFirst = false) {
   const matches = findMatches(editor.value, $('find-input').value, $('case-sensitive').checked);
   if (!matches.length) findIndex = -1;
-  else if (selectFirst || findIndex < 0 || findIndex >= matches.length) findIndex = 0;
+  else if (selectFirst || findIndex >= matches.length) findIndex = -1;
   $('search-count').textContent = `${matches.length}${matches.length >= 10000 ? '+' : ''} ${matches.length === 1 ? 'match' : 'matches'}`;
   return matches;
 }

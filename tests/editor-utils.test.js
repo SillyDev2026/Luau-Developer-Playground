@@ -25,3 +25,18 @@ test('multiline indent/outdent preserves text and selection bounds', () => {
   assert.equal(result.source, '    alpha\n    beta\ngamma');
   assert.equal(indentSelection(result.source, 0, result.end, true).source, input);
 });
+
+import { highlightLuau } from '../src/highlight.js';
+test('highlighter preserves long input and escapes hostile markup', () => {
+  const source = ('local a = "<tag>" -- comment\n').repeat(1300);
+  const html = highlightLuau(source);
+  assert.ok(html.includes('&lt;tag&gt;'));
+  assert.ok(!html.includes('<tag>'));
+  assert.ok(html.length > source.length);
+});
+test('highlighter handles long comments without leaking markup', () => {
+  const html = highlightLuau('--[=[abc <x>\n def]=]\nprint(1)');
+  assert.ok(html.includes('token comment'));
+  assert.ok(html.includes('&lt;x&gt;'));
+  assert.ok(html.includes('token number'));
+});

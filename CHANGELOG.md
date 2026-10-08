@@ -17,3 +17,7 @@
 ## 0.1.0 — Initial release
 
 - Multi-file editor, syntax highlighting, local autosave, templates, import/export, themes and official Playground runner integration.
+
+### 0.2.0 patch refinement
+- Replaced per-character suffix slicing in syntax highlighting with sticky-regex scanning to reduce allocation churn on longer scripts.
+- Corrected first-match navigation in the Find panel.
