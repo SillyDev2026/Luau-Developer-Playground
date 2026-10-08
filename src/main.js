@@ -3,7 +3,7 @@ import { highlightLuau } from './highlight.js';
 import { buildPlaygroundURL } from './runner.js';
 import { findMatches, replaceAllLiteral, positionForLine, currentLineAndColumn, indentSelection } from './editor-utils.js';
 import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from './snapshots.js';
-import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js';
+import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js?v=0.3.4';
 import { summarizeSamples } from './module-bundle.js';
 import { BUILTIN_LIBRARIES, builtinById } from './builtin-libraries.js';
 

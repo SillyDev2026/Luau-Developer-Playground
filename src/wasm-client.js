@@ -2,7 +2,7 @@ import { loadBuiltinsForProject, builtinPath, builtinId } from "./builtin-librar
 // Manages two independent Luau VM instances. Stopping a run never kills the
 // analysis worker. All source code stays in the browser.
 export class LuauRuntime {
-  constructor({ workerFactory = () => new Worker(new URL('./wasm-worker.js?v=0.3.3', import.meta.url), { type: 'module' }), timeoutMs = 8000 } = {}) {
+  constructor({ workerFactory = () => new Worker(new URL('./wasm-worker.js?v=0.3.4', import.meta.url), { type: 'module' }), timeoutMs = 8000 } = {}) {
     this.workerFactory = workerFactory;
     this.timeoutMs = timeoutMs;
     this.executing = false;
