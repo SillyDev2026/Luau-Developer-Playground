@@ -1,3 +1,12 @@
+## v0.4.1 — Responsive scale/layout hotfix
+
+- Scale desktop side panels and mobile drawers against viewport width, preserving readable min/max dimensions.
+- Fix oversized Pre-built Number Libraries buttons caused by `.tiny-btn` inheriting icon-sized text and dimensions.
+- Grid-size Example/API/Import controls and prevent labels from overflowing.
+- Use dynamic viewport height and safe-area bottom spacing for Files/Settings drawers, mobile navigation and output area.
+- Guard narrow-screen breadcrumb, header and sidebar overflow.
+- Preserve local workspace data, saved appearance preferences, and mobile navigation.
+
 ## v0.4.0 — Editor intelligence and reliability
 
 - Signature help for Luau standard calls, Roblox API methods, constructors and local functions, with active argument highlighting.

@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#0c111c" />
-  <meta name="description" content="LuauForge v0.4.0: a responsive multi-file Luau editor with project snapshots, find and replace, and built-in Luau WebAssembly execution." />
+  <meta name="description" content="LuauForge v0.4.1: a responsive multi-file Luau editor with project snapshots, find and replace, and built-in Luau WebAssembly execution." />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="./src/styles.css?v=0.4.0" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=0.4.0" />
-  <title>LuauForge v0.4.0 — Developer Playground</title>
+  <link rel="stylesheet" href="./src/styles.css?v=0.4.1" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=0.4.1" />
+  <link rel="stylesheet" href="./src/responsive-layout.css?v=0.4.1" />
+  <title>LuauForge v0.4.1 — Developer Playground</title>
 </head>
 <body data-theme="dark">
   <div id="app">
     <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-hidden="true">{ }</div><div class="brand-name"><strong>Luau<span>Forge</span></strong><small>DEVELOPER PLAYGROUND <em>v0.4.0</em></small></div></div>
+      <div class="brand"><div class="brand-mark" aria-hidden="true">{ }</div><div class="brand-name"><strong>Luau<span>Forge</span></strong><small>DEVELOPER PLAYGROUND <em>v0.4.1</em></small></div></div>
       <div class="top-center"><span class="online-dot"></span><span>LOCAL WORKSPACE</span><span class="head-sep">/</span><strong id="project-title">My Workspace</strong></div>
       <div class="top-actions">
         <button id="command-open" class="quiet-btn command-open" title="Command palette (Ctrl+P)">⌕ <span>Quick actions</span> <kbd>Ctrl P</kbd></button>
@@ -68,7 +69,7 @@
       <aside id="inspector" class="inspector" aria-label="Workspace settings"><div class="inspector-title">WORKSPACE <button id="inspector-close" class="tiny-btn" title="Close inspector" aria-label="Close inspector">✕</button></div><div class="panel-box"><div class="panel-icon">⟡</div><div class="panel-heading">Your local project</div><div class="panel-subtitle">Your files, preferences and snapshots stay on this device until exported.</div><div class="panel-stats"><div><span>FILES</span><strong id="stat-files">3</strong></div><div><span>LINES</span><strong id="stat-lines">20</strong></div><div><span>SIZE</span><strong id="stat-size">1 KB</strong></div></div></div>
         <div class="setting-group"><div class="setting-heading">COMPILER SETTINGS</div><label for="mode-select">Type checking mode</label><select id="mode-select"><option value="strict">Strict</option><option value="nonstrict">Nonstrict</option><option value="nocheck">No check</option></select><label for="optimization-select">Optimization</label><select id="optimization-select"><option value="0">O0 — Debug</option><option value="1">O1 — Balanced</option><option value="2">O2 — Optimized</option></select></div>
         <div class="setting-group"><div class="setting-heading">LIVE ANALYSIS</div><label class="live-check-setting"><input id="live-check-toggle" type="checkbox" /> Check types after editing (1.5s idle)</label><small>Optional; uses the Luau WASM analyzer. Error and warning counts appear above the editor. Large files are checked manually.</small></div><div class="setting-group"><div class="setting-heading">MODULE BENCHMARK</div><label for="benchmark-module">Module to benchmark</label><select id="benchmark-module" aria-label="Module to benchmark"></select><small>Choose a workspace file or a built-in module; measures cold module loads and cached require calls within the Luau WASM VM, excluding frontend/network time.</small></div><div class="setting-group"><div class="setting-heading">EDITOR APPEARANCE</div><label>Text size</label><div class="font-controls"><button id="font-minus" type="button" aria-label="Decrease editor font size">−</button><strong id="font-size-label">13 px</strong><button id="font-plus" type="button" aria-label="Increase editor font size">＋</button></div><button id="reset-layout" class="quiet-btn layout-reset">↺ Reset layout sizes</button></div>
-        <div class="inspector-callout"><span>⟡</span><div><strong>Built-in Luau WebAssembly</strong><p>Run and analyze Luau directly in this workspace. Stop kills only the execution worker. The official Playground remains an optional fallback. Roblox services require Studio.</p><a href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Visit official playground ↗</a></div></div><div class="inspector-bottom">Developed for Luau creators <span>v0.4.0</span></div>
+        <div class="inspector-callout"><span>⟡</span><div><strong>Built-in Luau WebAssembly</strong><p>Run and analyze Luau directly in this workspace. Stop kills only the execution worker. The official Playground remains an optional fallback. Roblox services require Studio.</p><a href="https://play.luau.org/" target="_blank" rel="noopener noreferrer">Visit official playground ↗</a></div></div><div class="inspector-bottom">Developed for Luau creators <span>v0.4.1</span></div>
       </aside>
     </div>
     <div class="mobile-bar"><button id="mobile-files">☰<span> Files</span></button><button id="mobile-find">⌕<span> Find</span></button><button id="mobile-run">▶<span> Run</span></button><button id="mobile-settings">☷<span> Settings</span></button><button id="mobile-export">⇩<span> Export</span></button></div>
@@ -80,6 +81,6 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
   <input type="file" id="import-input" hidden accept=".lua,.luau,.json,text/plain,application/json" multiple />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js" defer></script>
-  <script type="module" src="./src/main.js?v=0.4.0"></script>
+  <script type="module" src="./src/main.js?v=0.4.1"></script>
 </body>
 </html>

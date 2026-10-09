@@ -7,8 +7,8 @@ const read = async name => readFile(new URL(name, root), 'utf8');
 
 test('entrypoint references local assets with relative paths', async () => {
   const html = await read('index.html');
-  assert.match(html, /src="\.\/src\/main\.js\?v=0\.4\.0"/);
-  assert.match(html, /href="\.\/src\/styles\.css\?v=0\.4\.0"/);
+  assert.match(html, /src="\.\/src\/main\.js\?v=0\.4\.1"/);
+  assert.match(html, /href="\.\/src\/styles\.css\?v=0\.4\.1"/);
   assert.match(html, /src="https:\/\/cdnjs\.cloudflare\.com/);
   assert.doesNotMatch(html, /src="\/src\//);
 });

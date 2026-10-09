@@ -1,3 +1,7 @@
+# LuauForge v0.4.1 — Responsive scaling patch
+
+The layout uses relative viewport widths, CSS Grid/Flexbox, and `clamp()` constraints (web equivalent of Roblox `UDim2.fromScale` plus min/max constraints). Mobile drawers fit the viewport, buttons have fixed readable font sizes, and panels do not overlap the editor. Desktop explorer resizing remains available. No project data is migrated or erased.
+
 # LuauForge v0.4.0
 
 **v0.4:** context-aware signature help with active parameter highlighting; F12 go to local definition; Ctrl+Shift+O symbol outline; Ctrl+Space manual completion; safer stale-request handling; keyboard-friendly suggestions; optional debounced Luau WASM error/warning indicator. These are editor features built on the existing Luau WASM runtime and do not emulate Roblox services.

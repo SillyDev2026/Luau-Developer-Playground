@@ -6,8 +6,8 @@ import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from '
 import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js?v=0.3.4';
 import { summarizeSamples } from './module-bundle.js';
 import { BUILTIN_LIBRARIES, builtinById } from './builtin-libraries.js';
-import { mountAutoRequire } from './auto-require.js?v=0.4.0';
-import { outlineSymbols } from './editor-intelligence.js?v=0.4.0';
+import { mountAutoRequire } from './auto-require.js?v=0.4.1';
+import { outlineSymbols } from './editor-intelligence.js?v=0.4.1';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -101,7 +101,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.4.0`;
+  document.title = `${project.active} — LuauForge v0.4.1`;
 }
 
 function button(label, css, fn, title = '') {
@@ -927,4 +927,4 @@ setOutputView('console');
 renderBenchmarkModules();
 mountAutoRequire({editor,getProject:()=>project,getRuntime:()=>luau,notify:toast});
 if(liveCheckEnabled)scheduleLiveCheck();
-consoleMessage('LuauForge v0.4.0 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+consoleMessage('LuauForge v0.4.1 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
