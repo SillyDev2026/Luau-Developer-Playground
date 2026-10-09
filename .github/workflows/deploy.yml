@@ -1,4 +1,4 @@
-name: Build and deploy LuauForge 1.0
+name: Build and deploy LuauForge 1.5
 on:
   push:
     branches: [main]
@@ -24,6 +24,7 @@ jobs:
       - run: npm run check
       - run: npm run smoke:wasm
       - run: npm run smoke:libraries
+      - run: npm run smoke:v15
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

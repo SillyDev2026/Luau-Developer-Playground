@@ -1,3 +1,12 @@
+## v1.5.0 — Additive developer toolbox release
+
+- 20 optional tools covering lexical refactoring/references/types, conservative quick fixes, saved snippets, import suggestions, module dependency inspection, API Markdown docs, pinned libraries and user-saved module shelf.
+- Advanced Luau WASM CPU benchmark suite: warmup, batched samples, median, P95, throughput, history and CSV/JSON export.
+- ZIP import with path validation, size limits and CRC checks; optional DEFLATE unpacking; explicit conflict checks and recovery snapshots.
+- Focus mode, desktop split editor, recovery and offline cache checks; preserve existing phone layout, IntelliSense contrast and workspace storage schema.
+- Builtins remain pinned to FastNum 2.9.5, NanoNum 2.4.10 and OmegaNum 2.4.0. Roblox native server APIs remain unavailable inside WASM.
+- Regression tests for ZIP safety, safe edits, dependency hints, history, and actual WASM bench measurement. Browser interactive testing remains subject to environment availability.
+
 ## v1.0.1 — mobile layout & IntelliSense hotfix
 
 - Fix IntelliSense background transparency caused by v0.x CSS variables missing from the v1 theme.

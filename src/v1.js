@@ -9,6 +9,7 @@ import { outlineSymbols } from './editor-intelligence.js';
 import { findMatches, replaceAllLiteral } from './editor-utils.js';
 import { countLines, projectSize, formatBytes, validateProject, projectToJSON } from './store.js';
 import { summarizeSamples } from './module-bundle.js';
+import { mountV15 } from './v15-ui.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
@@ -465,6 +466,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.0.1 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.5.0 ready · Existing workspace restored.', 'system');
 }
 initialize();
+mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });

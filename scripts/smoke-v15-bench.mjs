@@ -1,0 +1,13 @@
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { makeBenchSource, parseBenchResult } from '../src/v15-bench.js';
+const root = new URL('../public/wasm/', import.meta.url);
+const { default: factory } = await import(new URL('luau-module.js', root));
+const compiled = await WebAssembly.compile(await readFile(fileURLToPath(new URL('luau.wasm', root))));
+const wasm = await factory({ instantiateWasm(imports, ready) { WebAssembly.instantiate(compiled, imports).then(ready); return {}; } });
+const code = makeBenchSource({ expression: 'math.sqrt(i)', iterations: 10000, warmup: 1000, samples: 5 });
+const result = JSON.parse(wasm.ccall('luau_execute', 'string', ['string'], [code]));
+if (!result.success) throw new Error('Luau WASM benchmark failed: ' + result.error);
+const timing = parseBenchResult(result.output);
+if (timing.iterations !== 10000 || timing.samples !== 5 || !(timing.medianNs >= 0)) throw new Error('Invalid Luau WASM measurements');
+console.log('LuauForge v1.5 native Luau WASM benchmark PASS:', timing);

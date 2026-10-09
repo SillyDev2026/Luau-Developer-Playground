@@ -65,7 +65,7 @@ export class LuauRuntime {
       if (!this.execution) await this.request('execution', 'init', {}, 60000);
       const { result, elapsed } = await this.request('execution', 'execute', {
         code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode
-      });
+      }, project.benchmark ? 120000 : this.timeoutMs);
       return { result, elapsed };
     } finally { if (this.runGeneration === generation) this.executing = false; }
   }

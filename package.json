@@ -1,20 +1,21 @@
 {
   "name": "luau-developer-playground",
-  "version": "1.0.1",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
-  "description": "LuauForge 1.0: offline-capable responsive Luau WASM IDE",
+  "description": "LuauForge v1.5: responsive offline Luau WASM IDE with 20 developer toolbox actions",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "fetch:wasm": "node scripts/fetch-wasm.mjs",
     "smoke:wasm": "node scripts/smoke-wasm.mjs && node scripts/smoke-modules.mjs",
     "test": "node --test tests/*.test.js",
     "build": "node scripts/build.mjs",
-    "check": "node --check src/v1.js && node --check src/v1-model.js && node --check src/v1-editor.js && node --check src/auto-require.js && node --check src/completion-geometry.js && node --check src/v1-zip.js && node --check src/v1-graph.js && node --check src/wasm-client.js && node --check src/wasm-worker.js && npm run build && npm test && npm run verify:dist",
+    "check": "node --check src/v15-ui.js && node --check src/v15-analysis.js && node --check src/v15-modules.js && node --check src/v15-bench.js && node --check src/v15-zip.js && node --check src/v15-settings.js && node --check src/v1.js && node --check src/v1-model.js && node --check src/v1-editor.js && node --check src/auto-require.js && node --check src/completion-geometry.js && node --check src/v1-zip.js && node --check src/v1-graph.js && node --check src/wasm-client.js && node --check src/wasm-worker.js && npm run build && npm test && npm run verify:dist",
     "verify:dist": "node scripts/verify-dist.mjs",
     "smoke:libraries": "node scripts/smoke-builtin-libraries.mjs",
     "fetch:libraries": "node scripts/fetch-libraries.mjs",
-    "fetch:roblox-api": "node scripts/fetch-roblox-api.mjs"
+    "fetch:roblox-api": "node scripts/fetch-roblox-api.mjs",
+    "smoke:v15": "node scripts/smoke-v15-bench.mjs"
   },
   "engines": {
     "node": ">=20"

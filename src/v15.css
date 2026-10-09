@@ -1,0 +1,21 @@
+/* v1.5 is an additive toolbox: the 1.0.1 responsive workspace is retained. */
+.v15-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-width:100%;}
+.v15-tool-button{box-sizing:border-box;min-width:0;width:100%;min-height:42px;height:auto;padding:8px 6px;white-space:normal;overflow-wrap:anywhere;font:600 11px/1.3 system-ui,sans-serif;text-align:left;}
+.v15-toolbox{min-width:0;}
+.v15-preview{padding:10px;background:#0c1627;color:#dbe6fb;border:1px solid #3b4a60;border-radius:8px;font-size:12px;line-height:1.5;max-height:min(42dvh,340px);overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;}
+body.v15-focus .sidebar,body.v15-focus .inspector,body.v15-focus .output-panel,body.v15-focus .output-resizer{display:none!important;}
+body.v15-focus .workspace-main{flex:1 1 100%!important;width:100%;min-width:0;}
+body.v15-focus .editor-and-output{min-height:0;flex:1 1 100%;}
+body.v15-focus .editor-panel{min-height:0;flex:1 1 100%;}
+.v15-split{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;column-gap:1px;}
+.v15-split>.editor-stage{grid-column:1;grid-row:1;min-width:0;}
+.v15-split>.v15-secondary{grid-column:2;grid-row:1;min-width:0;min-height:0;}
+.v15-split>.editor-status{grid-column:1/-1;grid-row:2;}
+.v15-split .code-mobile-tools{display:none;}
+.v15-secondary{background:#101c2c;display:grid;grid-template-columns:minmax(0,1fr) 34px;grid-template-rows:38px minmax(0,1fr);min-width:0;min-height:0;border-left:1px solid #36465e;}
+.v15-secondary select{background:#17253b;color:#d2e5ff;border:0;border-bottom:1px solid #374c63;min-width:0;padding:0 8px;font-size:12px;}
+.v15-secondary button{background:#17253b;color:#dae8fb;border:0;border-bottom:1px solid #374c63;}
+.v15-secondary textarea{grid-column:1/-1;grid-row:2;width:100%;height:100%;min-width:0;min-height:0;resize:none;box-sizing:border-box;padding:12px;background:#101827;color:#e0e9f7;border:0;outline:none;font:var(--editor-font,14px)/1.5 'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;white-space:pre;overflow:auto;tab-size:4;}
+body[data-theme="light"] .v15-secondary textarea{background:#f8fbff;color:#142944;}
+@media(max-width:820px){.v15-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;}.v15-tool-button{font-size:11px;min-height:42px;padding:9px 6px;}.v15-split{display:flex!important;flex-direction:column;}.v15-split>.v15-secondary{display:none;}}
+@media(max-width:360px){.v15-tool-button{font-size:10px;}}

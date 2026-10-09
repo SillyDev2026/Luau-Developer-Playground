@@ -1,4 +1,41 @@
-# LuauForge v1.0.1 — editor visibility and responsive layout hotfix
+# LuauForge v1.5.0 — Developer Toolbox
+
+LuauForge v1.5 adds **20 optional developer actions** on top of the tested v1.0.1 editor. It does not change the saved workspace format, WASM binary, or built-in FastNum/NanoNum/OmegaNum sources. From a phone, open **Settings → Developer Toolbox v1.5**; from a computer open the Inspector.
+
+## 20 developer actions
+
+| Area | Tools | Behavior |
+| --- | --- | --- |
+| Refactoring | Rename symbol · preview, Find all references, Type explorer, Quick fixes, Saved snippets | Conservative lexical refactoring with explicit preview and recovery snapshots; basic type inspection; manually confirmed safe suggestions; persistent custom snippets. **Renames do not promise language-server-level scope correctness**. |
+| Modules | Missing import suggestions, Module graph & unused files, Generate module docs, Pinned library versions, Custom module shelf | Finds likely imports, shows incoming/outgoing dependencies and advisory unused files, generates Markdown source summaries, inspects exact bundled library pins, and keeps reusable user modules locally. **Alternate built-in versions are not downloaded automatically.** |
+| Benchmarks | Benchmark Suite 3.0, Benchmark comparison & history, Export benchmark CSV, Run project tests | Runs warmups and batched samples **inside real Luau WASM** using `os.clock()`, reports min/median/P95/max/mean/ns-op, stores last 50 runs, exports CSV/JSON and retains the existing .test.luau runner. |
+| Workspace | ZIP project import, Split editor, Mobile focus mode, Recovery manager, API documentation, Live Luau diagnostics | Validated ZIP restore for .lua/.luau, two editable panels on desktop, phone-first focus layout, snapshot + JSON backup, existing API browser and opt-in WASM type checking. |
+
+### Benchmarking instructions
+
+In **Settings → Developer Toolbox → Benchmark Suite 3.0**, enter a valid Luau expression such as `math.sqrt(i)`, optional setup code (e.g. `local FastME = require("@FastNum")`), iterations, warmup and samples. The benchmark runs inside Luau WASM and prints CPU-time measurements, **not** browser layout/DOM timing. Numbers are browser-WASM measurements, not Roblox server statistics; use the separately bundled Roblox Studio benchmark script for native timings. The benchmark UI is safe to cancel using the existing Stop control; it does not upload code to a backend.
+
+### Module and refactoring limitations
+
+The source analyzer is intentionally conservative: comments and string literals are excluded, property member names are not renamed, and bulk changes require confirmation and create a snapshot. Complex lexical shadowing and dynamically resolved module paths are not resolved by the lightweight analyzer—use Luau WASM type diagnostics and review changes. Unused-module hints are advisory, not deletion instructions. Custom modules and benchmark history use browser local storage and may be unavailable in private browsing. The built-in version inspector displays pinned sources; to test another source version, import it as a new workspace module.
+
+### ZIP source restore
+
+The ZIP importer validates CRC32, entry sizes, paths, and limits before accepting Luau source files. It accepts uncompressed ZIPs and deflate archives when `DecompressionStream('deflate-raw')` is available; non-Luau files such as README files are ignored. It refuses to silently overwrite existing workspace paths and saves a snapshot before import.
+
+### Editor sizing
+
+The existing v1.0.1 screen-responsive shell remains unchanged; all new options sit inside the scrollable Settings drawer. On phones, focus mode temporarily hides the console and secondary panels. Split editing is limited to tablet/desktop viewport sizes. The IntelliSense popup retains the v1.0.1 opaque colors and cursor-based positioning.
+
+### Verification
+
+Run `npm run check`, `npm run smoke:wasm`, `npm run smoke:libraries`, and `npm run smoke:v15`. Browser geometry is tested separately at 320, 360, 393, 800, 1280 and 1600 CSS pixels. Real interactive browser smoke tests may be restricted by sandbox policy; don't assume they passed if the environment blocked navigation.
+
+---
+
+# Previous releases
+
+## v1.0.1 — editor visibility and responsive layout hotfix
 
 - Fixed transparent and misplaced IntelliSense by replacing legacy undefined CSS colors with opaque v1 theme colors. Suggestions now follow the editor caret, flip above when near the bottom, and remain within the available editor height.
 - Improved phone/tablet header, library drawer, mobile dock and console dimensions; editor font now remains at least 16px on phones to prevent browser zoom.
