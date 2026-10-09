@@ -1,8 +1,3 @@
-## v0.3.5 — AutoRequire plugin-style editor commands
-- Added `/`-triggered fuzzy module suggestions, smart deduplication and relative paths.
-- Added Enter/Tab/touch completion, method suggestions, catalog Import and persisted toggle.
-- Preserved per-execution Luau WASM module caching and existing module benchmarks.
-
 ## v0.3.4 — Built-in number libraries
 
 - Added first-party library catalog for FastNum v2.9.5, NanoNum v2.4.10 and OmegaNumV2 v2.4.0.
@@ -63,3 +58,13 @@
 ## 0.1.0 — Initial release
 
 - Multi-file editor, syntax highlighting, local autosave, templates, import/export, themes and official Playground runner integration.
+
+## v0.3.6 — Luau IntelliSense + Roblox Studio API completion
+
+- Type any partial in-scope local variable (for example `t` → `test` / `testSpeed`) and accept with Enter/Tab; parameters, loops and lexical shadowing are recognized.
+- Autocomplete from local type annotations, inferred `game:GetService("Players")` and `Instance.new("Part")` expressions, table fields, and standard Luau library functions.
+- Roblox engine methods, properties, events, class types and enum names/values from a compact API index generated in CI from the Roblox Studio API dump. Inherited class members are included. On an offline or unconfigured source-branch deployment, a curated fallback is used.
+- Asynchronously enrich local suggestions using the official Luau WASM type checker; handle stale responses when the cursor or active file changes.
+- Existing slash-command AutoRequire and the built-in FastNum, NanoNum and OmegaNum autocomplete remain available.
+- Keep the generated API index stable between builds and sync it to the repository so GitHub Pages source/Jekyll and Actions deployments work.
+- Roblox engine completions are **editor metadata only**; browser WASM does not provide `game`, DataStores, or other Roblox Studio runtime services.

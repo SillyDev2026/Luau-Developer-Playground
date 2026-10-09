@@ -93,7 +93,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.3.5`;
+  document.title = `${project.active} — LuauForge v0.3.6`;
 }
 
 function button(label, css, fn, title = '') {
@@ -871,5 +871,5 @@ editorSection.addEventListener('drop', async event => { event.preventDefault(); 
 renderAll();
 setOutputView('console');
 renderBenchmarkModules();
-mountAutoRequire({editor,getProject:()=>project,notify:toast});
-consoleMessage('LuauForge v0.3.5 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+mountAutoRequire({editor,getProject:()=>project,getRuntime:()=>luau,notify:toast});
+consoleMessage('LuauForge v0.3.6 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

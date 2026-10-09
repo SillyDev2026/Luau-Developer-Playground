@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm run fetch:roblox-api
       - run: npm run fetch:wasm
       - run: npm run build
       - run: npm run check

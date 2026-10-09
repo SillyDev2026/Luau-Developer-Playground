@@ -1,4 +1,6 @@
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
+import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js';
+import { staticCompletions, applyCompletion, mergeCompletions } from './intellisense.js';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
@@ -79,59 +81,82 @@ export function complete(source,cursor,choice,files,active) {
   const text=existing?variable:'local '+variable+' = require('+JSON.stringify(found.specifier)+')';
   return {source:source.slice(0,context.from)+text+source.slice(context.to),cursor:context.from+text.length,created:!existing,variable};
 }
-export function mountAutoRequire({editor,getProject,notify}) {
+export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
   const parent=editor.parentElement;
   const menu=document.createElement('div');
   menu.id='auto-require-menu'; menu.className='auto-require-menu hidden'; menu.setAttribute('role','listbox');
-  menu.setAttribute('aria-label','AutoRequire and API suggestions');
+  menu.setAttribute('aria-label','Luau IntelliSense, AutoRequire and Roblox API suggestions');
   parent.append(menu);
   const setting=document.createElement('div');
   setting.className='setting-group';
-  const heading=document.createElement('div'); heading.className='setting-heading'; heading.textContent='AUTO REQUIRE';
+  const heading=document.createElement('div'); heading.className='setting-heading'; heading.textContent='INTELLISENSE + AUTO REQUIRE';
   const label=document.createElement('label'); label.className='auto-require-setting';
   const toggle=document.createElement('input'); toggle.type='checkbox';
   const key='luauforge:auto-require';
   let enabled=true;
   try{enabled=localStorage.getItem(key)!=='false';}catch{}
   toggle.checked=enabled;
-  const copy=document.createElement('span'); copy.textContent='Slash commands and API suggestions';
+  const copy=document.createElement('span'); copy.textContent='Local variables, type information, Roblox API and / imports';
   label.append(toggle,copy);
   const hint=document.createElement('small');
-  hint.textContent='Type /Fast, /Nano, /Omega or /Module on a new line. Enter/Tab to insert. FastME. opens API completions.';
+  hint.textContent='Type t to find local test; part. for members, Enum.Material. for enum values, or /Fast to import. Enter/Tab accepts.';
   setting.append(heading,label,hint);
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
-  let options=null,selected=0;
-  function hide(){options=null; menu.replaceChildren(); menu.classList.add('hidden'); editor.setAttribute('aria-expanded','false');}
-  function update() {
-    const project=getProject();
-    if(!enabled || editor.selectionStart!==editor.selectionEnd || editor.dataset.path!==project.active){hide();return;}
-    options=suggestions(editor.value,editor.selectionStart,project.files,project.active);
-    if(!options){hide();return;}
+  let options=null,selected=0,requestId=0,autoTimer=0;
+  loadRobloxAPI().then(()=>{if(document.activeElement===editor)update();});
+  function hide(){options=null;clearTimeout(autoTimer);requestId++;menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');}
+  function renderMenu() {
+    if(!options?.items.length){hide();return;}
     selected=Math.min(selected,options.items.length-1);
     menu.replaceChildren();
-    const head=document.createElement('div');head.className='auto-require-caption';head.textContent=options.mode==='require'?'AUTO REQUIRE • Enter / Tab':'API COMPLETION • Enter / Tab';menu.append(head);
+    const head=document.createElement('div');head.className='auto-require-caption';
+    head.textContent=options.mode==='require'?'AUTO REQUIRE • Enter / Tab':options.mode==='method'?'LIBRARY API • Enter / Tab':'LUAU INTELLISENSE • Enter / Tab';
+    menu.append(head);
     options.items.forEach((item,index)=>{
-      const row=document.createElement('button');row.type='button';row.className='auto-require-option'+(index===selected?' selected':'');row.setAttribute('role','option');
-      const name=document.createElement('span');name.textContent=item.label;
-      const detail=document.createElement('small');detail.textContent=item.detail;
-      row.append(name,detail);
+      const row=document.createElement('button');row.type='button';row.className='auto-require-option'+(index===selected?' selected':'');row.setAttribute('role','option');row.setAttribute('aria-selected',String(index===selected));
+      const name=document.createElement('span');name.className='completion-name';name.textContent=item.label;
+      const detail=document.createElement('small');detail.textContent=item.detail||item.kind;detail.title=item.detail||'';
+      const kind=document.createElement('span');kind.className='completion-kind';kind.textContent=item.kind||'symbol';
+      row.append(name,kind,detail);
       row.addEventListener('pointerdown',event=>event.preventDefault());
       row.addEventListener('click',()=>choose(index));
       menu.append(row);
     });
-    menu.classList.remove('hidden'); editor.setAttribute('aria-expanded','true');
+    menu.classList.remove('hidden');editor.setAttribute('aria-expanded','true');
+  }
+  function update() {
+    const project=getProject();
+    if(!enabled||editor.selectionStart!==editor.selectionEnd||editor.dataset.path!==project.active){hide();return;}
+    const original=suggestions(editor.value,editor.selectionStart,project.files,project.active);
+    // Slash imports always take priority. Documented builtin API method
+    // completion takes priority over generic engine member inference.
+    options=original||staticCompletions(editor.value,editor.selectionStart,getRobloxAPI());
+    if(!options){hide();return;}
+    selected=0;renderMenu();
+    clearTimeout(autoTimer);const generation=++requestId;
+    if(original||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
+    const code=editor.value,cursor=editor.selectionStart,file=project.active;
+    const line=code.slice(0,cursor).split('\n');
+    autoTimer=setTimeout(async()=>{
+      try{
+        const items=await getRuntime().autocomplete(project,line.length-1,line.at(-1).length);
+        if(generation!==requestId||editor.value!==code||editor.selectionStart!==cursor||getProject().active!==file||!options)return;
+        options=mergeCompletions(options,items);
+        renderMenu();
+      }catch{/* Local/Roblox suggestions remain usable without the WASM checker. */}
+    },350);
   }
   function choose(index=selected) {
     if(!options?.items[index])return;
-    const project=getProject(),item=options.items[index];
-    const result=complete(editor.value,editor.selectionStart,item,project.files,project.active);
+    const project=getProject(),item=options.items[index],wasImport=options.mode==='require';
+    const result=options.mode==='require'||options.mode==='method' ? complete(editor.value,editor.selectionStart,item,project.files,project.active) : applyCompletion(editor.value,options,item);
     if(!result){hide();return;}
     editor.value=result.source;
     editor.setSelectionRange(result.cursor,result.cursor);
     editor.dispatchEvent(new Event('input',{bubbles:true}));
     hide();editor.focus();
-    if(item.kind!=='method')notify(result.created?'Module imported: '+result.variable:'Reused existing import: '+result.variable);
+    if(wasImport)notify(result.created?'Module imported: '+result.variable:'Reused existing import: '+result.variable);
   }
   editor.addEventListener('input',update);
   editor.addEventListener('click',update);
@@ -140,7 +165,7 @@ export function mountAutoRequire({editor,getProject,notify}) {
     if(!options || event.isComposing || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
     event.preventDefault();event.stopImmediatePropagation();
     if(event.key==='Escape')hide();
-    else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;update();}
+    else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;renderMenu();}
     else choose();
   },true);
   toggle.addEventListener('change',()=>{enabled=toggle.checked;try{localStorage.setItem(key,String(enabled));}catch{}if(!enabled)hide();else update();});
