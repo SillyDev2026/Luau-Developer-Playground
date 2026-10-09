@@ -1,6 +1,7 @@
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
-import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js';
-import { staticCompletions, applyCompletion, mergeCompletions } from './intellisense.js';
+import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
+import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, GLOBALS } from './intellisense.js?v=0.4.0';
+import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
@@ -87,6 +88,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
   menu.id='auto-require-menu'; menu.className='auto-require-menu hidden'; menu.setAttribute('role','listbox');
   menu.setAttribute('aria-label','Luau IntelliSense, AutoRequire and Roblox API suggestions');
   parent.append(menu);
+  const help=document.createElement('div');help.id='signature-help';help.className='signature-help hidden';help.setAttribute('role','status');help.setAttribute('aria-live','off');parent.append(help);
   const setting=document.createElement('div');
   setting.className='setting-group';
   const heading=document.createElement('div'); heading.className='setting-heading'; heading.textContent='INTELLISENSE + AUTO REQUIRE';
@@ -104,10 +106,28 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
   let options=null,selected=0,requestId=0,autoTimer=0;
+  function updateSignature(){
+    if(!enabled||editor.selectionStart!==editor.selectionEnd){help.classList.add('hidden');return;}
+    const hint=signatureFor(editor.value,editor.selectionStart,getRobloxAPI());
+    if(!hint){help.classList.add('hidden');return;}
+    const parts=formatSignature(hint.signature,hint.activeParameter);
+    const left=document.createElement('span');left.textContent=parts.before;
+    const active=document.createElement('strong');active.textContent=parts.active;
+    const right=document.createElement('span');right.textContent=parts.after;
+    help.replaceChildren(left,active,right);help.classList.remove('hidden');
+  }
+  function goToDefinition(){
+    const def=definitionAt(editor.value,editor.selectionStart);
+    if(!def){notify('No visible local definition found for the current symbol.',true);return;}
+    hide();editor.focus();editor.setSelectionRange(def.position,def.position+def.name.length);
+    const lineHeight=parseFloat(getComputedStyle(editor).lineHeight)||23;
+    editor.scrollTop=Math.max(0,(def.line-5)*lineHeight);
+    notify('Definition: '+def.name+' · line '+def.line);
+  }
   loadRobloxAPI().then(()=>{if(document.activeElement===editor)update();});
   function hide(){options=null;clearTimeout(autoTimer);requestId++;menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');}
   function renderMenu() {
-    if(!options?.items.length){hide();return;}
+    if(!options?.items.length){menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');return;}
     selected=Math.min(selected,options.items.length-1);
     menu.replaceChildren();
     const head=document.createElement('div');head.className='auto-require-caption';
@@ -125,23 +145,32 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
     });
     menu.classList.remove('hidden');editor.setAttribute('aria-expanded','true');
   }
-  function update() {
+  function update(force=false) {
+    updateSignature();
     const project=getProject();
     if(!enabled||editor.selectionStart!==editor.selectionEnd||editor.dataset.path!==project.active){hide();return;}
     const original=suggestions(editor.value,editor.selectionStart,project.files,project.active);
     // Slash imports always take priority. Documented builtin API method
     // completion takes priority over generic engine member inference.
     options=original||staticCompletions(editor.value,editor.selectionStart,getRobloxAPI());
+    if(!options){const context=completionContext(editor.value,editor.selectionStart);if(context)options={...context,items:[]};}
+    if(force && !options) {
+      const from=editor.selectionStart;
+      options={mode:'identifier',query:'',from,to:from,items:[...localsInScope(editor.value,from).map(x=>({label:x.name,kind:x.kind,detail:x.type||'local',score:100})),...GLOBALS.map(label=>({label,kind:'global',detail:'Luau / Roblox global',score:30}))].slice(0,12)};
+    }
     if(!options){hide();return;}
     selected=0;renderMenu();
     clearTimeout(autoTimer);const generation=++requestId;
     if(original||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
     const code=editor.value,cursor=editor.selectionStart,file=project.active;
+    const snapshot={...project,files:{...project.files}};
+    const completionMode=options.mode;
     const line=code.slice(0,cursor).split('\n');
     autoTimer=setTimeout(async()=>{
       try{
-        const items=await getRuntime().autocomplete(project,line.length-1,line.at(-1).length);
+        const items=await getRuntime().autocomplete(snapshot,line.length-1,line.at(-1).length);
         if(generation!==requestId||editor.value!==code||editor.selectionStart!==cursor||getProject().active!==file||!options)return;
+        if(options.mode!==completionMode)return;
         options=mergeCompletions(options,items);
         renderMenu();
       }catch{/* Local/Roblox suggestions remain usable without the WASM checker. */}
@@ -158,11 +187,13 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
     hide();editor.focus();
     if(wasImport)notify(result.created?'Module imported: '+result.variable:'Reused existing import: '+result.variable);
   }
-  editor.addEventListener('input',update);
-  editor.addEventListener('click',update);
-  editor.addEventListener('keyup',update);
+  editor.addEventListener('input',()=>update());
+  editor.addEventListener('click',()=>update());
+  editor.addEventListener('keyup',()=>update());
   editor.addEventListener('keydown',event=>{
-    if(!options || event.isComposing || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
+    if(event.key==='F12'&&!event.shiftKey&&!event.ctrlKey&&!event.altKey){event.preventDefault();event.stopImmediatePropagation();goToDefinition();return;}
+    if((event.ctrlKey||event.metaKey)&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();update(true);return;}
+    if(!options || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
     event.preventDefault();event.stopImmediatePropagation();
     if(event.key==='Escape')hide();
     else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;renderMenu();}
@@ -188,5 +219,5 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
     });
     actions.append(button);
   }
-  return {update,hide};
+  return {update,hide,goToDefinition};
 }

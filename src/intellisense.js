@@ -1,7 +1,8 @@
+import { DEFAULT_PARENTS } from './roblox-api.js?v=0.4.0';
 // Lightweight lexical completions run immediately; WASM Luau type information
 // augments these asynchronously. Locals are lexical, NOT globals.
 const KEYWORDS = 'and break continue do else elseif end export false for function if in local nil not or repeat return then true type typeof until while'.split(' ');
-const GLOBALS = ['print','warn','assert','error','require','type','typeof','tostring','tonumber','pairs','ipairs','next','select','pcall','xpcall','setmetatable','getmetatable','rawget','rawset','rawequal','unpack','math','string','table','buffer','utf8','bit32','coroutine','os','debug','task','Enum','Instance','Vector3','Vector2','CFrame','Color3','UDim2','UDim','BrickColor','RaycastParams','OverlapParams','Random','game','workspace','script','plugin'];
+export const GLOBALS = ['print','warn','assert','error','require','type','typeof','tostring','tonumber','pairs','ipairs','next','select','pcall','xpcall','setmetatable','getmetatable','rawget','rawset','rawequal','unpack','math','string','table','buffer','utf8','bit32','coroutine','os','debug','task','Enum','Instance','Vector3','Vector2','CFrame','Color3','UDim2','UDim','BrickColor','RaycastParams','OverlapParams','Random','game','workspace','script','plugin'];
 
 export function maskLuau(source) {
   // Preserve string contents' positions, mask comments and strings so phantom
@@ -123,7 +124,7 @@ function classMembers(api, type) {
     seen.add(current);
     const entry=api?.classes?.[current];
     for(const item of (Array.isArray(entry)?entry:entry?.members)||[])if(!members.has(item[0]))members.set(item[0],item);
-    current=entry?.parent;
+    current=entry?.parent || DEFAULT_PARENTS[current];
   }
   return [...members.values()];
 }

@@ -1,5 +1,6 @@
 // Official engine API metadata is generated in CI from the Roblox Studio dump.
 // Fallback provides useful completions when offline or hosted from a raw branch.
+export const DEFAULT_PARENTS = Object.freeze({Part:'BasePart',WedgePart:'BasePart',MeshPart:'BasePart',UnionOperation:'BasePart',BasePart:'PVInstance',Model:'PVInstance',PVInstance:'Instance',Player:'Instance',Humanoid:'Instance',DataModel:'Instance',Workspace:'Model',Players:'Instance',RemoteEvent:'Instance',RemoteFunction:'Instance',ReplicatedStorage:'Instance',ServerStorage:'Instance',RunService:'Instance',TweenService:'Instance',RBXScriptSignal:''});
 const functions = methods => methods.map(([n,s,r])=>[n,'function',s,r]);
 export const CORE_API = {
   types:['Instance','DataModel','Workspace','Players','Player','Humanoid','BasePart','Part','Model','ReplicatedStorage','ServerStorage','ServerScriptService','RunService','TweenService','UserInputService','CollectionService','RemoteEvent','RemoteFunction','BindableEvent','ModuleScript','Script','LocalScript','Vector3','Vector2','CFrame','Color3','UDim','UDim2'],

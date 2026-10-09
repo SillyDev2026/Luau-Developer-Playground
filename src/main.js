@@ -6,7 +6,8 @@ import { listSnapshots, createSnapshot, restoreSnapshot, deleteSnapshot } from '
 import { LuauRuntime, normalizeDiagnostics, renderOutput } from './wasm-client.js?v=0.3.4';
 import { summarizeSamples } from './module-bundle.js';
 import { BUILTIN_LIBRARIES, builtinById } from './builtin-libraries.js';
-import { mountAutoRequire } from './auto-require.js';
+import { mountAutoRequire } from './auto-require.js?v=0.4.0';
+import { outlineSymbols } from './editor-intelligence.js?v=0.4.0';
 
 const $ = id => document.getElementById(id);
 let project = loadProject();
@@ -21,6 +22,10 @@ let previousFocus = null;
 const luau = new LuauRuntime();
 let outputView = 'console';
 let checkSequence = 0;
+let liveCheckTimer = 0;
+const liveCheckKey = 'luauforge:live-check';
+let liveCheckEnabled = false;
+try { liveCheckEnabled = localStorage.getItem(liveCheckKey)==='true'; } catch {}
 let executing = false;
 let executionToken = 0;
 const openedTabs = new Set([project.active]);
@@ -72,8 +77,10 @@ function updateProject(next, options = {}) {
     const normalized = validateProject(next);
     const changed = normalized.active !== project.active;
     project = normalized;
+    checkSequence++;
     if (changed) openedTabs.add(project.active);
     markPending();
+    scheduleLiveCheck();
     renderAll(options);
     renderBenchmarkModules();
   } catch (error) { toast(error.message, true); }
@@ -93,7 +100,7 @@ function setTitle() {
   $('project-title').textContent = project.name;
   $('project-folder').textContent = project.name.toUpperCase();
   $('breadcrumb-file').textContent = project.active;
-  document.title = `${project.active} — LuauForge v0.3.6`;
+  document.title = `${project.active} — LuauForge v0.4.0`;
 }
 
 function button(label, css, fn, title = '') {
@@ -236,12 +243,14 @@ function insertAtCursor(value, cursorBack = 0) {
 }
 
 function commitTextChange(value) {
+  checkSequence++;
   const prospective = { ...project, files: { ...project.files, [project.active]: value } };
   try {
     const bytes = new TextEncoder().encode(value).byteLength;
     if (bytes > FILE_SIZE_LIMIT || projectSize(prospective) > TOTAL_SIZE_LIMIT) throw new Error('The source exceeds the local project size limit. Export or split your files.');
     project = prospective;
     markPending();
+    scheduleLiveCheck();
     updateEditorDrawing();
     renderStats();
     if (!$('search-panel').classList.contains('hidden')) updateFindResults(false);
@@ -582,6 +591,33 @@ function stopLocal() {
   setExecuting(false);
   consoleMessage('■ Execution stopped. Analyzer remains available.', 'notice-line');
 }
+function setLiveCheckStatus(label,errors=0){
+  const badge=$('live-check-status');
+  badge.textContent=label;
+  badge.classList.toggle('live-error',errors>0);
+  badge.title='Show Luau diagnostics';
+}
+function scheduleLiveCheck(){
+  clearTimeout(liveCheckTimer);
+  ++checkSequence;
+  if(!liveCheckEnabled){setLiveCheckStatus('CHECK OFF');return;}
+  const active=project.active,source=project.files[active];
+  if(source.length>100000){setLiveCheckStatus('CHECK MANUALLY');return;}
+  setLiveCheckStatus('CHECK PENDING');
+  const serial=checkSequence;
+  liveCheckTimer=setTimeout(async()=>{
+    if(serial!==checkSequence||active!==project.active)return;
+    try{
+      const snapshot={...project,files:{...project.files}};
+      const {diagnostics}=await luau.diagnostics(snapshot);
+      if(serial!==checkSequence||active!==project.active||project.files[active]!==source)return;
+      const relevant=normalizeDiagnostics(diagnostics).filter(item=>item.module===active||item.module==='main'||!item.module);
+      const errors=relevant.filter(item=>item.severity==='error').length;
+      const warnings=relevant.filter(item=>item.severity==='warning').length;
+      setLiveCheckStatus(`${errors} ERR · ${warnings} WARN`,errors);
+    }catch(error){if(serial===checkSequence)setLiveCheckStatus('CHECK FAILED');}
+  },1500);
+}
 async function checkLocal() {
   const serial = ++checkSequence;
   const active = project.active;
@@ -592,7 +628,7 @@ async function checkLocal() {
   list.append('Checking Luau types…');
   try {
     const { diagnostics, elapsed } = await luau.diagnostics(snapshot);
-    if (serial !== checkSequence || active !== project.active) return;
+    if (serial !== checkSequence || active !== project.active || snapshot.files[active] !== project.files[active]) return;
     list.replaceChildren();
     const relevant = normalizeDiagnostics(diagnostics).filter(item => item.module === 'main' || item.module === active || !item.module);
     $('output-indicator').textContent = `${relevant.filter(item => item.severity === 'error').length} ERRORS`;
@@ -607,7 +643,7 @@ async function checkLocal() {
       list.append(row);
     }
   } catch (error) {
-    if (serial !== checkSequence) return;
+    if (serial !== checkSequence || active !== project.active) return;
     list.replaceChildren();
     list.append(`Analysis error: ${error.message}`);
     toast(error.message, true);
@@ -717,6 +753,7 @@ function openSnapshots() { renderSnapshots(); openModal('snapshot-modal', 'creat
 
 function buildCommands(query = '') {
   const commands = [
+    ...outlineSymbols(editor.value).map(symbol=>({label:`${symbol.kind} ${symbol.name} — line ${symbol.line}`,action:()=>jumpToSymbol(symbol)})),
     { label: 'Run Luau in browser WebAssembly', action: runLocal },
     { label: 'Stop Luau execution', action: stopLocal },
     { label: 'Check Luau types', action: checkLocal },
@@ -737,6 +774,19 @@ function buildCommands(query = '') {
   root.replaceChildren();
   for (const item of commandItems) root.append(button(item.label, 'command-option', () => { closeModal('command-modal'); item.action(); }));
   if (!commandItems.length) { const empty = document.createElement('p'); empty.textContent = 'No commands found.'; root.append(empty); }
+}
+function jumpToSymbol(symbol){
+  editor.focus();editor.setSelectionRange(symbol.position,symbol.position+symbol.name.length);
+  editor.scrollTop=Math.max(0,(symbol.line-5)*(project.fontSize*1.7));updateCursor();
+}
+function openSymbols(){
+  $('command-input').value='';
+  const entries=outlineSymbols(editor.value);
+  commandItems=entries.map(symbol=>({label:`${symbol.kind} ${symbol.name} — line ${symbol.line}`,action:()=>jumpToSymbol(symbol)}));
+  const root=$('command-results');root.replaceChildren();
+  if(!entries.length)root.textContent='No symbols in this file yet.';
+  for(const item of commandItems)root.append(button(item.label,'command-option',()=>{closeModal('command-modal');item.action();}));
+  openModal('command-modal','command-input');
 }
 function openCommands() { $('command-input').value = ''; buildCommands(); openModal('command-modal', 'command-input'); }
 
@@ -801,6 +851,9 @@ $('import-input').addEventListener('change', async event => { await importFiles(
 $('clear-console').addEventListener('click', () => { $('console-content').replaceChildren(); $('diagnostics-list').replaceChildren(); $('bytecode-view').textContent = ''; setOutputView('console'); consoleMessage('Console cleared.'); });
 $('stop-btn').addEventListener('click', stopLocal);
 $('diagnostics-btn').addEventListener('click', checkLocal);
+$('live-check-status').addEventListener('click',checkLocal);
+$('live-check-toggle').checked=liveCheckEnabled;
+$('live-check-toggle').addEventListener('change',event=>{liveCheckEnabled=event.target.checked;try{localStorage.setItem(liveCheckKey,String(liveCheckEnabled));}catch{}scheduleLiveCheck();});
 $('bytecode-btn').addEventListener('click', showBytecode);
 $('mode-select').addEventListener('change', event => updateProject({ ...project, mode: event.target.value }));
 $('optimization-select').addEventListener('change', event => updateProject({ ...project, optimization: Number(event.target.value) }));
@@ -836,6 +889,7 @@ $('font-minus').addEventListener('click', () => setEditorFont(-1));
 $('font-plus').addEventListener('click', () => setEditorFont(1));
 $('reset-layout').addEventListener('click', resetLayout);
 $('command-open').addEventListener('click', openCommands);
+$('symbol-outline').addEventListener('click',openSymbols);
 $('command-input').addEventListener('input', event => buildCommands(event.target.value));
 $('command-input').addEventListener('keydown', event => { if (event.key === 'Enter' && commandItems.length) { event.preventDefault(); const item = commandItems[0]; closeModal('command-modal'); item.action(); } });
 $('find-input').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); stepFind(event.shiftKey ? -1 : 1); } });
@@ -850,6 +904,7 @@ document.addEventListener('keydown', event => {
   else if (cmd && event.shiftKey && key === 'b') { event.preventDefault(); checkLocal(); }
   else if (cmd && key === 'f') { event.preventDefault(); showSearch(); }
   else if (cmd && key === 'p') { event.preventDefault(); openCommands(); }
+  else if (cmd && event.shiftKey && key==='o'){event.preventDefault();openSymbols();}
   else if (cmd && key === 'g') { event.preventDefault(); goToLine(); }
   else if (event.key === '/' && !activeModal && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) { event.preventDefault(); $('file-filter').focus(); }
   else if (event.key === 'Escape') {
@@ -872,4 +927,5 @@ renderAll();
 setOutputView('console');
 renderBenchmarkModules();
 mountAutoRequire({editor,getProject:()=>project,getRuntime:()=>luau,notify:toast});
-consoleMessage('LuauForge v0.3.6 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');
+if(liveCheckEnabled)scheduleLiveCheck();
+consoleMessage('LuauForge v0.4.0 loaded. Ctrl+Enter runs locally in the Luau WASM engine; Ctrl+Shift+B checks types.');

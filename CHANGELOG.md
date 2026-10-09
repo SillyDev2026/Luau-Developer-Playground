@@ -1,3 +1,13 @@
+## v0.4.0 — Editor intelligence and reliability
+
+- Signature help for Luau standard calls, Roblox API methods, constructors and local functions, with active argument highlighting.
+- F12 go to visible local definition; Ctrl+Shift+O searchable file symbol outline.
+- Ctrl+Space opens manual suggestions. Corrected completion-key handling with modifiers and stale async completion snapshots.
+- Prevented stale diagnostics from a changed buffer replacing newer results.
+- Optional debounced live diagnostics status badge that never steals editor focus; invalidates stale analysis.
+- Added focused regression tests for nested calls, scope lookups, and signature formatting.
+- Bundled browser Luau WASM, three number libraries and API metadata as before.
+
 ## v0.3.4 — Built-in number libraries
 
 - Added first-party library catalog for FastNum v2.9.5, NanoNum v2.4.10 and OmegaNumV2 v2.4.0.

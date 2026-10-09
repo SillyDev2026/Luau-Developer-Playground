@@ -1,3 +1,7 @@
+# LuauForge v0.4.0
+
+**v0.4:** context-aware signature help with active parameter highlighting; F12 go to local definition; Ctrl+Shift+O symbol outline; Ctrl+Space manual completion; safer stale-request handling; keyboard-friendly suggestions; optional debounced Luau WASM error/warning indicator. These are editor features built on the existing Luau WASM runtime and do not emulate Roblox services.
+
 # LuauForge v0.3.4 — Built-in FastNum, NanoNum and OmegaNum
 
 LuauForge comes with three **real, pinned, user-owned big-number libraries**, which load directly from the published website in the Luau WASM environment (never copied into localStorage or your personal project).
