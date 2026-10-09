@@ -131,7 +131,7 @@ function importLibrary(lib) {
 function metrics() {
   const p = workspace.project;
   $('project-metrics').textContent = `${Object.keys(p.files).length} files · ${formatBytes(projectSize(p))} · ${p.mode.toUpperCase()} · O${p.optimization}`;
-  $('font-value').textContent = p.fontSize + 'px'; $('font-label').textContent = p.fontSize + 'px';
+  $('font-value').textContent = p.fontSize + 'px'; $('font-label').textContent = (matchMedia('(max-width:820px)').matches ? Math.max(16,p.fontSize) : p.fontSize) + 'px';
 }
 function refresh() {
   const p = workspace.project;
@@ -465,6 +465,6 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.0 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.0.1 ready · Existing workspace restored.', 'system');
 }
 initialize();

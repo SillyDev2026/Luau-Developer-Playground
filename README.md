@@ -1,3 +1,9 @@
+# LuauForge v1.0.1 — editor visibility and responsive layout hotfix
+
+- Fixed transparent and misplaced IntelliSense by replacing legacy undefined CSS colors with opaque v1 theme colors. Suggestions now follow the editor caret, flip above when near the bottom, and remain within the available editor height.
+- Improved phone/tablet header, library drawer, mobile dock and console dimensions; editor font now remains at least 16px on phones to prevent browser zoom.
+- Retained local project storage, pinned Luau WASM runtime, FastNum/NanoNum/OmegaNum and existing public APIs.
+
 # LuauForge 1.0
 
 **A browser-based Luau developer workspace with a self-hosted WebAssembly VM, type diagnostics, multi-file `require`, AutoRequire, mobile-first editing tools, tests, and module benchmarks.**

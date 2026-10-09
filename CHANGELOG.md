@@ -1,3 +1,11 @@
+## v1.0.1 — mobile layout & IntelliSense hotfix
+
+- Fix IntelliSense background transparency caused by v0.x CSS variables missing from the v1 theme.
+- Anchor suggestions near the text caret, move above when space below is limited, and dynamically size to fit phone keyboards.
+- Raise completion overlay above editor content while retaining accessible keyboard navigation.
+- Improve responsive mobile panel sizing, header spacing, library buttons and code-editor font minimum; retain project storage.
+- Update PWA cache and add regression coverage for popup geometry and contrast.
+
 # Changelog
 
 ## v1.0.0 — Full adaptive workspace rebuild

@@ -1,3 +1,4 @@
+import { textareaCaretOffset, placeCompletionPopup } from './completion-geometry.js';
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, GLOBALS } from './intellisense.js?v=0.4.0';
@@ -106,6 +107,21 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
   let options=null,selected=0,requestId=0,autoTimer=0;
+  function positionSuggestions() {
+    if(menu.classList.contains('hidden'))return;
+    const caret=textareaCaretOffset(editor),position=placeCompletionPopup(caret,
+      {width:parent.clientWidth,height:parent.clientHeight},
+      {width:Math.min(425,parent.clientWidth-14),height:Math.min(menu.scrollHeight,290)});
+    menu.style.left=`${position.left}px`;
+    menu.style.top=`${position.top}px`;
+    menu.style.width=`${position.width}px`;
+    menu.style.maxHeight=`${position.height}px`;
+    menu.dataset.placement=position.below?'below':'above';
+  }
+  const relocate=()=>{if(!menu.classList.contains('hidden'))positionSuggestions();};
+  editor.addEventListener('scroll',relocate,{passive:true});
+  window.addEventListener('resize',relocate,{passive:true});
+  window.visualViewport?.addEventListener('resize',relocate,{passive:true});
   function updateSignature(){
     if(!enabled||editor.selectionStart!==editor.selectionEnd){help.classList.add('hidden');return;}
     const hint=signatureFor(editor.value,editor.selectionStart,getRobloxAPI());
@@ -143,7 +159,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
       row.addEventListener('click',()=>choose(index));
       menu.append(row);
     });
-    menu.classList.remove('hidden');editor.setAttribute('aria-expanded','true');
+    menu.classList.remove('hidden');editor.setAttribute('aria-expanded','true');positionSuggestions();
   }
   function update(force=false) {
     updateSignature();

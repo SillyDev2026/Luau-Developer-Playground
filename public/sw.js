@@ -1,14 +1,14 @@
 /* LuauForge 1.0 offline app shell. Projects remain in localStorage and are
  * never uploaded. Cache is scoped to this GitHub Pages project, not the origin.
  */
-const CACHE = 'luauforge-v1.0.0';
+const CACHE = 'luauforge-v1.0.1';
 const APP = './';
 const CORE = [
   './', './index.html', './favicon.svg', './manifest.webmanifest',
   './src/v1.js', './src/v1.css', './src/auto-require.css',
   './src/v1-editor.js', './src/v1-model.js', './src/v1-zip.js', './src/v1-graph.js',
   './src/store.js', './src/snapshots.js', './src/highlight.js', './src/editor-utils.js',
-  './src/auto-require.js', './src/intellisense.js', './src/editor-intelligence.js',
+  './src/auto-require.js', './src/completion-geometry.js', './src/intellisense.js', './src/editor-intelligence.js',
   './src/roblox-api.js', './src/module-bundle.js', './src/wasm-client.js',
   './src/wasm-worker.js', './src/builtin-libraries.js',
   './wasm/luau.wasm', './wasm/luau-module.js',

@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=1\.0\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=1\.0\.1"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -24,6 +24,6 @@ for(const [name,minSize] of [['FastNum.lua',90000],['NanoNum.lua',300000],['Omeg
   assert.ok(code.length > minSize,`Missing or truncated bundled library: ${name}`);
 }
 await stat(join(out, 'favicon.svg'));
-for (const path of ['src/v1.js','src/v1.css','src/v1-model.js','src/v1-editor.js','src/v1-zip.js','src/v1-graph.js','manifest.webmanifest','sw.js']) await stat(join(out, path));
+for (const path of ['src/v1.js','src/v1.css','src/v1-model.js','src/v1-editor.js','src/v1-zip.js','src/v1-graph.js','src/auto-require.css','src/completion-geometry.js','manifest.webmanifest','sw.js']) await stat(join(out, path));
 assert.equal((await readFile(join(root, 'public/wasm/luau.wasm'))).length, binary.length);
 console.log(`GitHub Pages distribution verified: ${binary.length} WASM bytes; valid loader and relative URLs`);
