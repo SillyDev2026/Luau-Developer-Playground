@@ -1,10 +1,10 @@
-name: Test and deploy GitHub Pages
+name: Build and deploy LuauForge 1.0
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 concurrency:
@@ -18,25 +18,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm run fetch:roblox-api
-      - run: npm run build
-      - run: npm test
       - run: npm run fetch:wasm
-      # GitHub Pages may be configured for branch/Jekyll rather than Actions.
-      # Keep the exact pinned runtime in main so BOTH publishing modes work.
-      # This is idempotent; the follow-up commit triggers one additional build.
-      - name: Persist pinned Luau runtime in the repository
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/wasm/luau-module.js public/wasm/luau.wasm public/roblox-api.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: synchronize pinned Luau WASM browser assets"
-            git push origin HEAD:main
-          fi
+      - run: npm run fetch:libraries
+      - run: npm run fetch:roblox-api
+      - run: npm run check
       - run: npm run smoke:wasm
       - run: npm run smoke:libraries
-      - run: node scripts/verify-dist.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

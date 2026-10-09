@@ -1,0 +1,12 @@
+{
+  "name": "LuauForge 1.0 - Luau Developer IDE",
+  "short_name": "LuauForge",
+  "description": "Standalone Luau WASM development workspace with offline editor, modules, tests and benchmarks",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b111c",
+  "theme_color": "#0c1422",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -82,7 +82,7 @@ export function complete(source,cursor,choice,files,active) {
   const text=existing?variable:'local '+variable+' = require('+JSON.stringify(found.specifier)+')';
   return {source:source.slice(0,context.from)+text+source.slice(context.to),cursor:context.from+text.length,created:!existing,variable};
 }
-export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
+export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogButtons=true}) {
   const parent=editor.parentElement;
   const menu=document.createElement('div');
   menu.id='auto-require-menu'; menu.className='auto-require-menu hidden'; menu.setAttribute('role','listbox');
@@ -203,7 +203,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify}) {
   document.addEventListener('click',event=>{if(event.target!==editor && !menu.contains(event.target))hide();});
   // Catalog buttons retain their full documentation action; add direct Import buttons.
   const catalog=document.querySelector('#builtin-catalog');
-  if(catalog)for(const [index,lib]of BUILTIN_LIBRARIES.entries()){
+  if(catalog && catalogButtons)for(const [index,lib]of BUILTIN_LIBRARIES.entries()){
     const actions=catalog.querySelectorAll('.builtin-catalog-actions')[index];
     if(!actions)continue;
     const button=document.createElement('button');button.type='button';button.className='tiny-btn auto-import-button';button.textContent='Import';

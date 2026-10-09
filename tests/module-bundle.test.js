@@ -48,9 +48,9 @@ test('median is computed from actual numerical samples', () => {
 test('module panel and benchmark action are connected', async () => {
   const { readFile } = await import('node:fs/promises');
   const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
-  const js=await readFile(new URL('../src/main.js',import.meta.url),'utf8');
-  assert.match(html,/id="benchmark-module-btn"/);
-  assert.match(html,/id="benchmark-module"/);
+  const js=await readFile(new URL('../src/v1.js',import.meta.url),'utf8');
+  assert.match(html,/id="benchmark-btn"/);
+  assert.match(html,/id="output-content"/);
   assert.match(js,/benchmarkModule\(/);
-  assert.match(js,/renderBenchmarkModules\(/);
+  assert.match(js,/runModuleBenchmark\(/);
 });

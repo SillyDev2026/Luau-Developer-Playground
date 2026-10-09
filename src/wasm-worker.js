@@ -2,7 +2,7 @@
 // The /public source folder is flattened to the site root by scripts/build.mjs.
 // Resolve relative to this worker to support GitHub Pages project subdirectories.
 import { bundleProject, extractRequireTimings } from './module-bundle.js';
-export const RUNTIME_VERSION = '0.3.4';
+export const RUNTIME_VERSION = '1.0.0';
 // A Pages Actions artifact contains /wasm/*, whereas Jekyll branch publishing
 // preserves public/wasm/*. Detect the actual layout rather than guessing.
 const RUNTIME_LOCATIONS = [

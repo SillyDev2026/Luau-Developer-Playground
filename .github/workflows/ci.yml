@@ -1,4 +1,4 @@
-name: Validate project
+name: Validate LuauForge source
 on:
   pull_request:
     branches: [main]
@@ -12,9 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm run fetch:roblox-api
       - run: npm run fetch:wasm
-      - run: npm run build
+      - run: npm run fetch:libraries
       - run: npm run check
       - run: npm run smoke:wasm
       - run: npm run smoke:libraries
