@@ -16,6 +16,7 @@ let saveTimer = 0;
 let fileReadBusy = false;
 let findIndex = -1;
 let commandItems = [];
+let commandScope = 'all';
 let mobileDrawer = '';
 let activeModal = '';
 let previousFocus = null;
@@ -752,8 +753,9 @@ function renderSnapshots() {
 function openSnapshots() { renderSnapshots(); openModal('snapshot-modal', 'create-snapshot'); }
 
 function buildCommands(query = '') {
-  const commands = [
-    ...outlineSymbols(editor.value).map(symbol=>({label:`${symbol.kind} ${symbol.name} — line ${symbol.line}`,action:()=>jumpToSymbol(symbol)})),
+  const symbols=outlineSymbols(editor.value).map(symbol=>({label:`${symbol.kind} ${symbol.name} — line ${symbol.line}`,action:()=>jumpToSymbol(symbol)}));
+  const commands = commandScope==='symbols'? symbols : [
+    ...symbols,
     { label: 'Run Luau in browser WebAssembly', action: runLocal },
     { label: 'Stop Luau execution', action: stopLocal },
     { label: 'Check Luau types', action: checkLocal },
@@ -780,15 +782,12 @@ function jumpToSymbol(symbol){
   editor.scrollTop=Math.max(0,(symbol.line-5)*(project.fontSize*1.7));updateCursor();
 }
 function openSymbols(){
+  commandScope='symbols';
   $('command-input').value='';
-  const entries=outlineSymbols(editor.value);
-  commandItems=entries.map(symbol=>({label:`${symbol.kind} ${symbol.name} — line ${symbol.line}`,action:()=>jumpToSymbol(symbol)}));
-  const root=$('command-results');root.replaceChildren();
-  if(!entries.length)root.textContent='No symbols in this file yet.';
-  for(const item of commandItems)root.append(button(item.label,'command-option',()=>{closeModal('command-modal');item.action();}));
+  buildCommands();
   openModal('command-modal','command-input');
 }
-function openCommands() { $('command-input').value = ''; buildCommands(); openModal('command-modal', 'command-input'); }
+function openCommands() { commandScope='all'; $('command-input').value = ''; buildCommands(); openModal('command-modal', 'command-input'); }
 
 function setEditorFont(delta) { updateProject({ ...project, fontSize: project.fontSize + delta }); }
 function resetLayout() { updateProject({ ...project, sidebarWidth: 258, outputHeight: 202, fontSize: 13, sidebarOpen: true, inspectorOpen: true }); toast('Layout sizes reset.'); }
