@@ -92,3 +92,15 @@ test('v1.5 toolbox entrypoint and layout are wired up',async()=>{
   assert.match(js,/mountV15\(/);
   assert.match(css,/@media\(max-width:820px\)/);
 });
+
+test('focus mode can always reopen Settings on mobile',async()=>{
+  const css=await readFile(new URL('../src/v15.css',import.meta.url),'utf8');
+  assert.match(css,/body\.v15-focus \.inspector\.is-mobile-open\{display:flex!important;/);
+});
+test('top-level Import picker can restore ZIP files without overwriting',async()=>{
+  const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+  const js=await readFile(new URL('../src/v1.js',import.meta.url),'utf8');
+  assert.match(html,/\.zip/);
+  assert.match(js,/const imported = await readZip\(await file\.arrayBuffer\(\)\)/);
+  assert.match(js,/workspace\.snapshot\(\);/);
+});

@@ -138,3 +138,5 @@ Luau scripts run in a dedicated WASM worker with termination support, **not a na
 ## Source acknowledgments
 
 Runtime: pinned [luau-lang/playground](https://github.com/luau-lang/playground). Bundled original-number libraries: [FastNum](https://github.com/SillyDev2026/FastNum), [NanoNum](https://github.com/SillyDev2026/NanoNum), [OmegaNumV2](https://github.com/SillyDev2026/OmegaNumV2). OmegaNum's isolated browser adapter replaces its Roblox `HttpService` JSON encoding dependency without editing upstream source.
+
+**v1.5 follow-up:** The regular Files → Import picker accepts source ZIP archives; phone Focus Mode keeps Settings accessible so you can turn it off.

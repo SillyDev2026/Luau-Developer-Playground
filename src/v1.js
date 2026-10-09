@@ -10,6 +10,7 @@ import { findMatches, replaceAllLiteral } from './editor-utils.js';
 import { countLines, projectSize, formatBytes, validateProject, projectToJSON } from './store.js';
 import { summarizeSamples } from './module-bundle.js';
 import { mountV15 } from './v15-ui.js';
+import { readZip } from './v15-zip.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
@@ -324,6 +325,15 @@ function exportZip() { try { const p = workspace.project; download((p.name.repla
 async function handleFiles(fileList) {
   for (const file of fileList) {
     try {
+      if (/\.zip$/i.test(file.name)) {
+        const imported = await readZip(await file.arrayBuffer());
+        const collisions = Object.keys(imported).filter(path => Object.hasOwn(workspace.project.files, path));
+        if (collisions.length) throw new Error('ZIP has existing paths: ' + collisions.join(', ') + '. Rename or remove those files first.');
+        workspace.snapshot();
+        workspace.update(p => ({ ...p, files: { ...p.files, ...imported }, active: Object.keys(imported)[0] }));
+        notify('Imported ' + Object.keys(imported).length + ' ZIP source files. Snapshot saved.');
+        continue;
+      }
       if (file.size > 1_500_000) throw new Error('File is too large.');
       const raw = await file.text();
       if (file.name.toLowerCase().endsWith('.json')) {

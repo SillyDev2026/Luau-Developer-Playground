@@ -19,3 +19,6 @@ body.v15-focus .editor-panel{min-height:0;flex:1 1 100%;}
 body[data-theme="light"] .v15-secondary textarea{background:#f8fbff;color:#142944;}
 @media(max-width:820px){.v15-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;}.v15-tool-button{font-size:11px;min-height:42px;padding:9px 6px;}.v15-split{display:flex!important;flex-direction:column;}.v15-split>.v15-secondary{display:none;}}
 @media(max-width:360px){.v15-tool-button{font-size:10px;}}
+
+/* Focus mode must remain reversible on touch-only devices. */
+@media(max-width:820px){body.v15-focus .inspector.is-mobile-open{display:flex!important;}body.v15-focus .mobile-dock{display:grid!important;}}

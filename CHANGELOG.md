@@ -1,5 +1,7 @@
 ## v1.5.0 — Additive developer toolbox release
 
+- Follow-up: restore ZIPs from the standard file picker and keep phone Settings accessible while Focus Mode is enabled.
+
 - 20 optional tools covering lexical refactoring/references/types, conservative quick fixes, saved snippets, import suggestions, module dependency inspection, API Markdown docs, pinned libraries and user-saved module shelf.
 - Advanced Luau WASM CPU benchmark suite: warmup, batched samples, median, P95, throughput, history and CSV/JSON export.
 - ZIP import with path validation, size limits and CRC checks; optional DEFLATE unpacking; explicit conflict checks and recovery snapshots.

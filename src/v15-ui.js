@@ -231,7 +231,7 @@ export function mountV15({ workspace, editor, runtime, notify, modal, promptModa
     ['Missing import suggestions', importSuggestions], ['Module graph & unused files', moduleInspector], ['Generate module docs', apiDocs], ['Pinned library versions', pins], ['Custom module shelf', shelf],
     ['Benchmark Suite 3.0', benchDialog], ['Benchmark comparison & history', history], ['Export benchmark CSV', exportHistory],
     ['Run project tests', () => $('test-btn').click()], ['ZIP project import', zipImporter], ['Split editor', toggleSplit], ['Mobile focus mode', focusMode], ['Recovery manager', recovery],
-    ['API documentation', () => { document.querySelector('[data-side="libraries"]').click(); document.getElementById('mobile-library').click(); }],
+    ['API documentation', () => { document.querySelector('[data-side="libraries"]').click(); if (matchMedia('(max-width:820px)').matches) document.getElementById('mobile-library').click(); }],
     ['Live Luau diagnostics', () => { $('live-check').checked = !$('live-check').checked; $('live-check').dispatchEvent(new Event('change')); notify('Live type checking ' + ($('live-check').checked ? 'enabled' : 'disabled')); }]
   ];
   const holder = $('v15-actions');
