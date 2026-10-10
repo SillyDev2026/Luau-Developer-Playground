@@ -42,6 +42,16 @@ test('public built-in TestTools loads through a site-local URL and resolves with
   assert.equal(bundle.dependencies[0].requested,'@SillyDev2026/Luau-Developer-Playground/community/TestTools.luau');
   assert.equal(Object.keys(bundle.modules).length,1);
 });
+test('public starter module falls back to branch-based Pages layout',async()=>{
+  const project={active:'main.luau',files:{'main.luau':'local T = require("@SillyDev2026/Luau-Developer-Playground/community/TestTools.luau")'}};
+  const seen=[];
+  const ready=await loadGithubForProject(project,{storage:storage(),moduleUrl:'https://site.example/Playground/src/github-modules.js',fetchImpl:async url=>{
+    seen.push(url);
+    return url.includes('/public/community/')?response(sample):response('Not found',404);
+  }});
+  assert.ok(ready.files['__luauforge_github__/SillyDev2026/Luau-Developer-Playground/community/TestTools.luau']);
+  assert.deepEqual(seen,['https://site.example/Playground/community/TestTools.luau','https://site.example/Playground/public/community/TestTools.luau']);
+});
 test('unapproved external modules cannot execute even when a source URL is known',async()=>{
   const project={active:'main.luau',files:{'main.luau':'local M = require("@Alice/My-Repo/src/Math.luau")'}};
   await assert.rejects(loadGithubForProject(project,{storage:storage(),fetchImpl:async()=>{throw Error('should not fetch');}}),/Untrusted/);

@@ -151,8 +151,21 @@ export async function loadGithubForProject(project,{storage=typeof localStorage=
     if(++count>MAX_MODULES) error(`Public module graph exceeds ${MAX_MODULES} files.`);
     pending.add(key);
     try {
-      const fileUrl=local ? new URL('../community/'+info.path.replace(/^community\//,''),moduleUrl).href : `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${sha}/${info.path.split('/').map(encodeURIComponent).join('/')}`;
-      const source=await fetchCachedSource(fileUrl,fetchImpl);
+      let source;
+      if (local) {
+        // Custom Pages builds flatten /public, while Jekyll branch builds do not.
+        const relative=info.path.replace(/^community\//,'');
+        const attempts=[];
+        for (const root of ['../community/','../public/community/']) {
+          const url=new URL(root+relative,moduleUrl).href;
+          try {source=await fetchCachedSource(url,fetchImpl);break;}
+          catch (reason) {attempts.push(reason.message||String(reason));}
+        }
+        if (!source) error(`Public starter module unavailable in this Pages build: ${attempts.join(' | ')}`);
+      } else {
+        const fileUrl=`https://raw.githubusercontent.com/${info.owner}/${info.repo}/${sha}/${info.path.split('/').map(encodeURIComponent).join('/')}`;
+        source=await fetchCachedSource(fileUrl,fetchImpl);
+      }
       const {size,studioOnly}=checkSource(source,key);
       if(studioOnly)error(`Module ${info.specifier} depends on Roblox Studio APIs and cannot run in standalone Luau WASM.`);
       total+=size;
