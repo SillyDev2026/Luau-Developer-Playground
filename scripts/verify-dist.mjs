@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=1\.5\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=1\.6\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
