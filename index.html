@@ -4,19 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0d1220" />
-  <meta name="description" content="LuauForge 1.7: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
+  <meta name="description" content="LuauForge 1.8: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=1.7.0" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=1.7.0" />
-  <link rel="stylesheet" href="./src/v15.css?v=1.7.0" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=1.7.0" />
-  <title>LuauForge 1.7.0 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=1.8.0" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=1.8.0" />
+  <link rel="stylesheet" href="./src/v15.css?v=1.8.0" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=1.8.0" />
+  <link rel="stylesheet" href="./src/community.css?v=1.8.0" />
+  <title>LuauForge 1.8.0 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>1.7.0</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>1.8.0</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
@@ -27,12 +28,18 @@
       <button class="primary-btn" id="run-btn" title="Run current file · Ctrl+Enter">▶ <span>Run</span></button>
     </div>
   </header>
+  <section class="release-banner hidden" id="release-banner" role="status" aria-label="LuauForge release update">
+    <div><strong>What's new</strong><p id="release-banner-text">Checking updates…</p></div>
+    <button type="button" id="release-open" aria-label="View release notes">Details</button>
+    <button type="button" id="release-dismiss" aria-label="Dismiss release update">✕</button>
+  </section>
   <div class="main-surface" id="main-surface">
     <section id="dashboard-view" class="hidden" aria-label="Developer Dashboard">
       <div class="dash-shell">
         <header class="dash-heading"><div><h1>Developer Dashboard</h1><p>20 live workspace widgets · LuauForge v1.6</p></div>
           <div class="dash-head-actions"><button id="dash-editor-open">Open editor</button><button id="dash-refresh">Refresh</button><button id="dash-studio-library">Roblox packages</button></div>
         </header>
+        <section class="dash-release" id="dashboard-release" aria-label="Latest release details"><strong>Release updates</strong><p>Check Settings → Community &amp; Updates for the latest changes.</p></section>
         <div id="dashboard-grid" class="dash-grid"></div>
         <section id="dash-studio-list" class="dash-studio-list hidden" aria-label="Roblox Studio library imports"></section>
         <section id="dash-config" class="dash-config hidden" aria-label="Dashboard widget settings"></section>
@@ -92,6 +99,17 @@
         <div class="setting-group"><div class="setting-title">PROJECT</div><div class="project-metrics" id="project-metrics"></div><button id="snapshot-btn" class="wide-btn">Create recovery snapshot</button><button id="history-btn" class="wide-btn">Restore snapshot</button><button id="export-json" class="wide-btn">Export project JSON</button><button id="export-zip" class="wide-btn">Export source ZIP</button><button id="github-import" class="wide-btn">Import public GitHub file</button><button id="reset-project" class="wide-btn danger">Reset project</button></div>
         <div class="setting-group"><div class="setting-title">TOOLS</div><button class="wide-btn" id="graph-btn">Module dependency graph</button><button class="wide-btn" id="benchmark-btn">Benchmark a module</button><button class="wide-btn" id="test-btn">Run all tests</button><button class="wide-btn" id="bytecode-btn">Inspect bytecode</button></div>
         <div class="setting-group v15-toolbox"><div class="setting-title">DEVELOPER TOOLBOX v1.5 · 20 TOOLS</div><p class="inspector-note">Refactor, inspect modules, benchmark Luau, and manage projects. All optional.</p><div id="v15-actions" class="v15-actions"></div></div>
+        <div class="setting-group" id="community-settings">
+          <div class="setting-title">COMMUNITY &amp; RELEASE UPDATES</div>
+          <label>GitHub username<input id="community-github" type="text" maxlength="39" placeholder="your-github-username" spellcheck="false" autocapitalize="off" autocomplete="off" /></label>
+          <label>Discord username<input id="community-discord" type="text" maxlength="32" placeholder="your.discord.username" spellcheck="false" autocapitalize="off" autocomplete="off" /></label>
+          <label class="toggle-row"><input id="community-updates" type="checkbox" checked /> <span>Show update notices while visiting LuauForge</span></label>
+          <div class="community-controls"><button type="button" id="community-save">Save preferences</button><button type="button" id="community-check">Check updates</button><button type="button" id="community-clear">Clear</button></div>
+          <p id="community-status" class="inspector-note" aria-live="polite">Loading public release information…</p>
+          <div id="community-summary" class="community-summary"></div>
+          <div id="release-changes" class="community-changes"></div>
+          <p class="inspector-note">Usernames stay on this device. They are not GitHub or Discord account connections. Discord channel announcements require the owner to configure a server-side webhook in GitHub Actions; private Discord DMs are not supported by this static website. Never paste passwords, tokens, or webhook URLs here.</p>
+        </div>
         <div class="setting-group"><div class="setting-title">RUNTIME STATUS</div><div id="runtime-indicator" class="runtime-indicator">○ WASM initializing on first run</div><p class="inspector-note">The browser runs standalone Luau WASM, not the Roblox engine. Roblox services are available for editing suggestions only. Studio benchmarking requires Roblox Studio.</p></div>
       </div>
     </aside>
@@ -103,6 +121,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=1.7.0"></script>
+<script type="module" src="./src/v1.js?v=1.8.0"></script>
 </body>
 </html>

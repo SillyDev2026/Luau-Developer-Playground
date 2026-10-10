@@ -1,0 +1,12 @@
+{
+  "version": "1.8.0",
+  "title": "Community Profiles & Update Alerts",
+  "publishedAt": "2026-10-10",
+  "changes": [
+    "Optional local GitHub and Discord username settings",
+    "Website release notes and in-app update notices",
+    "Check-for-updates and dismiss controls with safe offline behavior",
+    "Release announcements to a Discord channel after successful deployment (requires a private GitHub Actions webhook secret)",
+    "Developer Dashboard account summary and mobile-friendly preferences"
+  ]
+}

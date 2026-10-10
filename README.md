@@ -1,3 +1,29 @@
+# LuauForge v1.8 — Community settings and Discord update announcements
+
+The site now supports two **optional public account labels** in **Settings → Community & Release Updates**: a GitHub username and a Discord username. These are saved to this browser only (separate localStorage key). **They are not account authentication** and cannot grant GitHub access, identify a Discord user, or send a direct message. Never enter tokens, passwords, or webhook URLs into the website.
+
+The website retrieves the public versioned `updates.json` feed while open and displays a dismissible release banner plus changelog. Update preferences and dismissed versions stay on the current device; offline failures are nonfatal and do not change project saves.
+
+## Announce releases to a Discord server channel
+
+**Only the repository administrator** needs to configure the webhook:
+
+1. In a Discord server channel where you have permission, create a channel webhook in **Edit Channel → Integrations → Webhooks** (Discord UI terminology may change).
+2. In the GitHub repository, navigate to **Settings → Secrets and variables → Actions → New repository secret**. Set secret name to **`LUAUFORGE_DISCORD_WEBHOOK_URL`** and paste the webhook URL. Do not add this URL to any LuauForge code, `updates.json`, localStorage, Git commits, or browser forms.
+3. On subsequent changes to the version in `package.json` (e.g. 1.8.0 to 1.8.1), update `public/updates.json` to the same version and add release notes. Push to `main`.
+4. The custom GitHub Pages deployment workflow will run tests, deploy successfully, then publish **one channel message** announcing the new version and changes. An unconfigured secret skips the message. If Discord is down, the announcement step does not fail the website deployment.
+
+Messages use `allowed_mentions: { parse: [] }`, so arbitrary @everyone mentions are suppressed. Workflow reruns can repeat an announcement; the automation only restricts announcements to version-changing push commits. This configuration **announces to a Discord server channel, not individual users' DMs**. Personal Discord notifications require a separate opt-in subscription service, Discord bot with authenticated consent, and server-side token storage. GitHub Pages cannot securely implement that on its own.
+
+## Other v1.8 improvements
+
+- Quick in-app release feed checks, with offline-safe behavior.
+- Dashboard GitHub card displaying explicitly **local-only** GitHub/Discord labels.
+- Small release alert panel on desktop and phones; does not alter editor or drawer geometry.
+- All original AutoRequire, GitHub module imports, modules, project data, and WebAssembly runtimes retained.
+
+---
+
 ## Public GitHub module imports (v1.7)
 
 LuauForge supports **public, opt-in, commit-pinned** Luau modules. In Libraries select **Add public GitHub module**, paste a GitHub `.lua` or `.luau` file URL, preview it, accept the trust checkbox, and select **Pin & import**. The app inserts `local MyModule = require("@Owner/Repo/path/MyModule.luau")` and loads the pinned public source into sandboxed Luau WASM. Modules needing Roblox services must instead run inside Roblox Studio.

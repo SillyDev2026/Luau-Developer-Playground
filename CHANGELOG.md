@@ -1,3 +1,11 @@
+## v1.8.0 — Community and release updates
+
+- Added optional local-only GitHub/Discord username settings, strict validation, save/clear actions, and an account overview in the Developer Dashboard.
+- Added public `updates.json` feed, in-app release banner, release notes panel, update check, dismiss state and resilient offline handling.
+- Added post-successful-deployment GitHub Actions Discord channel announcement; webhook stays in encrypted `LUAUFORGE_DISCORD_WEBHOOK_URL` repository secret. Version-change gate, mention suppression and nonblocking failures.
+- Preserved Luau WASM runtime, existing project storage, module pins, test suites and mobile/desktop editor geometry.
+- Personal Discord DM and authenticated GitHub sync are not included; both require a secure opt-in backend.
+
 ## v1.7.0 — Public GitHub module registry
 
 - Import public `.lua` and `.luau` modules by repository and path using `require("@Owner/Repo/path/File.luau")`.

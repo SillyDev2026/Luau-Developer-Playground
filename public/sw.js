@@ -1,7 +1,7 @@
 /* LuauForge 1.0 offline app shell. Projects remain in localStorage and are
  * never uploaded. Cache is scoped to this GitHub Pages project, not the origin.
  */
-const CACHE = 'luauforge-v1.7.0';
+const CACHE = 'luauforge-v1.8.0';
 const APP = './';
 const CORE = [
   './', './index.html', './favicon.svg', './manifest.webmanifest',
@@ -14,6 +14,7 @@ const CORE = [
   './src/v15-ui.js', './src/v15.css', './src/v15-analysis.js', './src/v15-modules.js',
   './src/v15-bench.js', './src/v15-zip.js', './src/v15-settings.js',
   './src/dashboard.js', './src/dashboard-model.js', './src/dashboard.css', './src/studio-libraries.js',
+  './src/community-settings.js', './src/community.css', './updates.json',
   './wasm/luau.wasm', './wasm/luau-module.js',
   './libraries/FastNum.lua', './libraries/NanoNum.lua', './libraries/OmegaNum.lua',
   './community/TestTools.luau', './community/MathKit.luau', './community/tests/MathKitTests.luau', './community/registry.json',

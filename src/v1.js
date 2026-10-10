@@ -12,6 +12,7 @@ import { summarizeSamples } from './module-bundle.js';
 import { mountV15 } from './v15-ui.js';
 import { readZip } from './v15-zip.js';
 import { mountDashboard } from './dashboard.js';
+import { mountCommunitySettings } from './community-settings.js';
 import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
 
@@ -572,7 +573,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.7.0 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.8.0 ready · Existing workspace restored.', 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });
@@ -585,3 +586,10 @@ dashboard = mountDashboard({workspace,state,runtime,openEditor:()=>dashboard?.cl
   snapshotNow,snapshotDialog,createTemplate,exportZip,
   importProject:()=>document.getElementById('file-picker').click(),
   download,notify,showOutput:switchOutput});
+
+// Community preferences use an independent localStorage key. This code neither
+// touches existing workspace saves nor loads third-party scripts.
+const community = mountCommunitySettings({ notify, onOpenRelease: () => {
+  if (dashboard?.isOpen()) dashboard.close();
+  openMobile('inspector');
+}});

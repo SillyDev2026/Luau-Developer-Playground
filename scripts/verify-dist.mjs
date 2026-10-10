@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=1\.7\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=1\.8\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -38,3 +38,9 @@ for (const module of ['TestTools.luau','MathKit.luau','registry.json']) await st
 await stat(join(out,'src/github-modules.js'));
 
 await stat(join(out,'community/tests/MathKitTests.luau'));
+
+const updateFeed = JSON.parse(await readFile(join(out,'updates.json'),'utf8'));
+assert.equal(updateFeed.version, '1.8.0');
+for (const asset of ['src/community-settings.js', 'src/community.css']) await stat(join(out,asset));
+assert.match(html,/id="community-settings"/);
+assert.match(html,/id="release-banner"/);

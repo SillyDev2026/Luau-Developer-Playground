@@ -1,4 +1,4 @@
-name: Build and deploy LuauForge 1.7
+name: Build and deploy LuauForge 1.8
 on:
   push:
     branches: [main]
@@ -38,3 +38,17 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      # Channel announcements are opt-in for the site administrator.
+      # Run only after successful GitHub Pages deployment; never expose secret
+      # webhooks to browser JavaScript or committed website assets.
+      - name: Checkout announcement source
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Announce new release to Discord (optional)
+        if: github.event_name == 'push'
+        continue-on-error: true
+        env:
+          LUAUFORGE_DISCORD_WEBHOOK_URL: ${{ secrets.LUAUFORGE_DISCORD_WEBHOOK_URL }}
+        run: node scripts/announce-discord.mjs
