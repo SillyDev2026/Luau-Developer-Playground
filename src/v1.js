@@ -13,6 +13,7 @@ import { mountV15 } from './v15-ui.js';
 import { readZip } from './v15-zip.js';
 import { mountDashboard } from './dashboard.js';
 import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
+import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
@@ -111,6 +112,17 @@ function renderLibrary() {
     }), clickButton('API', () => libraryAPI(lib)), clickButton('Import', () => { importLibrary(lib); if (matchMedia('(max-width:820px)').matches) closeMobile(); }));
     card.append(actions); catalog.append(card);
   }
+  for(const lib of githubModuleTargets()) {
+    if(query && !`${lib.specifier} ${lib.label}`.toLowerCase().includes(query))continue;
+    const card=createElement('section',undefined,'builtin-catalog-item');
+    const title=createElement('div',undefined,'builtin-catalog-heading');title.append(createElement('strong',lib.label),createElement('span',lib.local?'Public example':'Pinned source'));
+    card.append(title,createElement('p',lib.specifier));
+    const actions=createElement('div',undefined,'builtin-catalog-actions');
+    actions.append(clickButton('Import',()=>{importGithubSpecifier(lib.specifier,lib.label);closeMobile();}),clickButton('Test',()=>{createGithubExample(lib);closeMobile();}),clickButton('Source',()=>window.open(lib.local?`https://github.com/SillyDev2026/Luau-Developer-Playground/blob/main/${lib.path}`:`https://github.com/${lib.owner}/${lib.repo}/blob/${lib.sha}/${lib.path}`,'_blank','noopener,noreferrer')));
+    card.append(actions);
+    if(!lib.local)card.append(clickButton('Unpin',()=>{removeGithubPin(lib.specifier);renderLibrary();notify('Removed local pin; existing project files were not changed.');},'wide-btn'));
+    catalog.append(card);
+  }
   for(const lib of STUDIO_LIBRARIES) {
     if(query && !`${lib.id} ${lib.label} ${lib.purpose}`.toLowerCase().includes(query))continue;
     const card=createElement('section',undefined,'builtin-catalog-item');
@@ -133,6 +145,65 @@ function renderLibrary() {
     }));
     card.append(buttons);catalog.append(card);
   }
+}
+function importGithubSpecifier(specifier,label='Public module') {
+  const code=editor.input.value;
+  if(boundVariable(code,specifier)){notify('Already imported '+specifier);return;}
+  const base=String(label).replace(/[^A-Za-z0-9_]/g,'_').replace(/^[^A-Za-z_]/,'M_') || 'PublicModule';
+  let variable=base,index=2;
+  while(new RegExp('\\blocal\\s+'+variable+'\\b').test(code))variable=base+index++;
+  const statement=`local ${variable} = require(${JSON.stringify(specifier)})\n`;
+  const directive=code.match(/^--!\w+[^\n]*\n/);
+  const at=directive?directive[0].length:0;
+  editor.replace(at,at,statement,at+statement.length);
+  notify(`Inserted ${specifier}`);
+}
+function createGithubExample(lib) {
+  const path=lib.label==='TestTools'?'tests/github-test.test.luau':lib.label==='MathKitTests'?'tests/github-suite.test.luau':`examples/github-${lib.label.toLowerCase()}.luau`;
+  const variable=lib.label.replace(/[^A-Za-z0-9_]/g,'_');
+  const source=lib.label==='TestTools'
+    ? `--!strict\nlocal T = require(${JSON.stringify(lib.specifier)})\nT.run("GitHub import", function()\n    T.equal(20 + 22, 42)\nend)\n`
+    : lib.label==='MathKitTests' ? `--!strict\nlocal Suite = require(${JSON.stringify(lib.specifier)})\nSuite.run()\n` : `--!strict\nlocal ${variable} = require(${JSON.stringify(lib.specifier)})\nprint("Imported public GitHub module", type(${variable}))\n`;
+  try{if(Object.hasOwn(workspace.project.files,path))workspace.open(path);else workspace.create(path,source);setSide('files');notify('Created runnable public module example');}
+  catch(err){notify(err.message,true);}
+}
+function addPublicGithubModule() {
+  modal('Import public GitHub module',body=>{
+    body.append(createElement('p','Paste a public .lua or .luau GitHub file URL, or @Owner/Repo/path.luau. You will preview the source and pin the exact commit before allowing execution. Browser imports run untrusted source inside sandboxed Luau WASM; review it first.','dialog-hint'));
+    const input=createElement('input');input.placeholder='@Owner/Repo/modules/MyModule.luau';input.maxLength=350;body.append(input);
+    const status=createElement('p','No external code is loaded until you preview it.','dialog-hint');body.append(status);
+    const source=createElement('pre',undefined,'github-source-preview');source.hidden=true;body.append(source);
+    const consent=createElement('label',undefined,'github-consent');const checkbox=createElement('input');checkbox.type='checkbox';consent.append(checkbox,createElement('span','I reviewed this source and trust it to run in the Luau WASM sandbox.'));body.append(consent);
+    const confirm=clickButton('Pin & import',()=>{},'dialog-cta');confirm.disabled=true;body.append(confirm);
+    let preview=null;
+    const button=clickButton('Preview source & resolve commit',async()=>{
+      button.disabled=true;confirm.disabled=true;checkbox.checked=false;preview=null;status.textContent='Fetching public GitHub source…';
+      try{preview=await previewGithubModule(input.value);status.textContent=`${preview.specifier} · commit ${preview.sha.slice(0,12)} · ${preview.size} bytes${preview.studioOnly?' · Roblox Studio only (cannot run in browser)':''}`;source.textContent=preview.source;source.hidden=false;confirm.disabled=true;}
+      catch(err){status.textContent='Cannot import: '+err.message;source.hidden=true;}
+      finally{button.disabled=false;}
+    },'wide-btn');body.insertBefore(button,status);
+    checkbox.addEventListener('change',()=>{confirm.disabled=!preview||preview.studioOnly||!checkbox.checked;});
+    confirm.addEventListener('click',()=>{
+      try{if(!checkbox.checked||!preview)throw new Error('Review and explicitly trust the module source before importing.');const pin=saveGithubPin(preview);closeModal();renderLibrary();importGithubSpecifier(pin.specifier,preview.path.split('/').at(-1).replace(/\.lua(u)?$/i,''));notify('GitHub revision pinned; the import is ready.');}
+      catch(err){notify(err.message,true);}
+    });
+  });
+}
+function publishGithubModule() {
+  modal('Publish source to a public GitHub repository',body=>{
+    body.append(createElement('p','GitHub Pages cannot commit to your repository without GitHub OAuth. Copy your current ModuleScript, then use GitHub’s authenticated Add file → Create new file editor. Everyone can then import your public file by URL.','dialog-hint'));
+    const input=createElement('input');input.placeholder='Owner/Repository';input.maxLength=140;body.append(input);
+    const path=createElement('input');path.value=workspace.project.active;path.maxLength=220;body.append(path);
+    body.append(clickButton('Copy module source',async()=>{try{await navigator.clipboard.writeText(editor.input.value);notify('Module source copied.');}catch(err){notify('Clipboard unavailable: select and copy the editor text instead.',true);}},'wide-btn'));
+    body.append(clickButton('Open GitHub file editor',()=>{
+      const id=input.value.trim();
+      if(!/^[\w-]{1,39}\/[\w.-]{1,100}$/.test(id) || id.split('/').some(x=>x==='.'||x==='..')){notify('Enter Owner/Repository, e.g. SillyDev2026/MyModules',true);return;}
+      const filename=path.value.trim();
+      if(!/^[\w./-]+\.lua(u)?$/i.test(filename)||filename.split('/').some(x=>x==='.'||x==='..')){notify('Enter a valid .lua or .luau repository file path.',true);return;}
+      window.open(`https://github.com/${id}/new/HEAD?filename=${encodeURIComponent(filename)}`,'_blank','noopener,noreferrer');
+      notify('Paste your module source and commit it publicly in GitHub.');
+    },'dialog-cta'));
+  });
 }
 function libraryAPI(lib) {
   modal(lib.label + ' API · v' + lib.version, body => {
@@ -394,7 +465,7 @@ function palette() {
   const commands = [
     ['Run current file', runCurrent], ['Stop execution', stopCurrent], ['Check types', () => checkCurrent()], ['Inspect bytecode', bytecodeCurrent],
     ['Find in file', openFind], ['Show file explorer', () => setSide('files')], ['Browse libraries', () => setSide('libraries')],
-    ['Show symbols', () => setSide('symbols')], ['Dependency graph', dependencyGraph], ['Benchmark module', benchmarkPicker],
+    ['Add public GitHub module', addPublicGithubModule], ['Publish source to public GitHub', publishGithubModule], ['Show symbols', () => setSide('symbols')], ['Dependency graph', dependencyGraph], ['Benchmark module', benchmarkPicker],
     ['Run project tests', runTests], ['Create snapshot', snapshotNow], ['Restore snapshot', snapshotDialog],
     ['Export JSON', exportProject], ['Export source ZIP', exportZip], ['New file', newFile], ['Rename file', renameCurrent],
     ['Delete file', deleteCurrent], ['Toggle theme', toggleTheme], ['Toggle word wrap', toggleWrap],
@@ -468,7 +539,7 @@ function initialize() {
   $('wrap-select').addEventListener('change', toggleWrap);
   $('live-check').addEventListener('change', event => { state.liveCheck = event.target.checked; preserveSettings(); if (state.liveCheck) liveDiagnostics(); });
   $('reset-layout').addEventListener('click', resetLayout);
-  $('file-filter').addEventListener('input', renderFiles); $('library-filter').addEventListener('input', renderLibrary);
+  $('file-filter').addEventListener('input', renderFiles); $('library-filter').addEventListener('input', renderLibrary); $('github-module-add').addEventListener('click',addPublicGithubModule); $('github-module-publish').addEventListener('click',publishGithubModule);
   $('new-file').addEventListener('click', newFile); $('import-file').addEventListener('click', () => $('file-picker').click());
   $('file-picker').addEventListener('change', event => { handleFiles([...event.target.files]); event.target.value = ''; });
   $('rename-project').addEventListener('click', () => promptModal('Rename workspace', 'Name your project:', workspace.project.name, name => workspace.update({ name })));
@@ -501,7 +572,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.6.0 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.7.0 ready · Existing workspace restored.', 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });

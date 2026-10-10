@@ -1,3 +1,12 @@
+## v1.7.0 — Public GitHub module registry
+
+- Import public `.lua` and `.luau` modules by repository and path using `require("@Owner/Repo/path/File.luau")`.
+- Explicit preview and consent, commit SHA pinning, bounded downloads, repository traversal checks and Studio-only detection.
+- Lightweight per-device pin registry separate from legacy saved workspace schema.
+- Three public, runnable examples (TestTools, MathKit, MathKitTests), auto-require suggestions, source links and runnable tests.
+- Module loader hydrates GitHub sources before analysis and execution; relative dependencies use pinned revisions and real Luau VM caching.
+- Existing built-in libraries and editor layout retained.
+
 ## v1.6.0 — Dashboard and verified Studio source catalog
 - Add 20 live dashboard widgets with local settings, navigation and recovery hooks.
 - Add seven pinned Roblox Studio source modules; never misrepresent Studio-only modules as WASM-compatible.

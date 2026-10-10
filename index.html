@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0d1220" />
-  <meta name="description" content="LuauForge 1.6: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
+  <meta name="description" content="LuauForge 1.7: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=1.6.0" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=1.6.0" />
-  <link rel="stylesheet" href="./src/v15.css?v=1.6.0" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=1.6.0" />
-  <title>LuauForge 1.6.0 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=1.7.0" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=1.7.0" />
+  <link rel="stylesheet" href="./src/v15.css?v=1.7.0" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=1.7.0" />
+  <title>LuauForge 1.7.0 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>1.6.0</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>1.7.0</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
@@ -56,7 +56,7 @@
           <button data-template="test">✓ Test file</button><button data-template="benchmark">◷ Benchmark file</button>
         </div>
       </div>
-      <div class="side-content hidden" id="libraries-pane"><label class="filter"><span>⌕</span><input id="library-filter" placeholder="Find a library or API" type="search" /></label><div id="builtin-catalog" class="builtin-catalog"></div></div>
+      <div class="side-content hidden" id="libraries-pane"><label class="filter"><span>⌕</span><input id="library-filter" placeholder="Find a library or API" type="search" /></label><button id="github-module-publish" class="wide-btn" type="button">⇧ Publish current module on GitHub</button><button id="github-module-add" class="wide-btn" type="button">＋ Add public GitHub module</button><p class="inspector-note">Import from a public GitHub repository. Review source, pin a commit, then use require("@Owner/Repo/path.luau").</p><div id="builtin-catalog" class="builtin-catalog"></div></div>
       <div class="side-content hidden" id="symbols-pane"><div class="section-caption">CURRENT FILE SYMBOLS</div><div class="symbol-tree" id="symbol-tree"></div></div>
       <div class="sidebar-footer"><span class="profile-dot">LF</span><div><strong>Local workspace</strong><small id="save-status" role="status">Ready</small></div><span class="saved-check">✓</span></div>
       <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Resize explorer" tabindex="0"></div>
@@ -103,6 +103,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=1.6.0"></script>
+<script type="module" src="./src/v1.js?v=1.7.0"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=1\.6\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=1\.7\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -33,3 +33,8 @@ for(const name of ['NexusDataStore','ZonePlusV2','BufferUtil','Compression','Sig
   const studio = await readFile(join(out,'studio-libraries',name+'.lua'));
   assert.ok(studio.length > 4000,`Missing pinned Studio package: ${name}`);
 }
+
+for (const module of ['TestTools.luau','MathKit.luau','registry.json']) await stat(join(out,'community',module));
+await stat(join(out,'src/github-modules.js'));
+
+await stat(join(out,'community/tests/MathKitTests.luau'));

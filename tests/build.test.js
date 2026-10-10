@@ -6,8 +6,8 @@ const read = async path => readFile(new URL(path, root), 'utf8');
 
 test('v1 entrypoint uses versioned local shell assets and preserves runtime files', async () => {
   const html = await read('index.html');
-  assert.match(html, /href="\.\/src\/v1\.css\?v=1\.6\.0"/);
-  assert.match(html, /src="\.\/src\/v1\.js\?v=1\.6\.0"/);
+  assert.match(html, /href="\.\/src\/v1\.css\?v=1\.7\.0"/);
+  assert.match(html, /src="\.\/src\/v1\.js\?v=1\.7\.0"/);
   assert.match(html, /href="\.\/manifest\.webmanifest"/);
   assert.doesNotMatch(html, /src="https:\/\//);
   for (const path of ['public/wasm/luau.wasm','dist/wasm/luau.wasm','dist/libraries/FastNum.lua','dist/sw.js']) assert.ok((await stat(new URL(path, root))).size > 100);

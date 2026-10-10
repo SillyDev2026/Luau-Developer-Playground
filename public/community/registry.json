@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "description": "Public LuauForge examples stored in the Luau-Developer-Playground GitHub repository. Add third-party modules using the in-app public GitHub import flow.",
+  "modules": [
+    {
+      "specifier": "@SillyDev2026/Luau-Developer-Playground/community/TestTools.luau",
+      "name": "TestTools",
+      "environment": "wasm",
+      "source": "community/TestTools.luau"
+    },
+    {
+      "specifier": "@SillyDev2026/Luau-Developer-Playground/community/MathKit.luau",
+      "name": "MathKit",
+      "environment": "wasm",
+      "source": "community/MathKit.luau"
+    },
+    {
+      "specifier": "@SillyDev2026/Luau-Developer-Playground/community/tests/MathKitTests.luau",
+      "name": "MathKitTests",
+      "environment": "wasm",
+      "source": "community/tests/MathKitTests.luau"
+    }
+  ]
+}

@@ -1,3 +1,22 @@
+## Public GitHub module imports (v1.7)
+
+LuauForge supports **public, opt-in, commit-pinned** Luau modules. In Libraries select **Add public GitHub module**, paste a GitHub `.lua` or `.luau` file URL, preview it, accept the trust checkbox, and select **Pin & import**. The app inserts `local MyModule = require("@Owner/Repo/path/MyModule.luau")` and loads the pinned public source into sandboxed Luau WASM. Modules needing Roblox services must instead run inside Roblox Studio.
+
+Public modules **TestTools**, **MathKit**, and **MathKitTests** are available without setup. MathKitTests imports the other two using relative dependencies and exposes `run()`:
+
+```luau
+local T = require("@SillyDev2026/Luau-Developer-Playground/community/TestTools.luau")
+T.run("from public GitHub", function()
+    T.equal(20 + 22, 42)
+end)
+local Suite = require("@SillyDev2026/Luau-Developer-Playground/community/tests/MathKitTests.luau")
+Suite.run()
+```
+
+GitHub code imports are **read-only**. GitHub Pages cannot push to other users' repositories without a separately authorized OAuth application; to publish a shared module, commit the `.luau` file in your public GitHub repository using GitHub's editor. Each user can then add the public file URL in LuauForge. Imports are pinned locally on that device, outside the workspace's existing storage format. Dependency imports inside a GitHub module must use explicit `.luau`/`.lua` file extensions and stay within the repository. The built-in public starter modules are distributed with this site.
+
+---
+
 # LuauForge 1.6 — Developer Dashboard + Studio Library Catalog
 
 Adds twenty live, independently dismissible dashboard widgets: project overview, opened files, quick actions, runtime health, diagnostics, run performance, benchmark history, module catalog, dependency health, API search, tests, storage, activity, GitHub status, templates, code quality, comparisons, transparent project checks, preferences, and recovery. Accessible from the Home icon on phones and desktops. Widgets use actual locally held project state rather than placeholder metrics; unavailable values display honestly.

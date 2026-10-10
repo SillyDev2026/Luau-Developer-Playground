@@ -36,7 +36,7 @@ function skipTrivia(source, start) {
   }
   return i;
 }
-function findRequires(source) {
+export function findRequires(source) {
   const found = [];
   let i = 0;
   while (i < source.length) {
@@ -76,6 +76,14 @@ export function resolveModule(importer, requested, files) {
     const virtual = builtinPath(builtin);
     if (!Object.hasOwn(files, virtual)) throw new Error(`Missing built-in library ${requested}. The library must be loaded before the script runs.`);
     return virtual;
+  }
+  if (typeof requested === 'string' && /^@[A-Za-z0-9-]+\/[A-Za-z0-9._-]+\//.test(requested)) {
+    const path = '__luauforge_github__/' + requested.slice(1);
+    const candidates = VALID_EXTENSION.test(path) ? [path] : [path+'.luau', path+'.lua', path+'/init.luau', path+'/init.lua'];
+    const matching = candidates.filter(name => Object.hasOwn(files, name));
+    if (!matching.length) throw new Error(`GitHub module ${requested} is not registered or could not be fetched. Add it from Libraries → Add public GitHub module.`);
+    if (matching.length > 1) throw new Error(`Ambiguous GitHub import ${requested}; add an extension.`);
+    return matching[0];
   }
   if (typeof requested !== 'string' || !requested.startsWith('./') && !requested.startsWith('../')) {
     throw new Error(`Unsupported require(${JSON.stringify(requested)}) in ${importer}. Use a relative path such as require("./modules/Math.luau").`);

@@ -1,4 +1,5 @@
 import { loadBuiltinsForProject, builtinPath, builtinId } from "./builtin-libraries.js";
+import { loadGithubForProject } from "./github-modules.js";
 // Manages two independent Luau VM instances. Stopping a run never kills the
 // analysis worker. All source code stays in the browser.
 export class LuauRuntime {
@@ -60,7 +61,7 @@ export class LuauRuntime {
     const generation = ++this.runGeneration;
     try {
       // Initialization (WASM load/compile) can be longer than a normal execution.
-      const ready = await loadBuiltinsForProject(project);
+      const ready = await loadBuiltinsForProject(await loadGithubForProject(project));
       if (this.runGeneration !== generation) throw new Error('Execution stopped');
       if (!this.execution) await this.request('execution', 'init', {}, 60000);
       const { result, elapsed } = await this.request('execution', 'execute', {
@@ -75,8 +76,9 @@ export class LuauRuntime {
     const generation = ++this.runGeneration;
     try {
       const special = builtinId(modulePath);
+      if (modulePath.startsWith('@') && !special) throw new Error('GitHub module benchmarking: open a script with the module require and benchmark its load with os.clock().');
       const extra = special ? { ...project, files: { ...project.files, '__lf_bench_loader.luau': `local library = require(\"@${special}\")` } } : project;
-      const ready = await loadBuiltinsForProject(extra);
+      const ready = await loadBuiltinsForProject(await loadGithubForProject(extra));
       if (this.runGeneration !== generation) throw new Error('Execution stopped');
       const path = special ? builtinPath(special) : modulePath;
       const { result } = await this.request('execution', 'benchmarkModule', { files: ready.files, active: ready.active, mode: ready.mode, modulePath: path, displayName: special ? `@${special}` : modulePath }, 120000);
@@ -88,7 +90,7 @@ export class LuauRuntime {
     return result;
   }
   async diagnostics(project) {
-    const ready = await loadBuiltinsForProject(project);
+    const ready = await loadBuiltinsForProject(await loadGithubForProject(project));
     const { result, elapsed } = await this.request('analysis', 'diagnostics', {
       code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode
     }, 60000);
@@ -101,7 +103,7 @@ export class LuauRuntime {
     return { result, elapsed };
   }
   async autocomplete(project, line, col) {
-    const ready = await loadBuiltinsForProject(project);
+    const ready = await loadBuiltinsForProject(await loadGithubForProject(project));
     const { result } = await this.request('analysis', 'autocomplete', {
       code: ready.files[ready.active], files: ready.files, active: ready.active, mode: ready.mode, line, col
     }, 60000);

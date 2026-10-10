@@ -1,5 +1,6 @@
 import { textareaCaretOffset, placeCompletionPopup } from './completion-geometry.js';
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
+import { githubModuleTargets } from './github-modules.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
@@ -29,6 +30,7 @@ const fuzzy = (q, word) => {
 export function targets(files, active) {
   return [
     ...BUILTIN_LIBRARIES.map(lib=>({kind:'builtin',id:lib.id,label:lib.label,variable:lib.local,specifier:'@'+lib.id,detail:'Bundled v'+lib.version})),
+    ...githubModuleTargets().map(lib=>({kind:'github',id:lib.specifier,label:lib.label,variable:safeVar(lib.label),specifier:lib.specifier,detail:'Public GitHub · '+(lib.description||'pinned')})),
     ...Object.keys(files).filter(path=>path!==active && /\.lua(u)?$/i.test(path)).map(path=>({kind:'module',id:path,label:path.split('/').at(-1).replace(/\.lua(u)?$/i,''),variable:safeVar(path.split('/').at(-1).replace(/\.lua(u)?$/i,'')),specifier:relative(active,path),detail:path}))
   ];
 }

@@ -27,3 +27,9 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
 @media(max-width:360px){.location-suffix,.header-secondary{display:none;} .tabs{min-width:0;} .tab{max-width:min(150px,44vw);}}
 
 @media(max-width:820px){.mobile-dock{grid-template-columns:repeat(6,minmax(0,1fr))!important;}.mobile-dock button span{font-size:clamp(8px,2.5vw,10px)!important;}}
+
+/* v1.7 public GitHub source preview: readable at every viewport width. */
+.github-source-preview { display:block; max-height:36dvh; overflow:auto; white-space:pre; max-width:100%; padding:10px; font:12px/1.45 ui-monospace,monospace; background:#0f1729; color:#e2e8f0; border:1px solid #465474; border-radius:9px; }
+.github-source-preview[hidden]{display:none;}
+.github-consent { display:flex; align-items:flex-start; gap:9px; padding:9px 0; font:13px/1.4 system-ui,sans-serif; }
+.github-consent input{ flex:0 0 auto; width:18px; height:18px; }
