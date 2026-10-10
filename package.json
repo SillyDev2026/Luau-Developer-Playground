@@ -1,9 +1,9 @@
 {
   "name": "luau-developer-playground",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "private": true,
   "type": "module",
-  "description": "LuauForge v1.8 profiles, release notices, Discord channel announcements: 20 workspace widgets and pinned Roblox Studio library catalog",
+  "description": "LuauForge 1.8.1 secure Discord bot and webhook deployment announcements",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "fetch:wasm": "node scripts/fetch-wasm.mjs",

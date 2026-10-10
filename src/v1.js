@@ -573,7 +573,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.8.0 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.8.1 ready · Existing workspace restored.', 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });

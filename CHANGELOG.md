@@ -1,3 +1,10 @@
+## v1.8.1 — Secure Discord bot announcements
+
+- Added optional Discord bot transport using a GitHub Actions secret and the configured application/channel identifiers.
+- Added explicit manual test-message workflow input, gated behind successful Pages deployment.
+- Preserved existing webhook transport as fallback, disabled unsolicited mentions, avoided logging secrets, and tested destination and permissions error handling.
+- Preserved all editor, workspace, WASM, dashboard and phone functionality.
+
 ## v1.8.0 — Community and release updates
 
 - Added optional local-only GitHub/Discord username settings, strict validation, save/clear actions, and an account overview in the Developer Dashboard.

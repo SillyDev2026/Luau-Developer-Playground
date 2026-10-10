@@ -1,12 +1,12 @@
 {
-  "version": "1.8.0",
-  "title": "Community Profiles & Update Alerts",
+  "version": "1.8.1",
+  "title": "Discord Bot Release Announcements",
   "publishedAt": "2026-10-10",
   "changes": [
-    "Optional local GitHub and Discord username settings",
-    "Website release notes and in-app update notices",
-    "Check-for-updates and dismiss controls with safe offline behavior",
-    "Release announcements to a Discord channel after successful deployment (requires a private GitHub Actions webhook secret)",
-    "Developer Dashboard account summary and mobile-friendly preferences"
+    "Discord bot release messages use a secret GitHub Actions bot token and a specified channel ID",
+    "Optional manual send-test-announcement workflow input",
+    "Existing webhook notifications remain as a fallback",
+    "All messages disable Discord mass/user mentions",
+    "Existing profiles, Luau editor, WebAssembly runner and libraries preserved"
   ]
 }

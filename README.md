@@ -1,3 +1,18 @@
+# LuauForge v1.8.1 — Connect the Discord application and channel
+
+The Discord application ID is **1491648971041411163**, and the intended notification channel ID is **1558591089529851915**. These IDs are public identifiers, **not authentication credentials**.
+
+**For automatic channel announcements using your Discord bot:**
+
+1. [Invite your bot to a server](https://discord.com/oauth2/authorize?client_id=1491648971041411163&scope=bot&permissions=3072). Select the server containing channel `1558591089529851915`. The invite requests only **View Channels** and **Send Messages**, but channel overrides must also allow both.
+2. In the Discord Developer Portal for application `1491648971041411163`, open **Bot** and use the bot token. **Never paste it into public code, the LuauForge site, or chat.**
+3. In your GitHub repository open **Settings → Secrets and variables → Actions → New repository secret** and create `LUAUFORGE_DISCORD_BOT_TOKEN` with the token as its value. The token is available only to GitHub Actions and must not be committed or exposed to visitors.
+4. In **Actions → Build and deploy LuauForge 1.8.1 → Run workflow**, enable **Send a Discord test message after deployment** to verify bot permissions and channel routing. A normal release message is sent only on a successful `main` deployment where the `package.json` version actually changes.
+
+If no bot token is configured, LuauForge continues to support `LUAUFORGE_DISCORD_WEBHOOK_URL` as a fallback. A bot token takes priority if both are present. No messages are sent when neither secret exists. Discord usernames saved in the website are local-only labels, not bot login or DM subscriptions.
+
+---
+
 # LuauForge v1.8 — Community settings and Discord update announcements
 
 The site now supports two **optional public account labels** in **Settings → Community & Release Updates**: a GitHub username and a Discord username. These are saved to this browser only (separate localStorage key). **They are not account authentication** and cannot grant GitHub access, identify a Discord user, or send a direct message. Never enter tokens, passwords, or webhook URLs into the website.
