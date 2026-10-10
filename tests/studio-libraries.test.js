@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { STUDIO_LIBRARIES, STUDIO_PACKAGE_EXTRAS, studioLibraryById, packageItems, fetchStudioLibrary, fetchStudioPackage } from '../src/studio-libraries.js';
+test('7 Studio-only libraries are included and pinned to immutable SHAs',()=>{assert.equal(STUDIO_LIBRARIES.length,7);for(const lib of STUDIO_LIBRARIES){assert.match(lib.commit,/^[0-9a-f]{40}$/);assert.match(lib.blobSha,/^[0-9a-f]{40}$/);assert.ok(lib.dependencies.length);assert.match(lib.environment,/studio/);assert.equal(studioLibraryById(lib.id),lib);}});
+test('NexusDataStore includes required PlayersData template and Compression sibling',()=>{assert.deepEqual(packageItems(studioLibraryById('NexusDataStore')).map(x=>x.into),['NexusDataStore/NexusDataStore.lua','NexusDataStore/PlayersData.lua','Compression.lua']);});
+test('Signal and NetStream include their dependency files',()=>{assert.deepEqual(packageItems(studioLibraryById('Signal')).map(x=>x.into),['Signal.lua','EventBus.lua','Promise.lua']);assert.ok(packageItems(studioLibraryById('NetStream')).length>5);});
+test('missing downloads are not disguised as valid Luau code',async()=>{await assert.rejects(()=>fetchStudioLibrary(studioLibraryById('Signal'),async()=>({ok:true,headers:{get:()=> 'text/html'},text:async()=>'<html/> ' })),/not published/);});
+test('studio package errors on a missing required dependency',async()=>{await assert.rejects(()=>fetchStudioPackage(studioLibraryById('Signal'),async()=>({ok:false,status:404})),/Missing package file/);});
+test('studio assets never enter the browser WASM built-in registry',async()=>{const {BUILTIN_LIBRARIES,builtinId}=await import('../src/builtin-libraries.js');assert.equal(BUILTIN_LIBRARIES.length,3);for(const lib of STUDIO_LIBRARIES)assert.equal(builtinId('@'+lib.id),null);});

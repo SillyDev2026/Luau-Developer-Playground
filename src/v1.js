@@ -11,9 +11,12 @@ import { countLines, projectSize, formatBytes, validateProject, projectToJSON } 
 import { summarizeSamples } from './module-bundle.js';
 import { mountV15 } from './v15-ui.js';
 import { readZip } from './v15-zip.js';
+import { mountDashboard } from './dashboard.js';
+import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
+let dashboard = null;
 const state = { side: 'files', output: 'console', dialogs: false, busy: false, runToken: 0, checking: 0, problems: [], outputLogs: [], bytecode: null, bench: null, tests: null, liveCheck: false, lastFile: null, toastTimer: 0, liveTimer: 0, outputHeight: 202, sideWidth: 266, disposed: false };
 const settingsKey = 'luauforge:v1:settings';
 try { Object.assign(state, JSON.parse(localStorage.getItem(settingsKey) || '{}')); } catch { /* no saved settings */ }
@@ -107,6 +110,28 @@ function renderLibrary() {
       catch (error) { notify(error.message, true); }
     }), clickButton('API', () => libraryAPI(lib)), clickButton('Import', () => { importLibrary(lib); if (matchMedia('(max-width:820px)').matches) closeMobile(); }));
     card.append(actions); catalog.append(card);
+  }
+  for(const lib of STUDIO_LIBRARIES) {
+    if(query && !`${lib.id} ${lib.label} ${lib.purpose}`.toLowerCase().includes(query))continue;
+    const card=createElement('section',undefined,'builtin-catalog-item');
+    const heading=createElement('div',undefined,'builtin-catalog-heading');
+    heading.append(createElement('strong',lib.label),createElement('span','Studio only'));
+    card.append(heading,createElement('p',lib.purpose + ' · Dependencies: '+lib.dependencies.join(', ')));
+    const buttons=createElement('div',undefined,'builtin-catalog-actions');
+    buttons.append(clickButton('Example',()=>{
+      const path=`examples/studio/${lib.id}.server.luau`;
+      try { Object.hasOwn(workspace.project.files,path)?workspace.open(path):workspace.create(path,lib.example);setSide('files');closeMobile();notify('Studio-only example added; Roblox services cannot execute in WASM.'); }
+      catch(error){notify(error.message,true);}
+    }),clickButton('Source',async()=>{
+      try{const source=await fetchStudioLibrary(lib);download(lib.filename,source,'text/plain');notify(`${lib.label} source downloaded for Roblox Studio`);}
+      catch(error){notify(error.message,true);}
+    }),clickButton('Import',async()=>{
+      try{const source=await fetchStudioLibrary(lib);const path=`studio/${lib.id}.luau`;
+      if(Object.hasOwn(workspace.project.files,path))throw new Error('Already imported '+path);
+      workspace.snapshot();workspace.create(path,source);setSide('files');closeMobile();notify('Studio-only source imported; it needs Roblox Studio and listed dependencies.');}
+      catch(error){notify(error.message,true);}
+    }));
+    card.append(buttons);catalog.append(card);
   }
 }
 function libraryAPI(lib) {
@@ -435,7 +460,7 @@ function initialize() {
   $('check-btn').addEventListener('click', () => checkCurrent()); $('bytecode-btn').addEventListener('click', bytecodeCurrent);
   $('benchmark-btn').addEventListener('click', benchmarkPicker); $('test-btn').addEventListener('click', runTests); $('graph-btn').addEventListener('click', dependencyGraph);
   $('palette-btn').addEventListener('click', palette); $('outline-btn').addEventListener('click', () => { setSide('symbols'); openMobile('sidebar'); });
-  $('theme-btn').addEventListener('click', toggleTheme); $('brand-home').addEventListener('click', palette); $('wrap-btn').addEventListener('click', toggleWrap);
+  $('theme-btn').addEventListener('click', toggleTheme); $('brand-home').addEventListener('click', () => dashboard?.open()); $('wrap-btn').addEventListener('click', toggleWrap);
   $('settings-btn').addEventListener('click', () => openMobile('inspector')); $('hide-inspector').addEventListener('click', () => { closeMobile(); $('inspector').classList.add('is-hidden'); });
   $('mode-select').addEventListener('change', event => workspace.update({ mode: event.target.value }));
   $('optimization-select').addEventListener('change', event => workspace.update({ optimization: Number(event.target.value) }));
@@ -459,7 +484,7 @@ function initialize() {
   $('mobile-files').addEventListener('click', () => { setSide('files'); openMobile('sidebar'); });
   $('mobile-library').addEventListener('click', () => { setSide('libraries'); openMobile('sidebar'); });
   $('mobile-tools').addEventListener('click', () => { switchOutput('benchmarks'); openMobile('inspector'); });
-  $('mobile-settings').addEventListener('click', () => openMobile('inspector'));
+  $('mobile-settings').addEventListener('click', () => openMobile('inspector')); $('mobile-dashboard').addEventListener('click',()=>dashboard?.open());
   $('hide-sidebar').addEventListener('click', closeMobile); $('side-shade').addEventListener('click', closeMobile);
   $('dialog-close').addEventListener('click', closeModal); $('modal-backdrop').addEventListener('pointerdown', e => { if (e.target === $('modal-backdrop')) closeModal(); });
   $('code-undo').addEventListener('click', () => { editor.input.focus(); document.execCommand('undo'); });
@@ -476,7 +501,16 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.5.0 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v1.6.0 ready · Existing workspace restored.', 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });
+
+// Dashboard is deliberately mounted after existing editor/toolbox initialization.
+// No migration or modification of previous workspace/localStorage formats.
+dashboard = mountDashboard({workspace,state,runtime,openEditor:()=>dashboard?.close(),openFile,
+  runCurrent,checkCurrent,runTests,benchmarkPicker,setSide,
+  openModules:()=>{dashboard?.close();setSide('libraries');if(matchMedia('(max-width:820px)').matches)openMobile('sidebar');},
+  snapshotNow,snapshotDialog,createTemplate,exportZip,
+  importProject:()=>document.getElementById('file-picker').click(),
+  download,notify,showOutput:switchOutput});

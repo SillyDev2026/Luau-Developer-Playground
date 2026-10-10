@@ -1,3 +1,13 @@
+# LuauForge 1.6 — Developer Dashboard + Studio Library Catalog
+
+Adds twenty live, independently dismissible dashboard widgets: project overview, opened files, quick actions, runtime health, diagnostics, run performance, benchmark history, module catalog, dependency health, API search, tests, storage, activity, GitHub status, templates, code quality, comparisons, transparent project checks, preferences, and recovery. Accessible from the Home icon on phones and desktops. Widgets use actual locally held project state rather than placeholder metrics; unavailable values display honestly.
+
+## New source imports
+
+Seven source-pinned Roblox Studio modules are bundled in `public/studio-libraries/`: NexusDataStore, ZonePlusV2/ZonePlusNext, BufferUtil, Compression, Signal, Promise, and NetStream. Their sources are maintained by SillyDev2026 and pinned by commit and Git blob hash in `scripts/fetch-studio-libraries.mjs`. They are *Studio-only* and are **not executable** inside the standalone Luau WASM VM: Roblox DataStoreService, Workspace, RunService and task scheduler are unavailable. Some modules also require companion ModuleScripts such as `PlayersData`, `EventBus` or an entire `NetworkHandler` folder; consult their upstream READMEs before using them. The catalog provides source download, workspace import, and Studio-specific examples. Full folder dependencies are *not* automatically installed.
+
+Run `npm run fetch:studio` to populate the pinned source files locally before the production build. `npm run check` validates their presence in the deployment artifact. Existing three WASM-compatible number libraries remain unchanged.
+
 # LuauForge v1.5.0 — Developer Toolbox
 
 LuauForge v1.5 adds **20 optional developer actions** on top of the tested v1.0.1 editor. It does not change the saved workspace format, WASM binary, or built-in FastNum/NanoNum/OmegaNum sources. From a phone, open **Settings → Developer Toolbox v1.5**; from a computer open the Inspector.
@@ -140,3 +150,7 @@ Luau scripts run in a dedicated WASM worker with termination support, **not a na
 Runtime: pinned [luau-lang/playground](https://github.com/luau-lang/playground). Bundled original-number libraries: [FastNum](https://github.com/SillyDev2026/FastNum), [NanoNum](https://github.com/SillyDev2026/NanoNum), [OmegaNumV2](https://github.com/SillyDev2026/OmegaNumV2). OmegaNum's isolated browser adapter replaces its Roblox `HttpService` JSON encoding dependency without editing upstream source.
 
 **v1.5 follow-up:** The regular Files → Import picker accepts source ZIP archives; phone Focus Mode keeps Settings accessible so you can turn it off.
+
+### Deployment checks
+
+`npm run fetch:studio` downloads and verifies the pinned Git blobs (plus NexusDataStore, Signal and NetStream companion files). A CI build uses this command before `npm run check`. The standalone browser-based number libraries are kept separate from Studio-only sources. Custom project data is not changed. Offline app-shell caching covers dashboard code; Studio source packages are downloaded on demand and require an initial online visit.

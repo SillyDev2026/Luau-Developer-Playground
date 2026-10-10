@@ -1,4 +1,4 @@
-name: Build and deploy LuauForge 1.5
+name: Build and deploy LuauForge 1.6
 on:
   push:
     branches: [main]
@@ -20,6 +20,7 @@ jobs:
           node-version: '22'
       - run: npm run fetch:wasm
       - run: npm run fetch:libraries
+      - run: npm run fetch:studio
       - run: npm run fetch:roblox-api
       - run: npm run check
       - run: npm run smoke:wasm

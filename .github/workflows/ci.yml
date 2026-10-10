@@ -14,6 +14,7 @@ jobs:
           node-version: '22'
       - run: npm run fetch:wasm
       - run: npm run fetch:libraries
+      - run: npm run fetch:studio
       - run: npm run check
       - run: npm run smoke:wasm
       - run: npm run smoke:libraries

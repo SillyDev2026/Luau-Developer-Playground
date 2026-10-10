@@ -88,7 +88,7 @@ test('v1.5 toolbox entrypoint and layout are wired up',async()=>{
   const js=await readFile(new URL('../src/v1.js',import.meta.url),'utf8');
   const css=await readFile(new URL('../src/v15.css',import.meta.url),'utf8');
   assert.match(html,/id="v15-actions"/);
-  assert.match(html,/v15\.css\?v=1\.5\.0/);
+  assert.match(html,/v15\.css\?v=1\.6\.0/);
   assert.match(js,/mountV15\(/);
   assert.match(css,/@media\(max-width:820px\)/);
 });

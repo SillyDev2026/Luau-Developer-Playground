@@ -38,7 +38,7 @@ test('v1 autocomplete uses opaque existing palette instead of legacy undefined v
 test('offline service worker precaches the caret positioning helper',async()=>{
   const sw=await read('../public/sw.js');
   assert.match(sw,/completion-geometry\.js/);
-  assert.match(sw,/luauforge-v1\.5\.0/);
+  assert.match(sw,/luauforge-v1\.6\.0/);
 });
 
 test('phone autocomplete cannot stretch to fill editor due to a bottom anchor',async()=>{

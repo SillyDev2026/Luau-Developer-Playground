@@ -1,3 +1,10 @@
+## v1.6.0 — Dashboard and verified Studio source catalog
+- Add 20 live dashboard widgets with local settings, navigation and recovery hooks.
+- Add seven pinned Roblox Studio source modules; never misrepresent Studio-only modules as WASM-compatible.
+- Preserve v1.5 editor, WASM VM, existing projects, library sources, and responsive drawer geometry.
+- Add source integrity checks, dashboard model tests and Studio catalog tests.
+- Expose Home on the mobile dock and editor header with no workspace reset.
+
 ## v1.5.0 — Additive developer toolbox release
 
 - Follow-up: restore ZIPs from the standard file picker and keep phone Settings accessible while Focus Mode is enabled.

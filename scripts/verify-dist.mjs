@@ -24,6 +24,12 @@ for(const [name,minSize] of [['FastNum.lua',90000],['NanoNum.lua',300000],['Omeg
   assert.ok(code.length > minSize,`Missing or truncated bundled library: ${name}`);
 }
 await stat(join(out, 'favicon.svg'));
-for (const path of ['src/v15-ui.js','src/v15.css','src/v15-analysis.js','src/v15-modules.js','src/v15-bench.js','src/v15-zip.js','src/v15-settings.js','src/v1.js','src/v1.css','src/v1-model.js','src/v1-editor.js','src/v1-zip.js','src/v1-graph.js','src/auto-require.css','src/completion-geometry.js','manifest.webmanifest','sw.js']) await stat(join(out, path));
+for (const path of ['src/dashboard.js','src/dashboard-model.js','src/dashboard.css','src/studio-libraries.js','src/v15-ui.js','src/v15.css','src/v15-analysis.js','src/v15-modules.js','src/v15-bench.js','src/v15-zip.js','src/v15-settings.js','src/v1.js','src/v1.css','src/v1-model.js','src/v1-editor.js','src/v1-zip.js','src/v1-graph.js','src/auto-require.css','src/completion-geometry.js','manifest.webmanifest','sw.js']) await stat(join(out, path));
 assert.equal((await readFile(join(root, 'public/wasm/luau.wasm'))).length, binary.length);
 console.log(`GitHub Pages distribution verified: ${binary.length} WASM bytes; valid loader and relative URLs`);
+
+// Source-only Roblox Studio imports are pinned and checked during deployment.
+for(const name of ['NexusDataStore','ZonePlusV2','BufferUtil','Compression','Signal','Promise','NetStream']) {
+  const studio = await readFile(join(out,'studio-libraries',name+'.lua'));
+  assert.ok(studio.length > 4000,`Missing pinned Studio package: ${name}`);
+}

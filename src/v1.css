@@ -25,3 +25,5 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
   #code-input,.highlight-scroll pre,.line-gutter{font-size:max(16px,var(--editor-font));}
 }
 @media(max-width:360px){.location-suffix,.header-secondary{display:none;} .tabs{min-width:0;} .tab{max-width:min(150px,44vw);}}
+
+@media(max-width:820px){.mobile-dock{grid-template-columns:repeat(6,minmax(0,1fr))!important;}.mobile-dock button span{font-size:clamp(8px,2.5vw,10px)!important;}}
