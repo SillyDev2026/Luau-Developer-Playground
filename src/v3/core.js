@@ -60,7 +60,9 @@ export function formatWhitespace(source) {
 
 export function qualityAudit(files,{maxFindings=160}={}) {
   const findings=[];
-  const report=(file,line,severity,message)=>{if(findings.length<maxFindings)findings.push({file,line,severity,message});};
+  const limit=Number.isInteger(maxFindings)?Math.max(1,Math.min(1000,maxFindings)):160;
+  let truncated=false;
+  const report=(file,line,severity,message)=>{if(findings.length<limit)findings.push({file,line,severity,message});else truncated=true;};
   for (const [file,code] of Object.entries(files||{})) {
     if (typeof code !== 'string') continue;
     const lines=code.split(/\r?\n/);
@@ -75,7 +77,7 @@ export function qualityAudit(files,{maxFindings=160}={}) {
   const graph=analyzeDependencies(files||{});
   for (const cycle of graph.cycles) report(cycle[0]||'workspace',1,'warning',`Dependency cycle: ${cycle.join(' → ')}`);
   for (const issue of graph.problems) report(issue.file,1,'warning',issue.message);
-  return {findings,cycles:graph.cycles.length,unresolved:graph.problems.length,scanned:Object.keys(files||{}).length,truncated:findings.length>=maxFindings};
+  return {findings,cycles:graph.cycles.length,unresolved:graph.problems.length,scanned:Object.keys(files||{}).length,truncated};
 }
 
 export function compareSources(before, after, { maxLines = 320 }={}) {
@@ -86,29 +88,37 @@ export function compareSources(before, after, { maxLines = 320 }={}) {
   }
   const dp=Array.from({length:a.length+1},()=>new Uint16Array(b.length+1));
   for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
-  const changes=[];let i=0,j=0;
+  const changes=[];let i=0,j=0,truncated=false;
+  const append=entry=>{append(entry);else truncated=true;};
   while(i<a.length||j<b.length){
-    if(i<a.length&&j<b.length&&a[i]===b[j]){if(changes.length<240)changes.push({kind:'same',line:i+1,text:a[i]});i++;j++;}
-    else if(j<b.length&&(i===a.length||dp[i][j+1]>=dp[i+1][j])){if(changes.length<240)changes.push({kind:'added',line:j+1,text:b[j]});j++;}
-    else {if(changes.length<240)changes.push({kind:'removed',line:i+1,text:a[i]});i++;}
+    if(i<a.length&&j<b.length&&a[i]===b[j]){append({kind:'same',line:i+1,text:a[i]});i++;j++;}
+    else if(j<b.length&&(i===a.length||dp[i][j+1]>=dp[i+1][j])){append({kind:'added',line:j+1,text:b[j]});j++;}
+    else {append({kind:'removed',line:i+1,text:a[i]});i++;}
   }
-  return {limited:false,before:a.length,after:b.length,changes,truncated:changes.length>=240};
+  return {limited:false,before:a.length,after:b.length,changes,truncated};
 }
 
 export function createLockfile(files, pins=[],{projectName='Workspace'}={}) {
   if (!Array.isArray(pins)) throw new Error('Invalid imported module list.');
   const packages=pins.map(pin=>({specifier:pin.specifier,sha:pin.sha,size:pin.size||0}));
-  for (const p of packages) validatePackage(p);
+  const verified=packages.map(validatePackage);
+  if(verified.length>16)throw new Error('Too many pinned modules for a lockfile.');
+  if(new Set(verified.map(p=>p.specifier)).size!==verified.length)throw new Error('Duplicate module paths in lockfile.');
   const filesDigest=Object.entries(files||{}).sort(([a],[b])=>a.localeCompare(b)).map(([path,source])=>({path,bytes:utf8.encode(source).length}));
-  return {schema:'luauforge-lockfile',version:1,generatedAt:new Date().toISOString(),project:String(projectName).slice(0,72),packages,files:filesDigest};
+  return {schema:'luauforge-lockfile',version:1,generatedAt:new Date().toISOString(),project:String(projectName).slice(0,72),packages:verified,files:filesDigest};
 }
 function validatePackage(pkg) {
-  const match=PACKAGE.exec(pkg?.specifier||'');
-  if (!match||!OWNER.test(match[1])||!REPO.test(match[2])||match[2]==='.'||match[2]==='..'||!SHA.test(pkg.sha||'')||pkg.specifier.includes('..')||pkg.specifier.includes('//')) throw new Error('Invalid module path or commit SHA in lockfile.');
-  const size=Number(pkg.size)||0;
-  if(!Number.isFinite(size)||size<0||size>200000)throw new Error('Invalid pinned package size.');
-  return pkg;
+  if (!pkg || typeof pkg !== 'object' || Array.isArray(pkg)) throw new Error('Invalid module entry in lockfile.');
+  const match = PACKAGE.exec(pkg.specifier || '');
+  if (!match || !OWNER.test(match[1]) || !REPO.test(match[2]) || match[2] === '.' || match[2] === '..' ||
+      !SHA.test(pkg.sha || '') || pkg.specifier.includes('..') || pkg.specifier.includes('//'))
+    throw new Error('Invalid module path or commit SHA in lockfile.');
+  const size = pkg.size === undefined ? 0 : pkg.size;
+  if (!Number.isSafeInteger(size) || size < 0 || size > 200000)
+    throw new Error('Invalid pinned package size.');
+  return {specifier:pkg.specifier,sha:pkg.sha.toLowerCase(),size};
 }
+
 export function parseLockfile(raw) {
   if (typeof raw!=='string'||raw.length>60000) throw new Error('Lockfile is too large.');
   let data;try{data=JSON.parse(raw);}catch{throw new Error('Lockfile must be valid JSON.');}
