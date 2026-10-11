@@ -27,7 +27,7 @@ export function workspaceSearch(files, term, { caseSensitive = false, wholeWord 
         const begin = source.lastIndexOf('\n', at - 1) + 1;
         const last = source.indexOf('\n', at);
         results.push({file,line,column:at-begin+1,preview:source.slice(begin,last<0?source.length:last).trim().slice(0,180)});
-        if (results.length>=limit) return {matches:results,truncated:true};
+        if (results.length>limit) return {matches:results.slice(0,limit),truncated:true};
       }
       at = Math.max(at+1,end);
     }

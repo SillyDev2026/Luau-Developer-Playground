@@ -1,3 +1,10 @@
+# v3.0.1 — Console version and Discord community hotfix (2026-10-10)
+
+- Console welcome and startup message share current v3.0.1 version; community release version corrected.
+- Official Discord invite in Dashboard and settings, with external-link safety attributes.
+- Exact-limit workspace search truncation corrected and regression tested.
+- Refreshed offline cache; no changes to editor geometry, workspace saves or Luau VM.
+
 # v3.0.0 — V3 Workbench foundation (2026-10-10)
 
 - Isolated v3 project-tools UI and offline static analysis: multi-file search, project advisory audit, read-only diff and exportable Markdown report.

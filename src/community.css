@@ -14,3 +14,7 @@
 .dash-release{background:var(--panel,#17233b);border:1px solid var(--border,#364966);border-radius:10px;padding:12px 15px;min-width:0;color:var(--text,#dfe9fc);}.dash-release strong{font-size:13px}.dash-release p{font-size:11px;color:var(--muted,#9eafc8);margin:6px 0 0;line-height:1.5;overflow-wrap:anywhere;}
 body[data-theme=light] .release-banner{background:#eef3fc;color:#1b2b44;border-color:#8ba2c5;box-shadow:0 7px 20px #0013;}body[data-theme=light] .release-banner p{color:#4c627d;}body[data-theme=light] .release-banner button{background:#dde7f8;color:#1b304b;border-color:#c3d1e7;}
 @media(max-width:820px){.release-banner{top:calc(var(--header-height,55px) + 6px);right:7px;max-width:calc(100vw - 14px);padding:9px;}.release-banner button{font-size:11px;}.community-controls{gap:5px;}}
+
+/* Community links stay within existing responsive, scrollable panels. */
+.community-discord-link{display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-height:36px;margin:9px 0 3px;padding:7px 12px;border:1px solid var(--border,#33435e);border-radius:8px;background:var(--panel2,#1b2b42);color:var(--text,#dae4fa);font-size:12px;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.community-discord-link:hover{filter:brightness(1.2);text-decoration:underline}.community-discord-link:focus-visible{outline:2px solid var(--accent,#879eff);outline-offset:2px}

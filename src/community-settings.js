@@ -1,7 +1,7 @@
 // Public account labels and in-app update preferences only. Never store OAuth,
 // Discord bot tokens or webhook URLs in browser storage.
 export const COMMUNITY_KEY = 'luauforge:community:v1';
-export const CURRENT_VERSION = '1.8.1';
+export const CURRENT_VERSION = '3.0.1';
 const DEFAULTS = Object.freeze({ github: '', discord: '', inAppUpdates: true, lastSeenRelease: '' });
 
 export function validateGithub(name) {
@@ -75,6 +75,11 @@ export function mountCommunitySettings({ notify = () => {}, onOpenRelease = () =
       if (res.status === 404) res = await fetch(new URL('./public/updates.json', document.baseURI), { cache: 'no-store' });
       if (!res.ok) throw new Error(`Updates HTTP ${res.status}`);
       const release = parseRelease(await res.json());
+      if (newerVersion(CURRENT_VERSION, release.version)) {
+        banner.classList.add('hidden');
+        status.textContent = `Update feed is older than this installation (v${CURRENT_VERSION}); refresh online to check newer releases.`;
+        return release;
+      }
       displayRelease(release);
       if (!quiet) notify(`Release feed checked: v${release.version}`);
       return release;

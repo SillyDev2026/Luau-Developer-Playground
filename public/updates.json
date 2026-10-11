@@ -1,17 +1,13 @@
 {
-  "version": "3.0.0",
-  "title": "V3 Workbench and verified project tools",
+  "version": "3.0.1",
+  "title": "V3 console fixes, search reliability and official Discord",
   "publishedAt": "2026-10-10",
   "changes": [
-    "Compatibility-preserving v3 foundation (unchanged workspace format, WASM engine and mobile scaling)",
-    "Project-wide literal search with line navigation and safe result limits",
-    "Project quality audit with dependency cycle/unresolved import advisories",
-    "Safe whitespace cleanup with automatic recovery snapshot",
-    "Side-by-side file comparison rendered as read-only diff",
-    "Pinned public GitHub module lockfile export and explicit-review import",
-    "Markdown project report for files, dependencies and review items",
-    "Read-only GitHub Actions status viewer for public repositories",
-    "Expanded command palette and mobile-accessible workbench panel",
-    "Updated offline cache for v3 assets and extended regression tests"
+    "Fixed v1 console welcome message: current LuauForge v3 version shown instead",
+    "Release settings and startup status now use the same version",
+    "Official Discord invite linked from Dashboard and Community settings",
+    "Fixed project-search truncation when results equal the maximum",
+    "Updated offline cache while preserving editor sizing and mobile geometry",
+    "Expanded version and search regression checks"
   ]
 }

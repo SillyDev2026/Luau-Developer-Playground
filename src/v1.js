@@ -12,7 +12,7 @@ import { summarizeSamples } from './module-bundle.js';
 import { mountV15 } from './v15-ui.js';
 import { readZip } from './v15-zip.js';
 import { mountDashboard } from './dashboard.js';
-import { mountCommunitySettings } from './community-settings.js';
+import { mountCommunitySettings, CURRENT_VERSION } from './community-settings.js';
 import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
 import { mountV3 } from './v3/ui.js';
@@ -293,7 +293,7 @@ function addToolCard(parent, title, subtitle, action, text) {
 function renderOutputPanel() {
   const output = $('output-content'); output.replaceChildren();
   if (state.output === 'console') {
-    if (!state.outputLogs.length) output.append(createElement('div', 'Welcome to LuauForge 1.0 · Press Run or Ctrl+Enter. All code stays in your browser.', 'output-empty'));
+    if (!state.outputLogs.length) output.append(createElement('div', `Welcome to LuauForge v${CURRENT_VERSION} · Press Run or Ctrl+Enter. All code stays in your browser.`, 'output-empty'));
     for (const item of state.outputLogs) output.append(createElement('p', item.message, 'output-line ' + item.kind));
     output.scrollTop = output.scrollHeight;
   } else if (state.output === 'problems') {
@@ -576,7 +576,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v3.0.0 ready · Existing workspace restored.', 'system');
+  consoleLog(`LuauForge v${CURRENT_VERSION} ready · Existing workspace restored.`, 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });

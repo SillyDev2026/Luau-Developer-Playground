@@ -1,3 +1,13 @@
+# LuauForge v3.0.1 — Console hotfix and official Discord
+
+- Fixed console output still saying LuauForge 1.0; startup and console now use the v3 current version from Community settings.
+- Added [Join our LuauForge Discord](https://discord.gg/z8qUMDV8gD) to the Dashboard and Settings → Community & Release Updates.
+- Workspace search no longer falsely shows truncated when results match the limit exactly.
+- Existing storage keys, local projects, editor dimensions, mobile scale and Luau WASM remain unchanged.
+- Open the website online and refresh once to replace the old offline cache.
+
+---
+
 # LuauForge v3.0.0 — Compatibility-first V3 Workbench
 
 LuauForge v3 introduces an **isolated, tested developer workbench** on top of the existing WebAssembly IDE. This version preserves the v1.8.1 saved workspace data format (`luau-dev-playground:v2`), self-hosted Luau WASM runtime, `require("@Owner/Repo/path.luau")` imports, Studio package catalog, benchmark and test runners, existing themes and responsive scaling. No source migration, mandatory GitHub login or new backend is required.

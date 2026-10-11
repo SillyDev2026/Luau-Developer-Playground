@@ -15,6 +15,10 @@ test('project search cannot use uncontrolled regex and caps results',()=>{
  const r=workspaceSearch({'a.luau':'a.a.a.a.a.a.'},'.',{maxResults:2});assert.equal(r.matches.length,2);assert.equal(r.truncated,true);
  assert.throws(()=>workspaceSearch(sample,''),/search term/);
 });
+test('search truncation flag is true only if extra results exist',()=>{
+ const exact=workspaceSearch({'a.luau':'hi hi'},'hi',{maxResults:2});assert.equal(exact.matches.length,2);assert.equal(exact.truncated,false);
+ const extra=workspaceSearch({'a.luau':'hi hi hi'},'hi',{maxResults:2});assert.equal(extra.matches.length,2);assert.equal(extra.truncated,true);
+});
 test('search ignores comments when opted out',()=>{
  const files={'x.luau':'-- hello\nlocal s = "hello"\nprint("hello")'};
  assert.equal(workspaceSearch(files,'hello',{includeComments:false}).matches.length,0);
@@ -69,7 +73,7 @@ test('v3 UI is additive and versioned for offline deployment',async()=>{
  const sw=await readFile(new URL('../public/sw.js',import.meta.url),'utf8');
  const ui=await readFile(new URL('../src/v3/ui.js',import.meta.url),'utf8');
  for(const id of ['code-input','mobile-dock','dashboard-view','v3-actions'])assert.match(html,new RegExp(`id="${id}"`));
- assert.match(html,/v3\/ui\.css\?v=3\.0\.0/);
- assert.match(sw,/luauforge-v3\.0\.0/);assert.match(sw,/src\/v3\/ui\.js/);
+ assert.match(html,/v3\/ui\.css\?v=3\.0\.1/);
+ assert.match(sw,/luauforge-v3\.0\.1/);assert.match(sw,/src\/v3\/ui\.js/);
  assert.match(ui,/snapshot\(\)/);assert.match(ui,/source\(after\)/);
 });
