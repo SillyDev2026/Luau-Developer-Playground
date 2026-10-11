@@ -1,13 +1,13 @@
 {
-  "version": "3.1.2",
-  "title": "Function comment descriptions in hover and IntelliSense",
+  "version": "3.2.0",
+  "title": "Community feedback, Discord forums and voting",
   "publishedAt": "2026-10-11",
   "changes": [
-    "Show -- add 2 numbers and other adjacent Luau comments under function signatures",
-    "Display function descriptions on hover in local and imported workspace modules",
-    "Include comments in exported-module method autocomplete suggestions",
-    "Show documentation alongside active parameter signature hints",
-    "Support multiple consecutive -- lines and directly adjacent block comments",
-    "Ignore unrelated, distant or directive comments; preserve normal editor typing"
+    "New dedicated responsive Feedback page with searchable suggestion and bug feeds",
+    "Create real Discord forum threads in separate suggestion and bug-report channels",
+    "React with thumbs up/down, undo votes, and view scores in the website",
+    "Mirror website vote tallies into the Discord forum starter post",
+    "Keep Discord bot credentials private in the separately hosted Node backend",
+    "Use per-session pseudonymous profiles, submission limits and safe error messages"
   ]
 }

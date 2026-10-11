@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { createFeedbackApi } from './feedback.mjs';
 
 const TYPES=new Set(['Script','ModuleScript','LocalScript']);
 const TARGETS=new Set(['ReplicatedStorage','ServerScriptService','StarterGui','StarterPlayerScripts']);
@@ -85,9 +86,11 @@ function verifyScript(input){
   if(!TARGETS.has(input.target))throw failure(400,'Unsupported Studio destination');
   if(!isSource(input.source))throw failure(400,'Source must be UTF-8 text of 50 KB or less');
 }
-export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.now()}={}){
+export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.now(),feedbackDataFile,discordBotToken='',discordChannels,discordRequest}={}){
   if(!dataFile)throw Error('A persistent dataFile is required');
   const db=readDatabase(dataFile);
+  const feedback=createFeedbackApi({dataFile:feedbackDataFile||dataFile+'.feedback.json',botToken:discordBotToken,
+    channels:discordChannels,clock,...(discordRequest?{request:discordRequest}:{})});
   const allowed=new Set(allowedOrigins.filter(Boolean));
   const attempt=new Map();
   const save=()=>persist(dataFile,db);
@@ -107,6 +110,7 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
     const method=request.method;
     try{
       if(pathname==='/health'&&method==='GET')return json(response,200,{ok:true,service:'luauforge-collab'});
+      if(pathname.startsWith('/api/feedback'))return await feedback.handle(request,response,pathname);
       if(route[0]!=='api')throw failure(404,'Unknown endpoint');
       if(!['GET','POST','PATCH','DELETE'].includes(method))throw failure(405,'Method not allowed');
       // A small per-peer bound on account creation and invite redemption.

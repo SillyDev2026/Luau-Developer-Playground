@@ -1,3 +1,28 @@
+# v3.2.0 — Feedback Discord forums setup
+
+The site's new Feedback page requires this **separately hosted HTTPS Node backend**. It does not run on GitHub Pages. Suggestions and bug reports create actual threads in Discord forum channels using the bot's Discord REST API.
+
+1. In the Discord Developer Portal, create or reuse your bot application. Add the bot to the server that owns both forum channels. It needs View Channel, Send Messages (including forum thread creation), Read Message History and Add Reactions in both forums. Do not post its token publicly.
+2. Deploy `node server/index.mjs` with a persistent storage volume. Use `render.yaml` if using Render; make sure the plan supports persistent disk. The server must be reachable over HTTPS.
+3. Configure the following server environment variables:
+
+   - `DISCORD_BOT_TOKEN`: secret bot token (never checked into Git or exposed in the website).
+   - `DISCORD_SUGGESTIONS_FORUM_ID=1558939401394851850`.
+   - `DISCORD_BUG_REPORTS_FORUM_ID=1558939354234093638`.
+   - `FEEDBACK_DATA_FILE=/var/data/feedback.json` (an actual persistent disk path).
+   - `COLLAB_DATA_FILE=/var/data/workspaces.json` if shared scripts are also enabled.
+   - `ALLOWED_ORIGINS=https://sillydev2026.github.io` (plus allowed localhost origins for local testing).
+
+4. Open LuauForge → Feedback, enter your backend HTTPS origin, and connect a display-name profile. Create a test suggestion and verify the resulting Discord forum thread, then submit a bug report and verify the other forum. Test thumbs-up/down and undo.
+
+API: `GET /api/feedback/status` reports whether the bot/channel settings exist (not whether Discord permissions have been validated). `POST /api/feedback/session` creates a pseudonymous tab token; `GET /api/feedback/posts` lists public website posts; `POST /api/feedback/posts` creates a Discord thread; `POST /api/feedback/posts/:id/vote` changes a website vote. The backend stores hashed profile tokens, messages, Discord thread IDs and votes in a separate JSON database. Do not run multiple Node replicas on that JSON file.
+
+**Voting semantics:** website users can upvote/downvote or undo their own session's vote; totals are edited into the forum's bot-authored starter post. Discord users can separately react with native emojis. Discord reactions are **not** imported into the website count, and website visitors cannot react as Discord accounts via a shared bot token. Sessions are not verified identities, so malicious users can generate more profiles; rate limiting mitigates casual abuse but is not strong identity protection. Form content is untrusted and passed as plain text with all mentions disabled. The app doesn't add a moderation dashboard yet; server admins moderate forum posts in Discord.
+
+**Reliability:** failed Discord thread creation returns a visible error and does not claim a successful post. If updating the forum vote summary fails after a valid local vote, the vote is retained and the summary retries on a later board refresh. If the bot is unconfigured, posting is disabled. Disconnecting from the Feedback UI only ends the current tab session. No Discord bot token is transmitted to the website.
+
+---
+
 # v3.1.1 updates: Scripts page and safer Studio synchronization
 
 Open the new **Scripts** page from the top toolbar or mobile dock. Search and filter shared scripts, inspect published code, open the Luau editor, publish changed code, and (with editor permission) rename or move a script to another supported Studio destination. The workspace owner can remove invited developers with immediate token revocation; invited editors and viewers can use **Leave workspace** to revoke their own tokens. **Disconnect** only clears the browser tab, not the server token.

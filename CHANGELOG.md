@@ -1,3 +1,12 @@
+## 3.2.0 — 2026-10-11
+
+- Introduce a full-width community Feedback page with separate suggestion and bug forms, search, filters, sorting, responsive post cards and direct Discord thread links.
+- Add secure Node Discord forum integration, using suggestion channel `1558939401394851850` and bug-report channel `1558939354234093638`.
+- Add website thumbs-up/down votes with one active vote per pseudonymous session, click-to-undo, server-side counts and updates to the bot-authored Discord forum message.
+- Add optional bot-created 👍/👎 Discord reactions (separate from website counts), safe `allowed_mentions`, rate limiting, validation, privacy controls and failure reporting.
+- Include independent persistent feedback storage, environment-configurable forum IDs, optional Render settings, mocked Discord integration tests and deploy docs.
+- Keep private bot tokens outside the browser and preserve current editor, Studio bridge and local workspace features.
+
 ## 3.1.2 — 2026-10-11
 
 - Read adjacent Luau `--`/`---` and block comments as function documentation, including in imported workspace ModuleScripts.

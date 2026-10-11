@@ -15,5 +15,13 @@ services:
         value: /var/data/workspaces.json
       - key: ALLOWED_ORIGINS
         value: https://sillydev2026.github.io
+      - key: FEEDBACK_DATA_FILE
+        value: /var/data/feedback.json
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_SUGGESTIONS_FORUM_ID
+        value: '1558939401394851850'
+      - key: DISCORD_BUG_REPORTS_FORUM_ID
+        value: '1558939354234093638'
       - key: NODE_ENV
         value: production

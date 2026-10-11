@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.1\.2"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.2\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -51,3 +51,7 @@ for (const filename of ['src/v3/ui.js','src/v3/core.js','src/v3/ui.css']) await 
 assert.match(html,/id="v3-actions"/);
 for (const filename of ['src/collab.js','src/collab.css']) await stat(join(out,filename));
 assert.match(html,/id="collab-settings"/);
+
+for(const filename of ['src/feedback.js','src/feedback.css']) await stat(join(out,filename));
+assert.match(html,/id="feedback-view"/);
+assert.match(html,/id="feedback-post-list"/);

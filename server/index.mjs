@@ -7,7 +7,14 @@ const dataFile=resolve(process.env.COLLAB_DATA_FILE||'./server/data/workspaces.j
 const allowedOrigins=(process.env.ALLOWED_ORIGINS||'https://sillydev2026.github.io,http://127.0.0.1:4173,http://localhost:4173')
   .split(',').map(x=>x.trim()).filter(Boolean);
 if(!Number.isInteger(port)||port<0||port>65535)throw Error('Invalid PORT');
-const {server}=createCollabServer({dataFile,allowedOrigins});
+const {server}=createCollabServer({dataFile,allowedOrigins,
+  feedbackDataFile:resolve(process.env.FEEDBACK_DATA_FILE||'./server/data/feedback.json'),
+  discordBotToken:process.env.DISCORD_BOT_TOKEN||'',
+  discordChannels:{
+    suggestion:process.env.DISCORD_SUGGESTIONS_FORUM_ID||'1558939401394851850',
+    bug:process.env.DISCORD_BUG_REPORTS_FORUM_ID||'1558939354234093638'
+  }
+});
 server.listen(port,host,()=>{
   console.log('LuauForge collaboration API listening on '+host+':'+port+' (persistent file: '+dataFile+')');
 });
