@@ -1,0 +1,16 @@
+.collab-settings .collab-actions{display:flex;gap:8px;flex-wrap:wrap}
+.collab-settings .collab-actions button{flex:1;min-width:90px}
+.collab-settings input,.collab-settings select,.collab-settings textarea{max-width:100%;min-width:0}
+.collab-members{display:flex;flex-wrap:wrap;gap:6px}
+.collab-chip{display:inline-flex;padding:4px 8px;border:1px solid var(--border,#37465d);border-radius:12px;font-size:11px;overflow-wrap:anywhere}
+.collab-files{display:grid;gap:6px;max-height:230px;overflow-y:auto}
+.collab-script{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border:1px solid var(--border,#37465d);border-radius:7px}
+.collab-script-detail{min-width:0;display:grid;gap:3px;font-size:12px}
+.collab-script-detail strong{overflow-wrap:anywhere}
+.collab-script-detail small{color:var(--muted,#92a0b8);font-size:10px;overflow-wrap:anywhere}
+.collab-script button{flex-shrink:0;padding:6px 10px}
+.collab-secret{display:grid;gap:6px;padding:8px;border:1px solid var(--border,#37465d);border-radius:7px}
+.collab-secret textarea{width:100%;resize:vertical;word-break:break-all;font:11px/1.5 monospace}
+.collab-settings #collab-status[data-warning="true"]{color:#f39c9c}
+.collab-settings .setting-title{margin-top:10px}
+@media(max-width:760px){.collab-script{align-items:flex-start}.collab-script-detail small{font-size:10px}.collab-script button{min-width:48px}}
