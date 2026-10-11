@@ -7,18 +7,19 @@
   <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=3.0.6" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=3.0.6" />
-  <link rel="stylesheet" href="./src/v15.css?v=3.0.6" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=3.0.6" />
-  <link rel="stylesheet" href="./src/community.css?v=3.0.6" />
-  <link rel="stylesheet" href="./src/v3/ui.css?v=3.0.6" />
-  <title>LuauForge 3.0.6 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/community.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.1.0" />
+  <link rel="stylesheet" href="./src/collab.css?v=3.1.0" />
+  <title>LuauForge 3.1.0 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.0.6</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.1.0</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
@@ -98,6 +99,43 @@
         <div class="setting-group"><div class="setting-title">LUAU COMPILER</div><label>Type checking<select id="mode-select"><option value="strict">Strict</option><option value="nonstrict">Nonstrict</option><option value="nocheck">No-check</option></select></label><label>Optimization<select id="optimization-select"><option value="0">O0 — none</option><option value="1">O1 — baseline</option><option value="2">O2 — optimize</option></select></label><label class="toggle-row"><input type="checkbox" id="live-check"/> <span>Live type diagnostics</span></label></div>
         <div class="setting-group"><div class="setting-title">EDITOR</div><label>Font size <output id="font-value">14px</output><input id="font-slider" type="range" min="11" max="22" value="14"/></label><label class="toggle-row"><input type="checkbox" id="wrap-select"/> <span>Word wrap</span></label><button class="wide-btn" id="reset-layout">Reset panel sizes</button></div>
         <div class="setting-group"><div class="setting-title">PROJECT</div><div class="project-metrics" id="project-metrics"></div><button id="snapshot-btn" class="wide-btn">Create recovery snapshot</button><button id="history-btn" class="wide-btn">Restore snapshot</button><button id="export-json" class="wide-btn">Export project JSON</button><button id="export-zip" class="wide-btn">Export source ZIP</button><button id="github-import" class="wide-btn">Import public GitHub file</button><button id="reset-project" class="wide-btn danger">Reset project</button></div>
+        <div class="setting-group collab-settings" id="collab-settings">
+          <div class="setting-title">SHARED WORKSPACE + ROBLOX STUDIO</div>
+          <p class="inspector-note">Invite teammates, edit shared scripts, and place them in Studio. Requires your separately hosted HTTPS Node server. Sharing is opt-in: local projects are not uploaded automatically.</p>
+          <label>Collaboration API origin <input id="collab-api" type="url" placeholder="https://your-node-server.example" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
+          <label>Your display name <input id="collab-name" type="text" placeholder="Developer" maxlength="36" autocomplete="off"/></label>
+          <label>New shared workspace name <input id="collab-title" type="text" placeholder="Our Roblox game" maxlength="80" autocomplete="off"/></label>
+          <button type="button" class="wide-btn" id="collab-create">Create shared workspace</button>
+          <label>Received invitation code <input id="collab-code" type="text" placeholder="Paste one-use invite" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
+          <button type="button" class="wide-btn" id="collab-join">Join invited workspace</button>
+          <p id="collab-info" class="inspector-note">Not connected to a shared workspace.</p>
+          <div id="collab-members" class="collab-members" aria-label="Shared workspace members"></div>
+          <div class="collab-actions">
+            <button id="collab-refresh" type="button">Refresh</button>
+            <button id="collab-disconnect" type="button">Disconnect</button>
+          </div>
+          <div class="setting-title">CREATE ROBLOX SCRIPT</div>
+          <label>Script name <input id="collab-script-name" maxlength="50" placeholder="PlayersData" autocomplete="off"/></label>
+          <label>Class <select id="collab-type"></select></label>
+          <label>Studio destination <select id="collab-target"></select></label>
+          <button type="button" class="wide-btn" id="collab-create-script">Create script in shared workspace</button>
+          <div id="collab-files" class="collab-files" aria-label="Shared scripts"></div>
+          <button type="button" class="wide-btn" id="collab-save-script">Publish open shared script to team and Studio</button>
+          <p class="inspector-note">Changes are published when you click Publish, not on every keystroke. Teammates' file lists refresh periodically. Revision conflicts require a manual reload.</p>
+          <div class="setting-title">INVITATIONS + STUDIO PAIRING</div>
+          <label>Invite role <select id="collab-invite-role"><option value="editor">Editor — create and update scripts</option><option value="viewer">Viewer — read only</option></select></label>
+          <button type="button" class="wide-btn" id="collab-invite">Generate one-use invite code (owner)</button>
+          <button type="button" class="wide-btn" id="collab-studio-token">Generate Studio pairing token (owner)</button>
+          <p id="collab-studio-status" class="inspector-note">Studio plugin not paired yet.</p>
+          <div class="collab-secret hidden">
+            <label id="collab-secret-label" for="collab-secret">One-time secret</label>
+            <textarea id="collab-secret" readonly rows="3" spellcheck="false"></textarea>
+            <button id="collab-copy-secret" type="button">Copy code</button>
+          </div>
+          <a href="https://github.com/SillyDev2026/Luau-Developer-Playground/blob/main/studio/LuauForgeBridge.plugin.lua" target="_blank" rel="noopener noreferrer">Get the Studio plugin source ↗</a>
+          <p class="inspector-note">Only the workspace owner can link Studio. Anyone with editor access can publish code that the connected plugin may install, so invite trusted developers only.</p>
+          <p id="collab-status" class="inspector-note" role="status" aria-live="polite">Shared workspace is not connected.</p>
+        </div>
         <div class="setting-group"><div class="setting-title">TOOLS</div><button class="wide-btn" id="graph-btn">Module dependency graph</button><button class="wide-btn" id="benchmark-btn">Benchmark a module</button><button class="wide-btn" id="test-btn">Run all tests</button><button class="wide-btn" id="bytecode-btn">Inspect bytecode</button></div>
         <div class="setting-group v15-toolbox"><div class="setting-title">DEVELOPER TOOLBOX · 20 TOOLS</div><p class="inspector-note">Refactor, inspect modules, benchmark Luau, and manage projects. All optional.</p><div id="v15-actions" class="v15-actions"></div></div>
         <div class="setting-group v3-toolbox"><div class="setting-title">V3 WORKBENCH · PROJECT TOOLS</div><p class="inspector-note">Workspace search, quality review, safe cleanup, diff, pinned module lockfiles and GitHub CI.</p><div id="v3-actions" class="v3-actions"></div></div>
@@ -124,6 +162,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=3.0.6"></script>
+<script type="module" src="./src/v1.js?v=3.1.0"></script>
 </body>
 </html>

@@ -16,6 +16,7 @@ import { mountCommunitySettings, CURRENT_VERSION } from './community-settings.js
 import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
 import { mountV3 } from './v3/ui.js';
+import { mountCollabWorkspace } from './collab.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
@@ -572,6 +573,7 @@ function initialize() {
   window.addEventListener('pagehide', () => { workspace.dispose(); runtime.dispose(); state.disposed = true; });
   enableResizing();
   mountAutoRequire({ editor: editor.input, getProject: () => workspace.project, getRuntime: () => runtime, notify, catalogButtons: false });
+  mountCollabWorkspace({workspace,editor,notify});
   // Catalog actions are owned by v1. AutoRequire provides editor completions.
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
