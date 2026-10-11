@@ -94,6 +94,30 @@ function exportedName(source) {
   return clean.match(/\breturn\s+([A-Za-z_]\w*)\s*(?:;?\s*)$/)?.[1]||'';
 }
 
+function exportedSignatures(source) {
+  const clean=maskLuau(source),returned=exportedName(source);
+  const entries=sourceSignatures(source);
+  if(returned)return entries.filter(entry=>entry.name.startsWith(returned+'.') && !entry.name.slice(returned.length+1).includes('.'));
+  // A module returning a function-valued table literal can also provide API
+  // signatures. Never expose private helper functions by default.
+  const expression=/\breturn\s*\{([\s\S]*?)\}\s*;?\s*$/.exec(clean);
+  if(!expression)return [];
+  const names=new Set([...expression[1].matchAll(/(?:^|[,;\n])\s*([A-Za-z_]\w*)\s*=/g)].map(x=>x[1]));
+  return entries.filter(entry=>!entry.name.includes('.') && names.has(entry.name));
+}
+
+export function moduleMemberCompletions(source,cursor,context,project) {
+  if(context?.mode!=='member' || !/^[A-Za-z_]\w*$/.test(context.base||''))return [];
+  const imported=importedModule(source,context.base,cursor,project);
+  if(imported?.kind!=='file')return [];
+  const query=context.query.toLowerCase();
+  return exportedSignatures(imported.source)
+    .map(entry=>({label:entry.name.split('.').at(-1),kind:'function',detail:entry.signature+' · '+imported.path,origin:imported.path,score:0}))
+    .filter(item=>(context.separator!==':'||item.kind==='function') && item.label.toLowerCase().startsWith(query))
+    .map(item=>({...item,score:item.label.toLowerCase()===query?115:85}))
+    .sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label)).slice(0,12);
+}
+
 export function lookupSignature(name,source,cursor,project,api=getRobloxAPI()) {
   if(!/^[A-Za-z_]\w*(?:[.:][A-Za-z_]\w*)*$/.test(name))return null;
   const normalized=name.replaceAll(':','.');
@@ -113,9 +137,7 @@ export function lookupSignature(name,source,cursor,project,api=getRobloxAPI()) {
     if(entry)return {signature:entry,origin:library.label+' · bundled API'};
   }
   if(imported?.kind==='file'){
-    const exposed=exportedName(imported.source);
-    const matches=sourceSignatures(imported.source);
-    const found=matches.findLast(x=>x.name===(exposed?exposed+'.'+method:'') || (exposed==='' && x.name===method));
+    const found=exportedSignatures(imported.source).findLast(x=>x.name.split('.').at(-1)===method);
     if(found)return {signature:found.signature,origin:imported.path};
   }
   const symbols=localsInScope(source,cursor);
