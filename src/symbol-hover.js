@@ -45,6 +45,8 @@ function sourceSignatures(source) {
 }
 
 function memberSignature(api, type, member) {
+  const standard=(api?.standard?.[type]||[]).find(x=>x[0]===member && x[1]==='function');
+  if(standard)return standard[2];
   const seen=new Set();
   while(type&&!seen.has(type)){
     seen.add(type);
@@ -53,7 +55,7 @@ function memberSignature(api, type, member) {
     if(found)return found[2];
     type=entry?.parent||DEFAULT_PARENTS[type];
   }
-  return (api?.standard?.[type]||[]).find(x=>x[0]===member && x[1]==='function')?.[2]||'';
+  return '';
 }
 
 function normalize(path) {
