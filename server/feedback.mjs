@@ -105,6 +105,17 @@ export function createFeedbackApi({dataFile,botToken='',channels=CHANNELS,clock=
         return respond(res,201,{token:key,name:user.name});
       }
       if(route.length===3&&route[2]==='posts'&&method==='GET'){
+        // Repair a failed Discord summary after a cooldown when people refresh.
+        const retry=Object.values(data.posts).find(post=>post.discordSynced===false&&
+          clock()-(post.lastSyncAttemptAt||0)>=30000);
+        if(retry&&botToken){
+          retry.lastSyncAttemptAt=clock();save();
+          try{
+            await discord('PATCH','/channels/'+retry.threadId+'/messages/'+retry.messageId,
+              {content:forumMessage(retry),allowed_mentions:{parse:[]}});
+            retry.discordSynced=true;save();
+          }catch{/* Retain unsynced state and retry on a later refresh. */}
+        }
         // Public list; an optional session token personalizes vote state.
         let memberId='';
         try{memberId=auth(data,req).id;}catch{}
@@ -153,7 +164,7 @@ export function createFeedbackApi({dataFile,botToken='',channels=CHANNELS,clock=
         if(body.vote!==-1&&body.vote!==0&&body.vote!==1)throw fail(400,'Vote must be -1, 0, or 1');
         const prior=post.votes[user.id]||0,desired=body.vote===prior?0:body.vote;
         if(desired===0)delete post.votes[user.id];else post.votes[user.id]=desired;
-        post.discordSynced=false;save();
+        post.discordSynced=false;post.lastSyncAttemptAt=clock();save();
         try{
           await discord('PATCH','/channels/'+post.threadId+'/messages/'+post.messageId,
             {content:forumMessage(post),allowed_mentions:{parse:[]}});
