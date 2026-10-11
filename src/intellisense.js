@@ -159,7 +159,9 @@ export function completionContext(source,cursor) {
   const member=part.match(/(?:^|[^\w])([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*([.:])\s*([A-Za-z_]\w*)?$/);
   if(member)return {mode:'member',base:member[1],separator:member[2],query:member[3]||'',from:cursor-(member[3]||'').length,to:cursor};
   const word=part.match(/(?:^|[^\w.])([A-Za-z_]\w*)$/);
-  if(word&&word[1])return {mode:'identifier',query:word[1],from:cursor-word[1].length,to:cursor};
+// A completed Luau keyword is a statement, not a pending completion.
+  // Never let the popup replace an already typed `end`, `else`, `return`, etc.
+  if(word&&word[1]&&!KEYWORDS.includes(word[1]))return {mode:'identifier',query:word[1],from:cursor-word[1].length,to:cursor};
   return null;
 }
 
