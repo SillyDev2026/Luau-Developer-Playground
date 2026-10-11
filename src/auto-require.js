@@ -2,7 +2,7 @@ import { textareaCaretOffset, placeCompletionPopup } from './completion-geometry
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
 import { githubModuleTargets } from './github-modules.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
-import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, GLOBALS } from './intellisense.js?v=0.4.0';
+import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, maskLuau, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
@@ -37,12 +37,13 @@ export function targets(files, active) {
 export function slashAt(source, cursor) {
   if (cursor < 0 || cursor > source.length) return null;
   const from = source.lastIndexOf('\n',cursor-1)+1;
-  const match = source.slice(from,cursor).match(/^([ \t]*)\/([\w./-]*)$/);
+  const match = maskLuau(source).slice(from,cursor).match(/^([ \t]*)\/([\w./-]*)$/);
   return match ? {from:from+match[1].length,to:cursor,query:match[2]} : null;
 }
 export function boundVariable(source, specifier) {
+  const visible = maskLuau(source);
   for (const match of source.matchAll(/^[ \t]*local[ \t]+([A-Za-z_]\w*)[ \t]*=[ \t]*require[ \t]*\([ \t]*(["'])([^\n"']+)\2[ \t]*\)/gm)) {
-    if (match[3] === specifier) return match[1];
+    if (visible[match.index] === 'l' && match[3] === specifier) return match[1];
   }
   return null;
 }
@@ -78,7 +79,7 @@ export function complete(source,cursor,choice,files,active) {
   const existing=boundVariable(source,found.specifier);
   let variable=existing||found.variable;
   if(!existing) {
-    const declared=new Set([...source.matchAll(/\blocal\s+([A-Za-z_]\w*)/g)].map(m=>m[1]));
+    const declared=new Set([...maskLuau(source).matchAll(/\blocal\s+([A-Za-z_]\w*)/g)].map(m=>m[1]));
     const name=variable; let suffix=2;
     while(declared.has(variable)) variable=name+suffix++;
   }
@@ -211,7 +212,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   editor.addEventListener('keydown',event=>{
     if(event.key==='F12'&&!event.shiftKey&&!event.ctrlKey&&!event.altKey){event.preventDefault();event.stopImmediatePropagation();goToDefinition();return;}
     if((event.ctrlKey||event.metaKey)&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();update(true);return;}
-    if(!options || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
+    if(!options?.items?.length || menu.classList.contains('hidden') || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
     event.preventDefault();event.stopImmediatePropagation();
     if(event.key==='Escape')hide();
     else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;renderMenu();}
