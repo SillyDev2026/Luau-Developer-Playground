@@ -1,12 +1,13 @@
 {
-  "version": "3.0.4",
-  "title": "Fix stuck typing after end and else",
+  "version": "3.0.5",
+  "title": "Workspace-wide IntelliSense for every new script",
   "publishedAt": "2026-10-11",
   "changes": [
-    "Fixed automatic IntelliSense intercepting Enter instead of inserting new lines",
-    "Suppressed redundant autocomplete suggestions for complete Luau keywords",
-    "Normal arrow-key cursor movement works with passive suggestion menus",
-    "Tab completes unfinished suggestions; Ctrl+Space enables manual selection",
-    "Added regression tests without changing editor layout or saved projects"
+    "Autocomplete, type suggestions and hover now rebind when scripts are created, opened, renamed or imported",
+    "Workspace ModuleScript functions appear in completion lists after relative require calls",
+    "Support .lua and .luau files across nested scripts, modules and tests directories",
+    "Keep local functions private while suggesting only exported workspace module functions",
+    "Prevent stale completion and hover popups when switching files",
+    "Expand regression coverage without changing existing projects"
   ]
 }
