@@ -5,6 +5,7 @@ import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, maskLuau, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
 import { hoverAt, sourceOffsetAtPoint, moduleMemberCompletions } from './symbol-hover.js';
+import { workspaceTypeSuggestions } from './module-types.js';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
@@ -219,8 +220,13 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     // Slash imports always take priority. Documented builtin API method
     // completion takes priority over generic engine member inference.
     const context=completionContext(editor.value,editor.selectionStart);
-    const workspaceItems=!original&&context ? moduleMemberCompletions(editor.value,editor.selectionStart,context,project) : [];
-    options=original||(workspaceItems.length ? {...context,items:workspaceItems} : staticCompletions(editor.value,editor.selectionStart,getRobloxAPI()));
+    const typed=!original&&context ? workspaceTypeSuggestions(editor.value,editor.selectionStart,context,project) : null;
+    const workspaceItems=!original&&!typed&&context ? moduleMemberCompletions(editor.value,editor.selectionStart,context,project) : [];
+    // A declared imported type is authoritative: no unrelated engine or WASM
+    // functions may leak into the public exported type's member list.
+    options=original||(typed?.authoritative ? {...context,items:typed.items} :
+      workspaceItems.length ? {...context,items:workspaceItems} :
+      staticCompletions(editor.value,editor.selectionStart,getRobloxAPI()));
     if(!options&&context)options={...context,items:[]};
     if(force && !options) {
       const from=editor.selectionStart;
@@ -231,7 +237,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     clearTimeout(autoTimer);const generation=++requestId;
     // The target module's own exports are more reliable than global WASM
     // suggestions; do not mix unrelated functions into its member list.
-    if(original||workspaceItems.length||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
+    if(original||typed?.authoritative||workspaceItems.length||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
     const code=editor.value,cursor=editor.selectionStart,file=project.active;
     const snapshot={...project,files:{...project.files}};
     const completionMode=options.mode;
