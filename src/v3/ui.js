@@ -55,7 +55,7 @@ export function mountV3({ workspace, editor, modal, closeModal, notify, download
       if(!changed)return;
       body.append(button('Review diff',()=>showDiff(before,after,`Whitespace preview · ${file}`),'dialog-row'));
       body.append(button('Create snapshot and apply',()=>{
-        try{workspace.snapshot();workspace.source(after);closeModal();notify('Whitespace cleaned; recovery snapshot saved.');}
+        try{if(workspace.project.active!==file||workspace.project.files[file]!==before)throw Error('File changed since the preview. Reopen cleanup before applying.');workspace.snapshot();workspace.source(after);closeModal();notify('Whitespace cleaned; recovery snapshot saved.');}
         catch(err){showError(err);}
       },'dialog-cta'));
     });
@@ -102,7 +102,8 @@ export function mountV3({ workspace, editor, modal, closeModal, notify, download
           items.append(button(`Preview ${pin.specifier} @ ${pin.sha.slice(0,12)}`,async()=>{
             try{
               const source=await previewGithubModule(`https://github.com/${pin.specifier.slice(1).split('/').slice(0,2).join('/')}/blob/${pin.sha}/${pin.specifier.slice(1).split('/').slice(2).join('/')}`);
-              if(source.sha!==pin.sha.toLowerCase())throw Error('Resolved source commit does not match lockfile.');
+              if(source.sha!==pin.sha.toLowerCase()||source.specifier!==pin.specifier)throw Error('Resolved source does not match the lockfile path and commit.');
+              if(pin.size && source.size!==pin.size)throw Error('Source file size differs from the reviewed lockfile.');
               modal('Review imported source',review=>{
                 row(review,`${pin.specifier} · exact commit ${pin.sha} · ${source.size} bytes${source.studioOnly?' · Studio only':''}`);
                 const pre=element('pre',source.source.slice(0,50000),'github-source-preview');review.append(pre);
