@@ -1,7 +1,7 @@
 // Public account labels and in-app update preferences only. Never store OAuth,
 // Discord bot tokens or webhook URLs in browser storage.
 export const COMMUNITY_KEY = 'luauforge:community:v1';
-export const CURRENT_VERSION = '3.0.2';
+export const CURRENT_VERSION = '3.0.3';
 const DEFAULTS = Object.freeze({ github: '', discord: '', inAppUpdates: true, lastSeenRelease: '' });
 
 export function validateGithub(name) {
