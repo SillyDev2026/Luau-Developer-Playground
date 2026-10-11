@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./src/community.css?v=3.1.2" />
   <link rel="stylesheet" href="./src/v3/ui.css?v=3.1.2" />
   <link rel="stylesheet" href="./src/collab.css?v=3.1.2" />
+  <link rel="stylesheet" href="./src/feedback.css?v=3.2.0" />
   <title>LuauForge 3.1.2 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
@@ -24,6 +25,7 @@
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
       <button class="secondary-btn collab-header-link" id="collab-page-btn" type="button" title="Shared script workspace">◇ Scripts</button>
+      <button class="secondary-btn feedback-top-link" id="feedback-page-btn" type="button" title="Suggestions and bug reports">◉ Feedback</button>
       <button class="icon-btn header-secondary" id="palette-btn" title="Command palette · Ctrl+P" aria-label="Command palette">⌕</button>
       <button class="icon-btn header-secondary" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       <button class="secondary-btn header-secondary" id="check-btn" title="Check Luau types">✓ Check</button>
@@ -37,6 +39,53 @@
     <button type="button" id="release-dismiss" aria-label="Dismiss release update">✕</button>
   </section>
   <div class="main-surface" id="main-surface">
+    <section id="feedback-view" class="hidden" aria-label="Feedback and bug reports">
+      <div class="feedback-shell">
+        <header class="feedback-hero">
+          <div class="feedback-hero-text">
+            <span class="feedback-eyebrow">LUAUFORGE / COMMUNITY</span>
+            <h1>Help shape LuauForge.</h1>
+            <p>Share feature suggestions, report bugs, and vote on ideas. Submissions create Discord forum threads that developers can discuss.</p>
+            <div class="feedback-hero-tags"><span>◉ Community feedback</span><span>◇ Discord forum threads</span><span>✓ Public votes</span></div>
+          </div>
+          <button id="feedback-back-editor" type="button" class="feedback-back">← Back to editor</button>
+        </header>
+        <div class="feedback-layout">
+          <div class="feedback-main">
+            <div class="feedback-panel feedback-feed-head">
+              <div><span class="feedback-eyebrow">COMMUNITY BOARD</span><h2>Ideas &amp; reports <span id="feedback-post-count">0</span></h2></div>
+              <button id="feedback-reload" type="button">↻ Refresh</button>
+              <div class="feedback-filter-bar">
+                <input type="search" id="feedback-search" placeholder="Search feedback…" aria-label="Search feedback"/>
+                <select id="feedback-category" aria-label="Filter by category"><option value="all">All posts</option><option value="suggestion">Suggestions</option><option value="bug">Bug reports</option></select>
+                <select id="feedback-sort" aria-label="Sort feedback"><option value="newest">Newest</option><option value="top">Most upvoted</option><option value="discussed">Net score</option></select>
+              </div>
+            </div>
+            <div id="feedback-post-list" class="feedback-post-list" aria-label="Community feedback posts"><p class="feedback-empty">Connect the feedback server to load community posts.</p></div>
+          </div>
+          <aside class="feedback-side" aria-label="Feedback submission">
+            <div class="feedback-panel feedback-connect">
+              <div class="feedback-panel-top"><span class="feedback-icon">⌁</span><div><span class="feedback-eyebrow">PROFILE</span><h2>Connect to feedback</h2></div></div>
+              <p>Use a display name to submit and vote. This is not Discord account sign-in.</p>
+              <label>Node feedback server URL<input id="feedback-api" type="url" placeholder="https://your-node-server.example" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
+              <label>Display name<input id="feedback-name" maxlength="32" placeholder="Your developer name" autocomplete="nickname"/></label>
+              <button type="button" id="feedback-connect-btn" class="feedback-primary">Connect profile</button>
+              <p id="feedback-profile-status" class="feedback-small">Not connected</p>
+            </div>
+            <form id="feedback-form" class="feedback-panel feedback-create">
+              <div class="feedback-panel-top"><span class="feedback-icon">＋</span><div><span class="feedback-eyebrow">NEW FEEDBACK</span><h2>Create a forum post</h2></div></div>
+              <div class="feedback-kind-switch" role="group" aria-label="Feedback type"><label><input type="radio" name="feedback-type" value="suggestion" checked/><span>✦ Suggestion</span></label><label><input type="radio" name="feedback-type" value="bug"/><span>⚑ Bug report</span></label></div>
+              <label>Title<input id="feedback-title" maxlength="100" minlength="8" required placeholder="Describe your idea or problem"/></label>
+              <label>Details<textarea id="feedback-description" rows="6" minlength="20" maxlength="1400" required placeholder="What should change? How can the issue be reproduced?"></textarea></label>
+              <p class="feedback-small">For bugs, include steps to reproduce and what you expected. Don't include passwords, tokens, or private information.</p>
+              <button id="feedback-submit" class="feedback-primary" type="submit" disabled>Post to Discord forum →</button>
+              <p class="feedback-small" id="feedback-destination">Suggestions → Discord forum</p>
+            </form>
+            <p id="feedback-status" class="feedback-status" role="status" aria-live="polite">Configure a Node API to begin.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
     <section id="collab-view" class="hidden" aria-label="Shared scripts workspace">
       <div class="collab-page-inner"><header class="collab-page-heading"><div><span class="collab-eyebrow">LUAUFORGE · COLLABORATION</span><h1>Shared Scripts</h1><p>Create Luau scripts, manage team access, and publish updates to Roblox Studio.</p></div><button id="collab-back-editor" type="button" class="secondary-btn">← Back to editor</button></header><div id="collab-page-body"></div></div>
     </section>
@@ -177,7 +226,7 @@
       </div>
     </aside>
   </div>
-  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button></nav>
+  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button><button id="mobile-feedback" aria-label="Community feedback">◉<span>Feedback</span></button></nav>
 </div>
 <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
   <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">Quick command</h2><button id="dialog-close" aria-label="Close dialog">✕</button></div><div id="dialog-body" class="dialog-body"></div></section>
