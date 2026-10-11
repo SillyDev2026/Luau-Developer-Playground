@@ -85,7 +85,7 @@ test('explicit export record types and function-valued members are respected',()
   const project=makeProject('scripts/Client.lua',source);
   const {result}=suggestions(source,project);
   assert.deepEqual(result.items.map(x=>x.label),['Coins','Meta','Name','Save']);
-  assert.equal(result.items.find(x=>x.label==='Name').detail,'Name?: string');
+  assert.equal(result.items.find(x=>x.label==='Name').detail,'Name: string?');
   assert.equal(result.items.find(x=>x.label==='Save').kind,'function');
   const nestedCode='local Module = require("../modules/PlayersData.luau")\nlocal data: Module.Public\ndata.Meta.';
   assert.deepEqual(suggestions(nestedCode,makeProject('scripts/Client.lua',nestedCode)).result.items.map(x=>x.label),['Rank']);
