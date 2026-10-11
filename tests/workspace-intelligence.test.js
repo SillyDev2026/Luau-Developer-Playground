@@ -31,9 +31,9 @@ test('new script and test files get Luau type completions regardless of path or 
 
 test('new scripts complete functions exported by newly created .luau modules',()=>{
   const w=new Workspace({storage:localStore()});
-  w.create('modules/Math.luau',math);
+  w.create('modules/Arithmetic.luau',math);
   for(const path of ['scripts/Run.luau','scripts/Client.lua','tests/run.test.luau']){
-    const source='local Operations = require("../modules/Math.luau")\nOperations.a';
+    const source='local Operations = require("../modules/Arithmetic.luau")\nOperations.a';
     w.create(path,source);
     const options=suggestions(source,source.length,w.project);
     assert.deepEqual(options.map(x=>x.label),['add']);
@@ -43,7 +43,7 @@ test('new scripts complete functions exported by newly created .luau modules',()
     const code=w.project.files[path],at=code.lastIndexOf('mul')+1;
     const hover=hoverAt(code,at,w.project,CORE_API);
     assert.equal(hover.signature,'mul(a: number, b: number): number');
-    assert.equal(hover.origin,'modules/Math.luau');
+    assert.equal(hover.origin,'modules/Arithmetic.luau');
     assert.equal(signatureFor(code,code.indexOf('2, 3')+1,CORE_API,w.project).signature,'mul(a: number, b: number): number');
   }
   w.dispose();
