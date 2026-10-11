@@ -1,3 +1,11 @@
+## 3.0.4 — 2026-10-11
+
+- Do not suggest already complete Luau keywords such as `end`, `else` or `return`.
+- Automatic completion no longer intercepts Enter/newline or arrow-key cursor movement.
+- Tab completes unfinished suggestions but preserves normal indentation for exact matches.
+- Ctrl+Space explicitly enables arrow-key suggestion navigation and Enter/Tab acceptance.
+- Add keyboard regression tests; preserve editor layout, workspace storage and Luau runtime.
+
 ## 3.0.3 — 2026-10-10
 
 - Type-only completion for function parameters, returns, typed locals, casts and type aliases; stop mixing WASM value suggestions into annotation menus.
@@ -5,7 +13,7 @@
 - Extend call-site signature hints to workspace module functions, keep tooltips non-interactive, and cover pointer and import edge cases.
 - Keep existing editor layout, workspace persistence and Luau WASM runtime unchanged.
 
-## 3.0.3 — 2026-10-10
+## 3.0.2 — 2026-10-10
 
 - Fix IntelliSense keyboard handling when suggestion lists are empty or hidden.
 - Mask long bracket strings/comments consistently so completion and import analysis ignore literal text.

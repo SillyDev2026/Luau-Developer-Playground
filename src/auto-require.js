@@ -66,7 +66,7 @@ export function suggestions(source,cursor,files,active) {
     }
   }
   items.sort((a,b)=>b.score-a.score||a.method.localeCompare(b.method));
-  return items.length?{mode:'method',from:cursor-(match[2]||'').length,to:cursor,items:items.slice(0,9)}:null;
+  return items.length?{mode:'method',query:match[2]||'',from:cursor-(match[2]||'').length,to:cursor,items:items.slice(0,9)}:null;
 }
 export function complete(source,cursor,choice,files,active) {
   const context=suggestions(source,cursor,files,active);
@@ -87,6 +87,22 @@ export function complete(source,cursor,choice,files,active) {
   const text=existing?variable:'local '+variable+' = require('+JSON.stringify(found.specifier)+')';
   return {source:source.slice(0,context.from)+text+source.slice(context.to),cursor:context.from+text.length,created:!existing,variable};
 }
+// Keep normal editor navigation and newline insertion independent of a passive
+// autocomplete popup. Ctrl+Space explicitly activates keyboard selection.
+export function completionKeyAction(key,options,manual=false,selected=0) {
+  if(!options?.items?.length)return 'native';
+  if(key==='Escape')return 'dismiss';
+  if(key==='ArrowDown')return manual?'next':'native';
+  if(key==='ArrowUp')return manual?'previous':'native';
+  if(key==='Enter')return manual?'complete':'native';
+  if(key==='Tab'){
+    const choice=options.items[selected];
+    const exact=options.query && (choice?.method||choice?.label)===options.query;
+    return !manual&&exact?'native':'complete';
+  }
+  return 'native';
+}
+
 export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogButtons=true}) {
   const parent=editor.parentElement;
   const menu=document.createElement('div');
@@ -134,11 +150,11 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   const copy=document.createElement('span'); copy.textContent='Local variables, type information, Roblox API and / imports';
   label.append(toggle,copy);
   const hint=document.createElement('small');
-  hint.textContent='Type t to find local test; part. for members, Enum.Material. for enum values, or /Fast to import. Enter/Tab accepts.';
+  hint.textContent='Autocomplete: Tab accepts a suggestion; Enter makes a new line. Ctrl+Space activates arrow-key selection; Esc closes the list.';
   setting.append(heading,label,hint);
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
-  let options=null,selected=0,requestId=0,autoTimer=0;
+  let options=null,selected=0,requestId=0,autoTimer=0,manuallyInvoked=false;
   function positionSuggestions() {
     if(menu.classList.contains('hidden'))return;
     const caret=textareaCaretOffset(editor),position=placeCompletionPopup(caret,
@@ -173,13 +189,14 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     notify('Definition: '+def.name+' · line '+def.line);
   }
   loadRobloxAPI().then(()=>{if(document.activeElement===editor)update();});
-  function hide(){options=null;clearTimeout(autoTimer);requestId++;menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');}
+  function hide(){options=null;manuallyInvoked=false;clearTimeout(autoTimer);requestId++;menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');}
   function renderMenu() {
     if(!options?.items.length){menu.replaceChildren();menu.classList.add('hidden');editor.setAttribute('aria-expanded','false');return;}
     selected=Math.min(selected,options.items.length-1);
     menu.replaceChildren();
     const head=document.createElement('div');head.className='auto-require-caption';
-    head.textContent=options.mode==='require'?'AUTO REQUIRE • Enter / Tab':options.mode==='method'?'LIBRARY API • Enter / Tab':'LUAU INTELLISENSE • Enter / Tab';
+    const label=options.mode==='require'?'AUTO REQUIRE':options.mode==='method'?'LIBRARY API':'LUAU INTELLISENSE';
+    head.textContent=label+(manuallyInvoked?' • ↑/↓ select · Enter / Tab accepts':' • Tab completes · Enter new line');
     menu.append(head);
     options.items.forEach((item,index)=>{
       const row=document.createElement('button');row.type='button';row.className='auto-require-option'+(index===selected?' selected':'');row.setAttribute('role','option');row.setAttribute('aria-selected',String(index===selected));
@@ -195,6 +212,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   }
   function update(force=false) {
     updateSignature();
+    manuallyInvoked=force;
     const project=getProject();
     if(!enabled||editor.selectionStart!==editor.selectionEnd||editor.dataset.path!==project.active){hide();return;}
     const original=suggestions(editor.value,editor.selectionStart,project.files,project.active);
@@ -243,15 +261,20 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   for(const type of ['pointerleave','scroll','input','keydown','blur','click'])editor.addEventListener(type,hideHover);
   editor.addEventListener('input',()=>update());
   editor.addEventListener('click',()=>update());
-  editor.addEventListener('keyup',()=>update());
+  editor.addEventListener('keyup',event=>{
+    if(manuallyInvoked&&['ArrowDown','ArrowUp',' ','Control','Meta'].includes(event.key))return;
+    update();
+  });
   editor.addEventListener('keydown',event=>{
     if(event.key==='F12'&&!event.shiftKey&&!event.ctrlKey&&!event.altKey){event.preventDefault();event.stopImmediatePropagation();goToDefinition();return;}
     if((event.ctrlKey||event.metaKey)&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();update(true);return;}
-    if(!options?.items?.length || menu.classList.contains('hidden') || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey || !['ArrowDown','ArrowUp','Enter','Tab','Escape'].includes(event.key))return;
+    if(menu.classList.contains('hidden')||event.isComposing||event.ctrlKey||event.altKey||event.metaKey||event.shiftKey)return;
+    const action=completionKeyAction(event.key,options,manuallyInvoked,selected);
+    if(action==='native')return;
     event.preventDefault();event.stopImmediatePropagation();
-    if(event.key==='Escape')hide();
-    else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;renderMenu();}
-    else choose();
+    if(action==='dismiss')hide();
+    else if(action==='next'||action==='previous'){selected=(selected+(action==='next'?1:-1)+options.items.length)%options.items.length;renderMenu();}
+    else if(action==='complete')choose();
   },true);
   toggle.addEventListener('change',()=>{enabled=toggle.checked;try{localStorage.setItem(key,String(enabled));}catch{}if(!enabled){hide();hideHover();}else update();});
   document.addEventListener('click',event=>{if(event.target!==editor && !menu.contains(event.target))hide();});
