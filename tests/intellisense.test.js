@@ -74,3 +74,15 @@ test('Roblox API dump compaction preserves signatures, types, security and enums
  assert.equal(compiled.classes.Test.members.length,1);
  assert.deepEqual(compiled.enums.Mode,['A']);
 });
+
+
+test('long strings and long comments never leak fake local symbols or slash imports',()=>{
+ const code='local visible = 1\nlocal source = [=[\nlocal phantom = 10\n-- fake comment\n]=]\n--[==[\nlocal hidden = 2\n]==]\nvi';
+ const clean=maskLuau(code);
+ assert.equal(clean.length,code.length);
+ assert.equal(clean.split('\n').length,code.split('\n').length);
+ assert.ok(has(suggest(code),'visible'));
+ assert.ok(!has(suggest(code),'phantom'));
+ assert.ok(!has(suggest(code),'hidden'));
+ assert.equal(completionContext('local s = [=[\n/Math\n]=]',17),null);
+});

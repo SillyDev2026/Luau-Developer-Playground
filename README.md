@@ -1,3 +1,11 @@
+# LuauForge v3.0.2 — Editor and workbench reliability fixes
+
+Fixed blank IntelliSense menus consuming editor keys, Luau long-string/comment symbol masking, incorrect bracket matches inside literals, stale whitespace-cleanup previews, pin verification, and inaccurate capped-result indicators. Existing project storage, mobile UI geometry, runtime and bundled libraries remain unchanged.
+
+Use `npm run check` to validate the release; run `npm run smoke:wasm`, `npm run smoke:libraries`, and `npm run smoke:v15` for runtime coverage. Refresh the deployed site online once to install the `luauforge-v3.0.2` service worker cache.
+
+---
+
 # LuauForge v3.0.1 — Console hotfix and official Discord
 
 - Fixed console output still saying LuauForge 1.0; startup and console now use the v3 current version from Community settings.

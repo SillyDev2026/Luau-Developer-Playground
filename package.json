@@ -1,6 +1,6 @@
 {
   "name": "luau-developer-playground",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "private": true,
   "type": "module",
   "description": "LuauForge 3.0 compatibility-preserving developer workbench, module lockfiles and CI inspections",

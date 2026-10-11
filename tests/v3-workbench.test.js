@@ -73,7 +73,25 @@ test('v3 UI is additive and versioned for offline deployment',async()=>{
  const sw=await readFile(new URL('../public/sw.js',import.meta.url),'utf8');
  const ui=await readFile(new URL('../src/v3/ui.js',import.meta.url),'utf8');
  for(const id of ['code-input','mobile-dock','dashboard-view','v3-actions'])assert.match(html,new RegExp(`id="${id}"`));
- assert.match(html,/v3\/ui\.css\?v=3\.0\.1/);
- assert.match(sw,/luauforge-v3\.0\.1/);assert.match(sw,/src\/v3\/ui\.js/);
+ assert.match(html,/v3\/ui\.css\?v=3\.0\.2/);
+ assert.match(sw,/luauforge-v3\.0\.2/);assert.match(sw,/src\/v3\/ui\.js/);
  assert.match(ui,/snapshot\(\)/);assert.match(ui,/source\(after\)/);
+});
+
+
+test('diff and audit truncation are only reported for actual omitted results',()=>{
+ const same='a\n'.repeat(239)+'tail';
+ assert.equal(compareSources(same,same).truncated,false);
+ assert.equal(compareSources(same,same+'\nextra').truncated,true);
+ const notes={'n.luau':'-- TODO first\n-- TODO second\n'};
+ assert.equal(qualityAudit(notes,{maxFindings:2}).truncated,false);
+ assert.equal(qualityAudit(notes,{maxFindings:1}).truncated,true);
+});
+test('rejects nonnumeric lockfile sizes and exact-source mismatches',async()=>{
+ const candidate={schema:'luauforge-lockfile',version:1,packages:[{specifier:'@Owner/Repo/file.luau',sha:'a'.repeat(40),size:'unknown'}]};
+ assert.throws(()=>parseLockfile(JSON.stringify(candidate)),/size/);
+ const ui=await readFile(new URL('../src/v3/ui.js',import.meta.url),'utf8');
+ assert.match(ui,/File changed since the preview/);
+ assert.match(ui,/source\.specifier!==pin\.specifier/);
+ assert.match(ui,/source\.size!==pin\.size/);
 });

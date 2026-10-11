@@ -5,29 +5,52 @@ const KEYWORDS = 'and break continue do else elseif end export false for functio
 export const GLOBALS = ['print','warn','assert','error','require','type','typeof','tostring','tonumber','pairs','ipairs','next','select','pcall','xpcall','setmetatable','getmetatable','rawget','rawset','rawequal','unpack','math','string','table','buffer','utf8','bit32','coroutine','os','debug','task','Enum','Instance','Vector3','Vector2','CFrame','Color3','UDim2','UDim','BrickColor','RaycastParams','OverlapParams','Random','game','workspace','script','plugin'];
 
 export function maskLuau(source) {
-  // Preserve string contents' positions, mask comments and strings so phantom
-  // declarations inside quoted text/comments do not pollute symbol completion.
-  let output = '', i = 0;
+  // Keep every character offset and line break intact while ignoring text in
+  // strings and comments. Long bracket literals must not be tokenized as code.
+  let output = '';
+  let i = 0;
+  const mask = text => text.replace(/[^\r\n]/g, ' ');
   while (i < source.length) {
-    if (source.startsWith('--',i)) {
-      const block = source.slice(i).match(/^--\[(=*)\[/);
+    if (source.startsWith('--', i)) {
+      const block = /^--\[(=*)\[/.exec(source.slice(i));
       if (block) {
-        const close = ']' + block[1] + ']';
-        const at = source.indexOf(close,i+block[0].length);
-        const end = at < 0 ? source.length : at+close.length;
-        output += source.slice(i,end).replace(/[^\n]/g,' ');i=end;continue;
+        const closing = ']' + block[1] + ']';
+        const closeAt = source.indexOf(closing, i + block[0].length);
+        const end = closeAt < 0 ? source.length : closeAt + closing.length;
+        output += mask(source.slice(i, end));
+        i = end;
+        continue;
       }
-      const end = source.indexOf('\n',i);
-      const last = end<0?source.length:end;
-      output += ' '.repeat(last-i);i=last;continue;
+      const newline = source.indexOf('\n', i);
+      const end = newline < 0 ? source.length : newline;
+      output += mask(source.slice(i, end));
+      i = end;
+      continue;
     }
-    const ch=source[i];
-    if(ch==='\"'||ch==="'"||ch==='`'){
-      const quote=ch;let j=i+1;
-      while(j<source.length){if(source[j]==='\\'){j+=2;continue;}if(source[j]===quote){j++;break;}j++;}
-      output+=source.slice(i,j).replace(/[^\n]/g,' ');i=j;continue;
+    if (source[i] === '[') {
+      const long = /^\[(=*)\[/.exec(source.slice(i));
+      if (long) {
+        const closing = ']' + long[1] + ']';
+        const closeAt = source.indexOf(closing, i + long[0].length);
+        const end = closeAt < 0 ? source.length : closeAt + closing.length;
+        output += mask(source.slice(i, end));
+        i = end;
+        continue;
+      }
     }
-    output+=ch;i++;
+    const ch = source[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      let end = i + 1;
+      while (end < source.length) {
+        if (source[end] === '\\') { end = Math.min(source.length, end + 2); continue; }
+        if (source[end++] === ch) break;
+      }
+      output += mask(source.slice(i, end));
+      i = end;
+      continue;
+    }
+    output += ch;
+    i++;
   }
   return output;
 }

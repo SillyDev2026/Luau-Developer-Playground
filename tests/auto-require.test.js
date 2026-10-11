@@ -25,3 +25,17 @@ test('API completion for explicitly imported builtins',()=>{
   assert.ok(item);
   assert.ok(complete(source,source.length,item,files,'main.luau').source.endsWith('F.add()'));
 });
+
+
+test('slash imports and existing imports ignore masked long strings and comments',()=>{
+ assert.equal(slashAt('local s = [[\n/Fast\n]]',18),null);
+ const disguised='local text = [=[\nlocal Fake = require("@FastNum")\n]=]\n/Fast';
+ assert.equal(boundVariable(disguised,'@FastNum'),null);
+ const choice=suggestions(disguised,disguised.length,files,'main.luau').items.find(x=>x.id==='FastNum');
+ assert.equal(complete(disguised,disguised.length,choice,files,'main.luau').variable,'FastME');
+});
+test('keyboard completion only intercepts keys for visible nonempty suggestions',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const ui=await readFile(new URL('../src/auto-require.js',import.meta.url),'utf8');
+ assert.match(ui,/!options\?\.items\?\.length \|\| menu\.classList\.contains\('hidden'\)/);
+});

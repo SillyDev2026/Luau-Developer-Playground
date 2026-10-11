@@ -1,3 +1,12 @@
+## 3.0.2 — 2026-10-10
+
+- Fix IntelliSense keyboard handling when suggestion lists are empty or hidden.
+- Mask long bracket strings/comments consistently so completion and import analysis ignore literal text.
+- Ignore comment/string brackets in editor bracket navigation.
+- Reject stale source cleanup previews and lockfile imports whose exact pinned source does not match.
+- Validate pinned package sizes and report truncation only when entries were actually omitted.
+- Add regression tests for these cases without changing the saved workspace format.
+
 # v3.0.1 — Console version and Discord community hotfix (2026-10-10)
 
 - Console welcome and startup message share current v3.0.1 version; community release version corrected.
