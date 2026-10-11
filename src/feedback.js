@@ -69,7 +69,7 @@ export function mountFeedback({notify=()=>{},onOpenPage=()=>{}}={}){
     posts=response.posts||[];
     try{localStorage.setItem(ORIGIN_KEY,api);}catch{/* optional */}
     setProfile();render();
-    if(!configured)message('Backend reached, but the Discord bot is not configured yet. Ask the owner to set DISCORD_BOT_TOKEN.',true);
+    if(!configured)message('Backend reached, but the Discord forum integration is not configured. Ask the site owner to enable it.',true);
     else message('Connected to the feedback board. Suggestions and bugs open separate Discord forum threads.');
     return response;
   }
