@@ -1,14 +1,14 @@
 /* LuauForge v3 offline app shell. Projects remain in localStorage and are
  * never uploaded. Cache is scoped to this GitHub Pages project, not the origin.
  */
-const CACHE = 'luauforge-v3.1.2';
+const CACHE = 'luauforge-v3.2.0';
 const APP = './';
 const CORE = [
   './', './index.html', './favicon.svg', './manifest.webmanifest',
   './src/v1.js', './src/v1.css', './src/v3/ui.js', './src/v3/core.js', './src/v3/ui.css', './src/auto-require.css',
   './src/v1-editor.js', './src/v1-model.js', './src/v1-zip.js', './src/v1-graph.js',
   './src/store.js', './src/snapshots.js', './src/highlight.js', './src/editor-utils.js',
-  './src/collab.js', './src/collab.css', './src/auto-require.js', './src/completion-geometry.js', './src/module-types.js', './src/intellisense.js', './src/editor-intelligence.js', './src/symbol-hover.js',
+  './src/collab.js', './src/collab.css', './src/feedback.js', './src/feedback.css', './src/auto-require.js', './src/completion-geometry.js', './src/module-types.js', './src/intellisense.js', './src/editor-intelligence.js', './src/symbol-hover.js',
   './src/roblox-api.js', './src/module-bundle.js', './src/wasm-client.js',
   './src/wasm-worker.js', './src/builtin-libraries.js', './src/github-modules.js',
   './src/v15-ui.js', './src/v15.css', './src/v15-analysis.js', './src/v15-modules.js',
