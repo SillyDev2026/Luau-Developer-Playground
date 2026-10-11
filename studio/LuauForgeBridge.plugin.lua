@@ -76,10 +76,11 @@ local function request(method, endpoint, payload)
         options.Body = HttpService:JSONEncode(payload)
     end
     local result = HttpService:RequestAsync(options)
-    local body = HttpService:JSONDecode(result.Body)
+    local decoded, body = pcall(HttpService.JSONDecode, HttpService, result.Body)
     if not result.Success then
-        error("HTTP " .. tostring(result.StatusCode) .. ": " .. tostring(body.error))
+        error("HTTP " .. tostring(result.StatusCode) .. ": " .. tostring(decoded and body.error or "Server unavailable"))
     end
+    if not decoded then error("Expected JSON response from collaboration server") end
     return body
 end
 
@@ -92,6 +93,17 @@ local function managedScript(scriptId)
         end
     end
     return nil
+end
+
+local function sourceHash(source)
+    -- Stable per-script checksum to detect local Studio changes since last sync.
+    local a = 1
+    local b = 0
+    for i = 1, #source do
+        a = (a + string.byte(source, i)) % 65521
+        b = (b + a) % 65521
+    end
+    return b * 65536 + a
 end
 
 local function applyScript(item)
@@ -109,12 +121,19 @@ local function applyScript(item)
     if existing and existing.ClassName ~= item.type then
         error("Changing the class of an existing managed script requires manual review")
     end
+    if existing then
+        local expected = existing:GetAttribute("LuauForgeSourceHash")
+        if expected ~= nil and expected ~= sourceHash(existing.Source) then
+            error("Studio source was modified locally. Publish or back up changes before syncing this file.")
+        end
+    end
     for _, child in ipairs(target:GetChildren()) do
         if child.Name == item.name and child ~= existing then
             error("Target already contains " .. item.name .. "; refusing to overwrite it")
         end
     end
-    if not existing then
+    local created = existing == nil
+    if created then
         existing = Instance.new(item.type)
         existing.Name = item.name
         existing:SetAttribute("LuauForgeWorkspace", workspaceId)
@@ -122,16 +141,24 @@ local function applyScript(item)
         existing.Parent = target
     end
     -- UpdateSourceAsync also refreshes source open in the Studio script editor.
-    -- Do not change untagged scripts or mutate Source from the running game.
-    ScriptEditorService:UpdateSourceAsync(existing, function(_oldSource)
-        return item.source
+    -- On failure do not leave behind an empty tagged object.
+    local ok, err = pcall(function()
+        ScriptEditorService:UpdateSourceAsync(existing, function(_oldSource)
+            return item.source
+        end)
     end)
+    if not ok then
+        if created then existing:Destroy() end
+        error(err)
+    end
     existing.Name = item.name
     existing.Parent = target
     existing:SetAttribute("LuauForgeRevision", item.version)
+    existing:SetAttribute("LuauForgeSourceHash", sourceHash(item.source))
 end
 
-local function poll()
+local function poll(current)
+    if not connected or current ~= generation then return end
     if RunService:IsRunning() then
         status.Text = "Paused during Play/Test mode."
         return
@@ -139,6 +166,7 @@ local function poll()
     local body = request("GET", "/api/studio/" .. workspaceId .. "/changes", nil)
     local changes = body.changes or {}
     for _, item in ipairs(changes) do
+        if not connected or current ~= generation then return end
         local ok, err = pcall(applyScript, item)
         if ok then
             request("POST", "/api/studio/" .. workspaceId .. "/ack", {
@@ -155,7 +183,9 @@ local function poll()
 end
 
 local function validEndpoint(url)
-    if string.match(url, "^https://[%w%.%-]+") then return true end
+    -- Reject URL path, query, userinfo and misleading domain prefixes.
+    if string.match(url, "^https://[%w%.%-]+$") then return true end
+    if string.match(url, "^https://[%w%.%-]+:%d+$") then return true end
     return string.match(url, "^http://127%.0%.0%.1:%d+$") ~= nil
 end
 
@@ -189,7 +219,7 @@ connectButton.MouseButton1Click:Connect(function()
     status.Text = "Connecting…"
     task.spawn(function()
         while connected and current == generation do
-            local ok, err = pcall(poll)
+            local ok, err = pcall(poll, current)
             if not ok then status.Text = "Sync failed: " .. string.sub(tostring(err), 1, 130) end
             task.wait(5)
         end
