@@ -229,7 +229,9 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     if(!options){hide();return;}
     selected=0;renderMenu();
     clearTimeout(autoTimer);const generation=++requestId;
-    if(original||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
+    // The target module's own exports are more reliable than global WASM
+    // suggestions; do not mix unrelated functions into its member list.
+    if(original||workspaceItems.length||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
     const code=editor.value,cursor=editor.selectionStart,file=project.active;
     const snapshot={...project,files:{...project.files}};
     const completionMode=options.mode;
