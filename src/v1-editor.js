@@ -46,6 +46,9 @@ export class CodeEditor {
     this.input.selectionStart = this.input.selectionEnd = 0;
     this.input.scrollTop = this.input.scrollLeft = 0;
     this.render(); this.onCursor();
+    // File changes are programmatic: input does not fire on new/open/rename.
+    // Let completion providers discard items belonging to the old source.
+    this.input.dispatchEvent(new Event('luauforge:filechange'));
   }
   render() {
     cancelAnimationFrame(this.raf);

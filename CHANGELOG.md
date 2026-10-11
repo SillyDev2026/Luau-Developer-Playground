@@ -1,3 +1,11 @@
+## 3.0.5 — 2026-10-11
+
+- Reset stale editor suggestions, pending async completions, and hover popups whenever a different Lua/Luau source file is loaded.
+- Rebind IntelliSense to newly created scripts, opened files, renamed files, imports, and workspace restores.
+- Suggest exported functions of relatively imported workspace modules across `.lua`, `.luau`, nested `scripts/`, `modules/`, and `tests/` folders.
+- Share exported module signatures across completion, call hints, and hover; do not expose private helpers as module methods.
+- Add tests for new script lifecycle, nested import resolution, module privacy, and typed functions. Preserve local workspace schema, editor geometry, and WASM runtime.
+
 ## 3.0.4 — 2026-10-11
 
 - Do not suggest already complete Luau keywords such as `end`, `else` or `return`.

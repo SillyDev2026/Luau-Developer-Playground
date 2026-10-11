@@ -4,7 +4,7 @@ import { githubModuleTargets } from './github-modules.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, maskLuau, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
-import { hoverAt, sourceOffsetAtPoint } from './symbol-hover.js';
+import { hoverAt, sourceOffsetAtPoint, moduleMemberCompletions } from './symbol-hover.js';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
@@ -218,8 +218,10 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     const original=suggestions(editor.value,editor.selectionStart,project.files,project.active);
     // Slash imports always take priority. Documented builtin API method
     // completion takes priority over generic engine member inference.
-    options=original||staticCompletions(editor.value,editor.selectionStart,getRobloxAPI());
-    if(!options){const context=completionContext(editor.value,editor.selectionStart);if(context)options={...context,items:[]};}
+    const context=completionContext(editor.value,editor.selectionStart);
+    const workspaceItems=!original&&context ? moduleMemberCompletions(editor.value,editor.selectionStart,context,project) : [];
+    options=original||(workspaceItems.length ? {...context,items:workspaceItems} : staticCompletions(editor.value,editor.selectionStart,getRobloxAPI()));
+    if(!options&&context)options={...context,items:[]};
     if(force && !options) {
       const from=editor.selectionStart;
       options={mode:'identifier',query:'',from,to:from,items:[...localsInScope(editor.value,from).map(x=>({label:x.name,kind:x.kind,detail:x.type||'local',score:100})),...GLOBALS.map(label=>({label,kind:'global',detail:'Luau / Roblox global',score:30}))].slice(0,12)};
@@ -227,7 +229,9 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     if(!options){hide();return;}
     selected=0;renderMenu();
     clearTimeout(autoTimer);const generation=++requestId;
-    if(original||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
+    // The target module's own exports are more reliable than global WASM
+    // suggestions; do not mix unrelated functions into its member list.
+    if(original||workspaceItems.length||!getRuntime||!['member','identifier','type'].includes(options.mode))return;
     const code=editor.value,cursor=editor.selectionStart,file=project.active;
     const snapshot={...project,files:{...project.files}};
     const completionMode=options.mode;
@@ -259,6 +263,12 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     hoverFrame=requestAnimationFrame(()=>updateHover(event));
   });
   for(const type of ['pointerleave','scroll','input','keydown','blur','click'])editor.addEventListener(type,hideHover);
+  // Programmatic workspace switches (new/open/rename/import/restore) do not
+  // dispatch input events. Reset stale completions from the previous file.
+  editor.addEventListener('luauforge:filechange',()=>{
+    cancelAnimationFrame(hoverFrame);hideHover();help.classList.add('hidden');hide();
+  });
+  editor.addEventListener('focus',()=>update());
   editor.addEventListener('input',()=>update());
   editor.addEventListener('click',()=>update());
   editor.addEventListener('keyup',event=>{
