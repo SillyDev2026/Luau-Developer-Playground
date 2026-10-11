@@ -154,6 +154,14 @@ export function completionContext(source,cursor) {
   const endPart=original.split('\n').at(-1);
   // Do not complete while inside comments and string literals.
   if(part.trim()==='' && endPart.trim()!=='')return null;
+  // A module's exported type namespace only belongs in annotation positions.
+  // Module.foo in executable code remains a value/member lookup.
+  const qualified=part.match(/([A-Za-z_]\w*)\.([A-Za-z_]\w*)?$/);
+  if(qualified){
+    const head=part.slice(0,qualified.index);
+    const annotation=/(?:\blocal\s+\w+\s*:\s*|::\s*|\)\s*:\s*|\b(?:export\s+)?type\s+\w+\s*=\s*|\bfunction(?:\s+[\w.:]+)?\s*\([^)]*\b[A-Za-z_]\w*\s*:\s*)$/.test(head);
+    if(annotation)return {mode:'type-member',base:qualified[1],query:qualified[2]||'',from:cursor-(qualified[2]||'').length,to:cursor};
+  }
   const type=typeContext(prefix);
   if(type!==null)return {mode:'type',query:type,from:cursor-type.length,to:cursor};
   const member=part.match(/(?:^|[^\w])([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*([.:])\s*([A-Za-z_]\w*)?$/);
@@ -179,7 +187,7 @@ function classMembers(api, type) {
 
 export function staticCompletions(source,cursor,api) {
   const context=completionContext(source,cursor);
-  if(!context)return null;
+  if(!context||context.mode==='type-member')return null;
   const locals=localsInScope(source,cursor),byName=new Map(locals.map(x=>[x.name,x]));
   const proposals=[];
   const push=(label,kind,detail,type='',suffix='')=>{const score=relevance(context.query,label);if(score)proposals.push({label,kind,detail,type,suffix,score:score+(kind==='local'?15:0)});};
