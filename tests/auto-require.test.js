@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { targets, slashAt, boundVariable, suggestions, complete } from '../src/auto-require.js';
+import { targets, slashAt, boundVariable, suggestions, complete, completionKeyAction } from '../src/auto-require.js';
 const files={'main.luau':'','modules/Math.luau':'return {}','examples/demo.luau':'print(1)'};
 test('slash parser only runs at start of statement',()=>{
   assert.deepEqual(slashAt('  /Fast',7),{from:2,to:7,query:'Fast'});
@@ -34,8 +34,36 @@ test('slash imports and existing imports ignore masked long strings and comments
  const choice=suggestions(disguised,disguised.length,files,'main.luau').items.find(x=>x.id==='FastNum');
  assert.equal(complete(disguised,disguised.length,choice,files,'main.luau').variable,'FastME');
 });
-test('keyboard completion only intercepts keys for visible nonempty suggestions',async()=>{
+test('passive IntelliSense never intercepts Enter or caret arrows',()=>{
+ const choices={mode:'identifier',query:'en',items:[{label:'end',kind:'keyword'},{label:'Enum',kind:'global'}]};
+ for(const key of ['Enter','ArrowDown','ArrowUp'])assert.equal(completionKeyAction(key,choices), 'native',key);
+ assert.equal(completionKeyAction('Tab',choices),'complete');
+ assert.equal(completionKeyAction('Escape',choices),'dismiss');
+ assert.equal(completionKeyAction('Enter',{items:[]},true),'native');
+ assert.equal(completionKeyAction('Tab',null),'native');
+});
+
+test('Ctrl+Space intentionally activates arrow navigation and completion',()=>{
+ const choices={mode:'identifier',query:'el',items:[{label:'else',kind:'keyword'},{label:'elseif',kind:'keyword'}]};
+ assert.equal(completionKeyAction('ArrowDown',choices,true),'next');
+ assert.equal(completionKeyAction('ArrowUp',choices,true),'previous');
+ assert.equal(completionKeyAction('Enter',choices,true),'complete');
+ assert.equal(completionKeyAction('Tab',choices,true),'complete');
+});
+
+test('Tab preserves indentation for already-complete identifiers or module methods',()=>{
+ const keyword={mode:'identifier',query:'end',items:[{label:'end',kind:'keyword'}]};
+ const method={mode:'method',query:'add',items:[{label:'add(a, b)',method:'add',kind:'method'}]};
+ assert.equal(completionKeyAction('Tab',keyword),'native');
+ assert.equal(completionKeyAction('Tab',method),'native');
+ assert.equal(completionKeyAction('Tab',method,true),'complete');
+ assert.equal(completionKeyAction('Tab',{mode:'identifier',query:'pri',items:[{label:'print',kind:'global'}]}),'complete');
+});
+
+test('real editor key handling respects completion action and never captures passive Enter',async()=>{
  const {readFile}=await import('node:fs/promises');
  const ui=await readFile(new URL('../src/auto-require.js',import.meta.url),'utf8');
- assert.match(ui,/!options\?\.items\?\.length \|\| menu\.classList\.contains\('hidden'\)/);
+ assert.match(ui,/const action=completionKeyAction\(event\.key,options,manuallyInvoked,selected\)/);
+ assert.match(ui,/if\(action==='native'\)return;/);
+ assert.match(ui,/if\(manuallyInvoked&&\['ArrowDown','ArrowUp',' ','Control','Meta'\]\.includes\(event\.key\)\)return;/);
 });
