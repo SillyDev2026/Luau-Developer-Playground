@@ -1,3 +1,13 @@
+# LuauForge v3.2.0 — Feedback, bug reports and Discord forum voting
+
+The new **Feedback** page is available from the desktop header and mobile navigation. Visitors can create a pseudonymous feedback profile, submit suggestions and bug reports to separate Discord forums, search public feedback, filter by type, sort by votes or date, and cast **👍 / 👎** website votes (click again to undo). Every successful submission links to its real Discord forum thread; website totals are shown in the forum post text. Native Discord reactions are separate from website tallies.
+
+**Backend setup is required.** GitHub Pages only hosts the interface. Deploy/redeploy the Node.js API with persistent storage and configure `DISCORD_BOT_TOKEN` **on the server**, never in GitHub Pages or client JavaScript. The suggestions forum ID is `1558939401394851850`; the bug-report forum ID is `1558939354234093638`. Add the bot to the Discord server with permissions to view both forums, create posts/send messages, read history and add reactions. Set `FEEDBACK_DATA_FILE` on a persistent disk. [Read deployment steps](server/README.md).
+
+Posts and votes are tied to a browser-tab feedback session, **not Discord identity**. A new anonymous session can vote separately; server-side rate limiting is basic anti-abuse, not verified one-person-one-vote. Additional identity verification or CAPTCHA is recommended for a large public rollout. No real Discord posts are created until the operator supplies a valid token and hosts the API.
+
+---
+
 # LuauForge v3.1.2 — Function comment descriptions
 
 LuauForge IntelliSense now displays Luau function documentation comments immediately preceding a declaration, both in the function hover popup and completion lists for imported workspace modules. Call-site parameter hints also include the description.
