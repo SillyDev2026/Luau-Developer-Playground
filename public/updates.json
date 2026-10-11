@@ -1,13 +1,13 @@
 {
-  "version": "3.0.6",
-  "title": "Exported Luau types and typed member autocomplete",
+  "version": "3.1.0",
+  "title": "Invite-only collaboration and Roblox Studio bridge",
   "publishedAt": "2026-10-11",
   "changes": [
-    "Only export type aliases are offered as Module.Type in imported scripts",
-    "Infer exported typeof(data) fields from a module's local data table",
-    "Limit annotated data. member suggestions to its declared exported type",
-    "Support literal record types, nested fields and private internal aliases",
-    "Keep type-only completions separate from value methods and WASM suggestions",
-    "Preserve workspace file format, editor geometry and original Luau runtime"
+    "Node.js collaboration API for invited workspace editors and viewers",
+    "Create Script, LocalScript, ModuleScript and select four Studio destinations",
+    "Share code by explicit revisioned Publish; conflict-safe updates",
+    "Studio plugin creates only tagged managed scripts after owner pairing",
+    "Owner-issued one-use invite codes and dedicated Studio pairing tokens",
+    "GitHub Pages stays static; Node API requires separate HTTPS hosting"
   ]
 }
