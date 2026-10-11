@@ -27,6 +27,35 @@ function matchingParen(masked, open) {
   return -1;
 }
 
+// Bind documentation to the immediately following declaration, never to the
+// previous function or an unrelated statement. Both -- and --- are Luau comments.
+export function documentationBefore(source,position) {
+  const lineStart=source.lastIndexOf('\n',Math.max(0,position-1))+1;
+  if(source.slice(lineStart,position).trim())return '';
+  const preceding=source.slice(0,lineStart).replace(/\r?\n$/,'');
+  const lines=preceding.split(/\r?\n/);
+  const collected=[];
+  let i=lines.length-1;
+  while(i>=0 && /^\s*--(?!\[)/.test(lines[i])) {
+    const text=lines[i].replace(/^\s*---?[ \t]?/,'').trimEnd();
+    // --!strict and other Luau directives are not function documentation.
+    if(/^!\w+/.test(text))break;
+    collected.unshift(text);
+    i--;
+  }
+  if(collected.length)return collected.join('\n').trim().slice(0,1200);
+  // Also accept a directly adjacent --[[ multi-line doc ]] block.
+  const close=/\](=*)\]\s*$/.exec(preceding);
+  if(!close)return '';
+  const delimiter=close[1],open='--['+delimiter+'[',end=']'+delimiter+']';
+  const start=preceding.lastIndexOf(open);
+  if(start<0||!preceding.slice(start).endsWith(end))return '';
+  const openingLine=preceding.slice(0,start).split('\n').at(-1);
+  if(openingLine.trim())return '';
+  return preceding.slice(start+open.length,preceding.length-end.length)
+    .split(/\r?\n/).map(line=>line.replace(/^\s*\* ?/,'').trimEnd()).join('\n').trim().slice(0,1200);
+}
+
 function sourceSignatures(source) {
   const clean=maskLuau(source),out=[];
   const patterns=[
@@ -39,7 +68,7 @@ function sourceSignatures(source) {
     const after=source.slice(close+1).split('\n')[0];
     const returnType=after.match(/^\s*:\s*([^\n;]+?)(?=\s*(?:--|$))/)?.[1]?.trim()||'';
     const label=m[1].split(/[.:]/).at(-1);
-    out.push({name:m[1].replaceAll(':','.'),signature:label+'('+source.slice(open+1,close)+')'+(returnType?': '+returnType:''),position:m.index});
+    out.push({name:m[1].replaceAll(':','.'),signature:label+'('+source.slice(open+1,close)+')'+(returnType?': '+returnType:''),position:m.index,documentation:documentationBefore(source,m.index)});
   }
   return out;
 }
@@ -112,7 +141,7 @@ export function moduleMemberCompletions(source,cursor,context,project) {
   if(imported?.kind!=='file')return [];
   const query=context.query.toLowerCase();
   return exportedSignatures(imported.source)
-    .map(entry=>({label:entry.name.split('.').at(-1),kind:'function',detail:entry.signature+' · '+imported.path,origin:imported.path,score:0}))
+    .map(entry=>({label:entry.name.split('.').at(-1),kind:'function',detail:entry.signature+' · '+imported.path,documentation:entry.documentation,origin:imported.path,score:0}))
     .filter(item=>(context.separator!==':'||item.kind==='function') && item.label.toLowerCase().startsWith(query))
     .map(item=>({...item,score:item.label.toLowerCase()===query?115:85}))
     .sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label)).slice(0,12);
@@ -123,11 +152,11 @@ export function lookupSignature(name,source,cursor,project,api=getRobloxAPI()) {
   const normalized=name.replaceAll(':','.');
   const entries=sourceSignatures(source);
   const direct=entries.findLast(x=>x.name===normalized);
-  if(direct)return {signature:direct.signature,origin:project?.active||'Current file'};
+  if(direct)return {signature:direct.signature,documentation:direct.documentation,origin:project?.active||'Current file'};
   const parts=normalized.split('.');
   if(parts.length===1){
     const local=entries.findLast(x=>x.name===parts[0]);
-    return local?{signature:local.signature,origin:project?.active||'Current file'}:null;
+    return local?{signature:local.signature,documentation:local.documentation,origin:project?.active||'Current file'}:null;
   }
   const root=parts[0],method=parts.at(-1);
   const imported=importedModule(source,root,cursor,project);
@@ -138,7 +167,7 @@ export function lookupSignature(name,source,cursor,project,api=getRobloxAPI()) {
   }
   if(imported?.kind==='file'){
     const found=exportedSignatures(imported.source).findLast(x=>x.name.split('.').at(-1)===method);
-    if(found)return {signature:found.signature,origin:imported.path};
+    if(found)return {signature:found.signature,documentation:found.documentation,origin:imported.path};
   }
   const symbols=localsInScope(source,cursor);
   const aliases={game:'DataModel',workspace:'Workspace',Instance:'Instance',math:'math',table:'table',string:'string',buffer:'buffer',task:'task',Vector3:'Vector3',Vector2:'Vector2',CFrame:'CFrame',Color3:'Color3'};

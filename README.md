@@ -1,3 +1,24 @@
+# LuauForge v3.1.2 — Function comment descriptions
+
+LuauForge IntelliSense now displays Luau function documentation comments immediately preceding a declaration, both in the function hover popup and completion lists for imported workspace modules. Call-site parameter hints also include the description.
+
+Example in modules/Math.luau:
+
+```luau
+local Math = {}
+
+-- add 2 numbers
+function Math.add(a: number, b: number): number
+    return a + b
+end
+
+return Math
+```
+
+Hover over Math.add, or type M.a after requiring the module, to see the signature **add(a: number, b: number): number** and the explanation **add 2 numbers**. Consecutive -- comment lines, --- lines, and directly adjacent --[[...]] block comments are also supported. Unrelated or separated comments do not become function docs. Source text is shown safely as plain text and does not change your code, type checking, or saved projects.
+
+---
+
 # LuauForge v3.1.1 — Shared Scripts manager and collaboration fixes
 
 The redesigned **Scripts** page (top toolbar or mobile dock) opens a full-width workspace manager with script search, class/destination filters, revision status, published Luau preview, metadata editing, member administration, and Studio sync diagnostics. Open a script in the existing editor for full IntelliSense, then **Publish** when the source has changed. Draft changes are retained locally until published, and stale server revisions return a conflict rather than silently overwriting teammates' work.

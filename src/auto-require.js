@@ -132,7 +132,8 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     if(!result){hideHover();return;}
     const title=document.createElement('strong');title.textContent=result.signature;
     const origin=document.createElement('small');origin.textContent=result.origin;
-    hover.replaceChildren(title,origin);
+    const documentation=document.createElement('div');documentation.className='symbol-hover-doc';documentation.textContent=result.documentation||'';
+    hover.replaceChildren(title,...(result.documentation?[documentation]:[]),origin);
     hover.classList.remove('hidden');
     const left=Math.min(Math.max(6,event.clientX-bounds.left+14),Math.max(6,parent.clientWidth-hover.offsetWidth-6));
     const above=event.clientY-bounds.top-hover.offsetHeight-12;
@@ -179,7 +180,9 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     const left=document.createElement('span');left.textContent=parts.before;
     const active=document.createElement('strong');active.textContent=parts.active;
     const right=document.createElement('span');right.textContent=parts.after;
-    help.replaceChildren(left,active,right);help.classList.remove('hidden');
+    help.replaceChildren(left,active,right);
+    if(hint.documentation){const doc=document.createElement('div');doc.className='signature-doc';doc.textContent=hint.documentation;help.append(doc);}
+    help.classList.remove('hidden');
   }
   function goToDefinition(){
     const def=definitionAt(editor.value,editor.selectionStart);
@@ -205,6 +208,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
       const detail=document.createElement('small');detail.textContent=item.detail||item.kind;detail.title=item.detail||'';
       const kind=document.createElement('span');kind.className='completion-kind';kind.textContent=item.kind||'symbol';
       row.append(name,kind,detail);
+      if(item.documentation){const docs=document.createElement('span');docs.className='completion-doc';docs.textContent=item.documentation;row.append(docs);}
       row.addEventListener('pointerdown',event=>event.preventDefault());
       row.addEventListener('click',()=>choose(index));
       menu.append(row);

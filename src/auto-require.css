@@ -14,3 +14,11 @@
 .symbol-hover small{font:10px/1.4 system-ui,sans-serif;color:var(--muted,#8492ad)}
 .symbol-hover.hidden{display:none}
 @media(max-width:650px){.symbol-hover{font-size:11px;max-width:calc(100% - 12px)}}
+
+
+/* Function documentation from adjacent Luau -- comments. Text-only, never HTML. */
+.symbol-hover-doc{font:12px/1.5 system-ui,sans-serif;color:var(--text,#e5eafa);white-space:pre-wrap;overflow-wrap:anywhere;padding:5px 0 6px;border-bottom:1px solid var(--border,#263348);}
+.signature-doc{margin-top:7px;padding-top:7px;border-top:1px solid var(--border,#263348);font:11px/1.5 system-ui,sans-serif;color:var(--muted,#a5b5ca);white-space:pre-wrap;overflow-wrap:anywhere;}
+.auto-require-option:has(.completion-doc){flex-wrap:wrap;row-gap:5px;}
+.auto-require-option .completion-doc{flex:0 0 100%;order:4;min-width:0;color:var(--muted,#abb9d1);font:11px/1.45 system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;max-height:4.6em;overflow:hidden;}
+@media(max-width:650px){.symbol-hover-doc{font-size:11px}.auto-require-option .completion-doc{font-size:10px}}

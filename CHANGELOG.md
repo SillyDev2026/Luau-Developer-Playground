@@ -1,3 +1,10 @@
+## 3.1.2 — 2026-10-11
+
+- Read adjacent Luau `--`/`---` and block comments as function documentation, including in imported workspace ModuleScripts.
+- Show the documentation in IntelliSense hover, imported function autocomplete and active parameter signature hints.
+- Avoid unrelated comments, Luau `--!strict` directives and strings; display comments as plain text, not HTML.
+- Add focused regressions for single-line and multiline docs, unrelated comments, anonymous functions and imported modules. Preserve existing editor and workspace behavior.
+
 ## 3.1.1 — 2026-10-11
 
 - Create a full-width responsive Shared Scripts page and mobile/desktop navigation, with searchable/filterable script cards, source preview, script metadata controls, revision labels, and placement guidance.
