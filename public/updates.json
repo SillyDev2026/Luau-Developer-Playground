@@ -1,13 +1,13 @@
 {
-  "version": "3.1.0",
-  "title": "Invite-only collaboration and Roblox Studio bridge",
+  "version": "3.1.1",
+  "title": "New shared Scripts page and Studio sync reliability",
   "publishedAt": "2026-10-11",
   "changes": [
-    "Node.js collaboration API for invited workspace editors and viewers",
-    "Create Script, LocalScript, ModuleScript and select four Studio destinations",
-    "Share code by explicit revisioned Publish; conflict-safe updates",
-    "Studio plugin creates only tagged managed scripts after owner pairing",
-    "Owner-issued one-use invite codes and dedicated Studio pairing tokens",
-    "GitHub Pages stays static; Node API requires separate HTTPS hosting"
+    "A full-width Shared Scripts page with search, filters, script cards and source preview",
+    "Edit script properties and publish only changed Luau source with revision safety",
+    "Stable script file paths and protection against overwriting local drafts",
+    "Workspace owners can remove invited members; editors and viewers can revoke their own access",
+    "Studio sync retries back off after failures and show diagnostics",
+    "Studio bridge detects local changes and cleans up failed managed script creation"
   ]
 }
