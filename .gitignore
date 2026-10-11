@@ -4,3 +4,10 @@ dist/
 *.log
 
 # Runtime assets are tracked for branch/Jekyll Pages deployment.
+
+# Shared-source Node backend: NEVER publish its database or local secrets.
+server/data/
+server/*.json
+.env
+.env.*
+!*.example
