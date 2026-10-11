@@ -1,14 +1,12 @@
 {
-  "version": "3.0.2",
-  "title": "Editor and workbench bug fixes",
+  "version": "3.0.3",
+  "title": "Luau type completion and hover signatures",
   "publishedAt": "2026-10-10",
   "changes": [
-    "Fixed empty autocomplete popups intercepting Enter, Tab and arrow keys",
-    "Fixed phantom Luau symbols and imports inside long strings and comments",
-    "Bracket pairing now ignores quoted text and comments",
-    "Source cleanup no longer overwrites a file edited after its preview",
-    "Verified exact commit, module path and expected size for lockfile imports",
-    "Corrected project audit and diff truncation indicators",
-    "Expanded automated regression tests without changing workspace storage format"
+    "Fixed function type annotation autocomplete suggesting tonumber instead of number",
+    "Added function hover signatures for local and imported workspace modules",
+    "Added signatures for documented bundled libraries and Roblox APIs",
+    "Extended parameter hints to functions exported by workspace modules",
+    "Preserved existing editor size and saved project format"
   ]
 }
