@@ -143,7 +143,11 @@ local function applyScript(item)
     -- UpdateSourceAsync also refreshes source open in the Studio script editor.
     -- On failure do not leave behind an empty tagged object.
     local ok, err = pcall(function()
-        ScriptEditorService:UpdateSourceAsync(existing, function(_oldSource)
+        ScriptEditorService:UpdateSourceAsync(existing, function(oldSource)
+            local lastSynced = existing:GetAttribute("LuauForgeSourceHash")
+            if not created and lastSynced ~= nil and sourceHash(oldSource) ~= lastSynced then
+                error("Unsaved Studio editor changes detected. Resolve before syncing.")
+            end
             return item.source
         end)
     end)
