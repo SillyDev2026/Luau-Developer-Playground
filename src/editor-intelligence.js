@@ -88,9 +88,10 @@ export function signatureFor(source,cursor,api=getRobloxAPI(),project) {
       for(const match of before.matchAll(assignment))signature=name+'('+match[1]+')';
     }
   }
-  if(!signature)signature=lookupSignature(name,source,cursor,project,api)?.signature||'';
+  const documentation=lookupSignature(name,source,cursor,project,api);
+  if(!signature)signature=documentation?.signature||'';
   if(!signature)return null;
-  return {...context,signature};
+  return {...context,signature,documentation:documentation?.documentation||''};
 }
 
 export function outlineSymbols(source) {
