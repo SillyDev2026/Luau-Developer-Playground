@@ -1,6 +1,6 @@
 {
   "name": "luau-developer-playground",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "private": true,
   "type": "module",
   "description": "LuauForge 3.1 self-hosted developer workbench with opt-in Node collaboration and Studio plugin bridge",
