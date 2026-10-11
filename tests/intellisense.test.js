@@ -109,3 +109,17 @@ test('Luau function parameter and return annotations offer types, never tonumber
   assert.equal(completionContext('local count = tonumber', 'local count = tonumber'.length)?.mode,'identifier');
   assert.equal(staticCompletions('function Math.add(a: number','function Math.add(a: number'.length,CORE_API),null);
 });
+
+test('completed Luau keywords never reopen the completion popup at line end',()=>{
+  const prefix='local Math = {}\nfunction Math.mul(a: number, b: number): number\n    return a * b\nend\n';
+  for(const keyword of ['end','else','elseif','return','then','until','break','do','local','function','if']){
+    const source=prefix+'    '+keyword;
+    assert.equal(completionContext(source,source.length),null,'completion context for '+keyword);
+    assert.equal(staticCompletions(source,source.length,CORE_API),null,'completions for '+keyword);
+  }
+  const text=prefix+'    en';
+  assert.equal(completionContext(text,text.length)?.mode,'identifier');
+  assert.ok(has(suggest(text),'end'));
+  assert.equal(completionContext(prefix+'    Math.',(prefix+'    Math.').length)?.mode,'member');
+  assert.equal(completionContext(prefix+'    local result: nu',(prefix+'    local result: nu').length)?.mode,'type');
+});
