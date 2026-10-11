@@ -573,7 +573,7 @@ function initialize() {
   window.addEventListener('pagehide', () => { workspace.dispose(); runtime.dispose(); state.disposed = true; });
   enableResizing();
   mountAutoRequire({ editor: editor.input, getProject: () => workspace.project, getRuntime: () => runtime, notify, catalogButtons: false });
-  mountCollabWorkspace({workspace,editor,notify});
+  mountCollabWorkspace({workspace,editor,notify,onOpenPage:()=>{if(dashboard?.isOpen())dashboard.close();closeMobile();}});
   // Catalog actions are owned by v1. AutoRequire provides editor completions.
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
