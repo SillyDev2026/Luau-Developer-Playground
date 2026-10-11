@@ -125,8 +125,6 @@ export function createFeedbackApi({dataFile,botToken='',channels=CHANNELS,clock=
       if(route.length===3&&route[2]==='posts'&&method==='POST'){
         const user=auth(data,req);
         if(!botToken)throw fail(503,'Discord bot has not been configured on this backend');
-        limit('post-user:'+user.id,3,3600000);
-        limit('post-address:'+req.socket.remoteAddress,10,3600000);
         const body=await readBody(req);
         if(!['suggestion','bug'].includes(body.type))throw fail(400,'Choose Suggestion or Bug report');
         if(!validText(body.title,8,100)||/[\r\n]/.test(body.title))throw fail(400,'Title must be 8–100 characters on one line');
@@ -134,6 +132,9 @@ export function createFeedbackApi({dataFile,botToken='',channels=CHANNELS,clock=
         const channel=channels[body.type];
         if(!validSnowflake(channel))throw fail(503,'Discord forum channel is not configured');
         if(Object.keys(data.posts).length>=500)throw fail(503,'Feedback storage capacity reached');
+        // Invalid submissions must not consume a legitimate user's posting quota.
+        limit('post-user:'+user.id,3,3600000);
+        limit('post-address:'+req.socket.remoteAddress,10,3600000);
         const post={id:randomUUID(),type:body.type,title:body.title.trim(),body:body.body.trim(),
           author:user.name,createdAt:clock(),votes:{},discordSynced:true};
         let thread;
