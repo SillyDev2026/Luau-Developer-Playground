@@ -1,4 +1,11 @@
-## 3.0.2 — 2026-10-10
+## 3.0.3 — 2026-10-10
+
+- Type-only completion for function parameters, returns, typed locals, casts and type aliases; stop mixing WASM value suggestions into annotation menus.
+- Hover signatures for locally declared functions, imported workspace modules, documented bundled APIs and Roblox APIs.
+- Extend call-site signature hints to workspace module functions, keep tooltips non-interactive, and cover pointer and import edge cases.
+- Keep existing editor layout, workspace persistence and Luau WASM runtime unchanged.
+
+## 3.0.3 — 2026-10-10
 
 - Fix IntelliSense keyboard handling when suggestion lists are empty or hidden.
 - Mask long bracket strings/comments consistently so completion and import analysis ignore literal text.
