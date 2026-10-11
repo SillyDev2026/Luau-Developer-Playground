@@ -1,3 +1,13 @@
+# LuauForge v3.1.0 — Shared workspaces and Roblox Studio bridge
+
+Create private, invite-only collaborative Luau workspaces using an optional Node.js backend. The GitHub Pages website provides owner/editor/viewer roles, one-use invitations, Script / LocalScript / ModuleScript creation, Roblox Studio destination selection, versioned source publishing, and Studio pairing. A separate Studio plugin installs only tagged workspace scripts in ReplicatedStorage, ServerScriptService, StarterGui or StarterPlayer.StarterPlayerScripts. Source from ordinary existing local workspaces is never uploaded automatically. Studio syncing is one-way (website → Studio) and happens only when connected in Edit mode.
+
+**Hosting requirement:** GitHub Pages cannot run Node.js. Deploy the API from server/index.mjs to a persistent HTTPS host, set ALLOWED_ORIGINS and COLLAB_DATA_FILE, then enter the API URL in the website's Inspector → Shared Workspace + Roblox Studio. See server/README.md for deployment, security and plugin installation. Invited editors can publish scripts that may run in your place; invite only trusted collaborators.
+
+**Use:** Create a workspace → Generate an editor/viewer invite → Add script with class + destination → Edit in the existing LuauForge code editor → Publish → Studio owner generates pairing token → Connect the Studio plugin.
+
+---
+
 # LuauForge v3.0.6 — Exported Luau module types
 
 In a workspace ModuleScript (a .lua or .luau file), declare public types with export type. Ordinary type aliases remain private to that file. LuauForge uses the module's local table shape or a literal record type to complete properties on annotated variables in other scripts.
