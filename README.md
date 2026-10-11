@@ -1,3 +1,13 @@
+# LuauForge v3.0.5 — IntelliSense in every workspace script
+
+Autocomplete, type hints, signature help and hover now follow the active editor file when you create, open, rename, import, restore, or switch tabs. Any supported `.lua` or `.luau` script can use the editor intelligence features, including files in `scripts/`, `modules/`, and `tests/` folders. When another workspace module is imported with a relative `require(...)`, its exported functions are suggested after the module alias, with parameter and return signatures. Private helpers are not exposed as module completions. This is source-based editor intelligence, not a full Roblox Studio language server; Roblox engine APIs are reference metadata only.
+
+**Example:** in `modules/Math.luau`, define `function Math.add(a: number, b: number): number`; in `scripts/Run.luau`, type `local M = require("../modules/Math.luau")` followed by `M.a`. The editor suggests `add` and displays its signature on hover or inside a call. The same applies to `.lua` files and newly added workspace modules.
+
+Existing project data, script formatting, editor sizing and Luau WASM execution are unchanged.
+
+---
+
 # LuauForge v3.0.4 — Unblocked typing and predictable IntelliSense
 
 Typing `end`, `else`, `return`, or another complete Luau keyword no longer leaves an autocomplete popup intercepting your next action. **Enter always creates a new line while suggestions appear automatically**; arrow keys move the cursor normally. **Tab** accepts an incomplete suggestion; an already typed exact match keeps the normal indentation behavior. Press **Ctrl+Space** for intentional keyboard-navigable autocomplete: arrow keys select a suggestion, Enter/Tab inserts it, Escape dismisses. Mouse click selection and module AutoRequire are unchanged. No changes to saved workspace data, editor positioning, Luau WASM or bundled libraries.
