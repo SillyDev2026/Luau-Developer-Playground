@@ -1,13 +1,13 @@
 {
-  "version": "3.1.1",
-  "title": "New shared Scripts page and Studio sync reliability",
+  "version": "3.1.2",
+  "title": "Function comment descriptions in hover and IntelliSense",
   "publishedAt": "2026-10-11",
   "changes": [
-    "A full-width Shared Scripts page with search, filters, script cards and source preview",
-    "Edit script properties and publish only changed Luau source with revision safety",
-    "Stable script file paths and protection against overwriting local drafts",
-    "Workspace owners can remove invited members; editors and viewers can revoke their own access",
-    "Studio sync retries back off after failures and show diagnostics",
-    "Studio bridge detects local changes and cleans up failed managed script creation"
+    "Show -- add 2 numbers and other adjacent Luau comments under function signatures",
+    "Display function descriptions on hover in local and imported workspace modules",
+    "Include comments in exported-module method autocomplete suggestions",
+    "Show documentation alongside active parameter signature hints",
+    "Support multiple consecutive -- lines and directly adjacent block comments",
+    "Ignore unrelated, distant or directive comments; preserve normal editor typing"
   ]
 }
