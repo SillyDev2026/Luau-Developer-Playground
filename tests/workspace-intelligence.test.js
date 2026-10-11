@@ -78,7 +78,7 @@ test('table-returned functions in a .lua module are available for hover and auto
     'tests/check.lua':source,
     'tests/src/M.lua':'return {\n div = function(a: number, b: number): number\n return a/b\n end,\n}\n'
   }};
-  assert.deepEqual(suggestions(source,source.length,project).map(x=>x.label),[]);
+  assert.deepEqual(suggestions(source,source.length,project).map(x=>x.label),['div']);
   project.files['tests/check.lua']='local F = require("./src/M.lua")\nF.d';
   assert.deepEqual(suggestions(project.files['tests/check.lua'],project.files['tests/check.lua'].length,project).map(x=>x.label),['div']);
   const call='local F = require("./src/M.lua")\nF.div(1, 2)';
