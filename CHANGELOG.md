@@ -1,3 +1,12 @@
+## 3.0.6 — 2026-10-11
+
+- Add public exported Luau type aliases distinct from private type declarations.
+- Resolve imported Module.Data and enforce exported names in type-only completion.
+- Derive type members from export type Data = typeof(data) and literal nested record aliases.
+- Use declared exported type fields for typed local member completion rather than unrelated global/Roblox/WASM suggestions.
+- Preserve same-file private type usage, protect masked strings/comments, and add cross-file regression coverage.
+- Preserve saved workspaces, code formatting, Luau WASM runtime and editor layout.
+
 ## 3.0.5 — 2026-10-11
 
 - Reset stale editor suggestions, pending async completions, and hover popups whenever a different Lua/Luau source file is loaded.

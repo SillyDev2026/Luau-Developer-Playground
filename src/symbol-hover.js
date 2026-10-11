@@ -68,7 +68,7 @@ function normalize(path) {
   return parts.join('/');
 }
 
-function importedModule(source,base,cursor,project) {
+export function importedModule(source,base,cursor,project) {
   if(!project?.files)return null;
   const clean=maskLuau(source);
   const pattern=/\blocal\s+([A-Za-z_]\w*)\s*=\s*require\s*\(\s*(["'])([^"'\n]+)\2\s*\)/g;

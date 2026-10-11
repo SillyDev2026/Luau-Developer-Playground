@@ -1,13 +1,13 @@
 {
-  "version": "3.0.5",
-  "title": "Workspace-wide IntelliSense for every new script",
+  "version": "3.0.6",
+  "title": "Exported Luau types and typed member autocomplete",
   "publishedAt": "2026-10-11",
   "changes": [
-    "Autocomplete, type suggestions and hover now rebind when scripts are created, opened, renamed or imported",
-    "Workspace ModuleScript functions appear in completion lists after relative require calls",
-    "Support .lua and .luau files across nested scripts, modules and tests directories",
-    "Keep local functions private while suggesting only exported workspace module functions",
-    "Prevent stale completion and hover popups when switching files",
-    "Expand regression coverage without changing existing projects"
+    "Only export type aliases are offered as Module.Type in imported scripts",
+    "Infer exported typeof(data) fields from a module's local data table",
+    "Limit annotated data. member suggestions to its declared exported type",
+    "Support literal record types, nested fields and private internal aliases",
+    "Keep type-only completions separate from value methods and WASM suggestions",
+    "Preserve workspace file format, editor geometry and original Luau runtime"
   ]
 }
