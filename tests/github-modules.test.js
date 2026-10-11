@@ -81,5 +81,5 @@ test('site documentation wires up public module controls and HTML has no duplica
   for(const id of ['github-module-add','github-module-publish'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(ui,/previewGithubModule/);
   assert.match(ui,/checkbox\.checked/);
-  assert.match(html,/v=1\.8\.1/);
+  assert.match(html,/v=3\.0\.0/);
 });

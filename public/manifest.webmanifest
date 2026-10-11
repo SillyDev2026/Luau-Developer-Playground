@@ -1,5 +1,5 @@
 {
-  "name": "LuauForge 1.0 - Luau Developer IDE",
+  "name": "LuauForge 3.0 - Luau Developer IDE",
   "short_name": "LuauForge",
   "description": "Standalone Luau WASM development workspace with offline editor, modules, tests and benchmarks",
   "start_url": "./",

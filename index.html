@@ -4,20 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0d1220" />
-  <meta name="description" content="LuauForge 1.8: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
+  <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=1.8.1" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=1.8.1" />
-  <link rel="stylesheet" href="./src/v15.css?v=1.8.1" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=1.8.1" />
-  <link rel="stylesheet" href="./src/community.css?v=1.8.1" />
-  <title>LuauForge 1.8.1 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.0.0" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.0.0" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.0.0" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.0.0" />
+  <link rel="stylesheet" href="./src/community.css?v=3.0.0" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.0.0" />
+  <title>LuauForge 3.0.0 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>1.8.1</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.0.0</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
@@ -36,7 +37,7 @@
   <div class="main-surface" id="main-surface">
     <section id="dashboard-view" class="hidden" aria-label="Developer Dashboard">
       <div class="dash-shell">
-        <header class="dash-heading"><div><h1>Developer Dashboard</h1><p>20 live workspace widgets · LuauForge v1.6</p></div>
+        <header class="dash-heading"><div><h1>Developer Dashboard</h1><p>20 live workspace widgets · LuauForge v3.0</p></div>
           <div class="dash-head-actions"><button id="dash-editor-open">Open editor</button><button id="dash-refresh">Refresh</button><button id="dash-studio-library">Roblox packages</button></div>
         </header>
         <section class="dash-release" id="dashboard-release" aria-label="Latest release details"><strong>Release updates</strong><p>Check Settings → Community &amp; Updates for the latest changes.</p></section>
@@ -99,6 +100,7 @@
         <div class="setting-group"><div class="setting-title">PROJECT</div><div class="project-metrics" id="project-metrics"></div><button id="snapshot-btn" class="wide-btn">Create recovery snapshot</button><button id="history-btn" class="wide-btn">Restore snapshot</button><button id="export-json" class="wide-btn">Export project JSON</button><button id="export-zip" class="wide-btn">Export source ZIP</button><button id="github-import" class="wide-btn">Import public GitHub file</button><button id="reset-project" class="wide-btn danger">Reset project</button></div>
         <div class="setting-group"><div class="setting-title">TOOLS</div><button class="wide-btn" id="graph-btn">Module dependency graph</button><button class="wide-btn" id="benchmark-btn">Benchmark a module</button><button class="wide-btn" id="test-btn">Run all tests</button><button class="wide-btn" id="bytecode-btn">Inspect bytecode</button></div>
         <div class="setting-group v15-toolbox"><div class="setting-title">DEVELOPER TOOLBOX v1.5 · 20 TOOLS</div><p class="inspector-note">Refactor, inspect modules, benchmark Luau, and manage projects. All optional.</p><div id="v15-actions" class="v15-actions"></div></div>
+        <div class="setting-group v3-toolbox"><div class="setting-title">V3 WORKBENCH · PROJECT TOOLS</div><p class="inspector-note">Workspace search, quality review, safe cleanup, diff, pinned module lockfiles and GitHub CI.</p><div id="v3-actions" class="v3-actions"></div></div>
         <div class="setting-group" id="community-settings">
           <div class="setting-title">COMMUNITY &amp; RELEASE UPDATES</div>
           <label>GitHub username<input id="community-github" type="text" maxlength="39" placeholder="your-github-username" spellcheck="false" autocapitalize="off" autocomplete="off" /></label>
@@ -121,6 +123,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=1.8.1"></script>
+<script type="module" src="./src/v1.js?v=3.0.0"></script>
 </body>
 </html>

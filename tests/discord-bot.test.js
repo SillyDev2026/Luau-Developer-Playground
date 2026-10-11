@@ -65,8 +65,8 @@ test('Discord failures are surfaced without logging credential contents', async 
 });
 
 test('announcement dispatch requires explicit test flag; releases require a version change', async () => {
-  assert.equal(await shouldAnnounce({event:'workflow_dispatch',test:true,current:'1.8.1',previous:'1.8.1'}),true);
-  assert.equal(await shouldAnnounce({event:'workflow_dispatch',test:false,current:'1.8.1',previous:'1.8.0'}),false);
-  assert.equal(await shouldAnnounce({event:'push',test:false,current:'1.8.1',previous:'1.8.0'}),true);
-  assert.equal(await shouldAnnounce({event:'push',test:false,current:'1.8.1',previous:'1.8.1'}),false);
+  assert.equal(await shouldAnnounce({event:'workflow_dispatch',test:true,current:'3.0.0',previous:'3.0.0'}),true);
+  assert.equal(await shouldAnnounce({event:'workflow_dispatch',test:false,current:'3.0.0',previous:'1.8.0'}),false);
+  assert.equal(await shouldAnnounce({event:'push',test:false,current:'3.0.0',previous:'1.8.0'}),true);
+  assert.equal(await shouldAnnounce({event:'push',test:false,current:'3.0.0',previous:'3.0.0'}),false);
 });

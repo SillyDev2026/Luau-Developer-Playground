@@ -1,3 +1,16 @@
+# v3.0.0 — V3 Workbench foundation (2026-10-10)
+
+- Isolated v3 project-tools UI and offline static analysis: multi-file search, project advisory audit, read-only diff and exportable Markdown report.
+- Conservative, snapshot-backed source cleanup; preserves Luau assignments, string contents and user script formatting.
+- Immutable pinned GitHub module lockfile export; user-reviewed lockfile import with explicit consent per module and rejection of invalid revisions/path traversal.
+- Public GitHub Actions status reader and unified command palette access to v3 tools; no credentials in localStorage.
+- Rebuilt offline cache, v3 responsive action grid and updated release feed to 3.0.0.
+- Verified 156 automated tests, real Luau WASM module import/benchmark/libraries smoke checks, 320–1280px static Chromium geometry.
+- Existing v2 workspace storage, WASM runtime, Studio libraries, GitHub `require("@")` imports, notifications, mobile layout, settings preserved.
+- Not yet implemented: full 80-feature roadmap, GitHub OAuth/write backend, Discord DM subscription backend, production Studio sync, full language server/coverage/profiler.
+
+---
+
 ## v1.8.1 — Secure Discord bot announcements
 
 - Added optional Discord bot transport using a GitHub Actions secret and the configured application/channel identifiers.

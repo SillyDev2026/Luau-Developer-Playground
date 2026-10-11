@@ -1,12 +1,17 @@
 {
-  "version": "1.8.1",
-  "title": "Discord Bot Release Announcements",
+  "version": "3.0.0",
+  "title": "V3 Workbench and verified project tools",
   "publishedAt": "2026-10-10",
   "changes": [
-    "Discord bot release messages use a secret GitHub Actions bot token and a specified channel ID",
-    "Optional manual send-test-announcement workflow input",
-    "Existing webhook notifications remain as a fallback",
-    "All messages disable Discord mass/user mentions",
-    "Existing profiles, Luau editor, WebAssembly runner and libraries preserved"
+    "Compatibility-preserving v3 foundation (unchanged workspace format, WASM engine and mobile scaling)",
+    "Project-wide literal search with line navigation and safe result limits",
+    "Project quality audit with dependency cycle/unresolved import advisories",
+    "Safe whitespace cleanup with automatic recovery snapshot",
+    "Side-by-side file comparison rendered as read-only diff",
+    "Pinned public GitHub module lockfile export and explicit-review import",
+    "Markdown project report for files, dependencies and review items",
+    "Read-only GitHub Actions status viewer for public repositories",
+    "Expanded command palette and mobile-accessible workbench panel",
+    "Updated offline cache for v3 assets and extended regression tests"
   ]
 }

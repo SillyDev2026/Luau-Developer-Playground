@@ -1,0 +1,11 @@
+/* v3 tools are isolated from the original editor geometry and mobile dock. */
+.v3-toolbox{min-width:0}.v3-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr));gap:7px;margin-top:10px}
+.v3-actions button{color:var(--text,#e5ebf8);background:var(--panel2,#1a2941);border:1px solid var(--border,#304158);border-radius:8px;min-height:39px;padding:8px;font-size:12px;text-align:left;overflow-wrap:anywhere}
+.v3-actions button:hover{filter:brightness(1.18)}.v3-actions button:focus-visible{outline:2px solid var(--accent,#8fa8ff);outline-offset:2px}
+.v3-list{display:grid;gap:6px;max-height:min(50dvh,390px);overflow:auto;min-width:0;margin:9px 0}
+.v3-item{display:block;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel2,#1c2940);border:1px solid var(--border,#34455e);border-radius:8px;color:var(--text,#e5ebf8);padding:8px;font:12px/1.45 ui-monospace,monospace}
+.v3-item:hover{filter:brightness(1.17)}.v3-muted{font-size:12px;color:var(--muted,#9caeca);overflow-wrap:anywhere}
+.v3-input{width:100%;max-width:100%;min-width:0;padding:10px;border:1px solid var(--border,#34455e);border-radius:7px;background:var(--panel2,#1b2941);color:var(--text,#e4eaf4);font-size:16px}
+.v3-diff-added{border-left:3px solid #48c78d}.v3-diff-removed{border-left:3px solid #e68b8b}.v3-diff-same{opacity:.7}
+.v3-grid-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px}.v3-grid-row label{display:flex;align-items:center;gap:4px}
+@media(max-width:820px){.v3-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.v3-item{font-size:11px}.v3-list{max-height:44dvh}}

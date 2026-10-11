@@ -1,3 +1,36 @@
+# LuauForge v3.0.0 — Compatibility-first V3 Workbench
+
+LuauForge v3 introduces an **isolated, tested developer workbench** on top of the existing WebAssembly IDE. This version preserves the v1.8.1 saved workspace data format (`luau-dev-playground:v2`), self-hosted Luau WASM runtime, `require("@Owner/Repo/path.luau")` imports, Studio package catalog, benchmark and test runners, existing themes and responsive scaling. No source migration, mandatory GitHub login or new backend is required.
+
+## Using the V3 Workbench
+
+Open **Settings → V3 Workbench** on mobile or desktop, or open the command palette (`Ctrl/Cmd+P`) and search for a workbench action. Each action is independent of editor execution and keeps project data local.
+
+- **Search all files:** literal substring or whole-word search, optional case sensitivity, up to 250 matches with clickable file/line navigation. Safe against runaway regular expressions because user input is never parsed as a regex.
+- **Review project quality:** quick advisory report for long lines, TODO/FIXME notes, debug prints, trailing whitespace and static import cycles/errors. This is *not* a language server or runtime type checker.
+- **Safe source cleanup:** preview conservative trailing-whitespace cleanup and a final newline without splitting `local a = b` assignments; create a recovery snapshot before applying. Preserves contents of strings and comments.
+- **Compare two files:** bounded LCS-based line diff with added/removed lines; large files show a clear limit rather than freezing the browser.
+- **Export module lockfile:** writes `luauforge.lock.json` with public GitHub `@` specifiers pinned to 40-character commit hashes and file byte counts; project files are not included.
+- **Review/import lockfile:** validates untrusted JSON, rejects traversal or mutable refs, displays each pinned module's exact source and requires explicit per-module approval. It **does not auto-execute or install** arbitrary lockfile content.
+- **Export project report:** Markdown summary of source files, line counts, public pins, dependency checks and advisory findings.
+- **GitHub build status:** read-only public GitHub Actions workflow summary for an `Owner/Repository` slug. No token is stored.
+- **Shortcuts guide, Run project tests, Check Luau types, Add GitHub module, View modules:** navigation to preexisting tested capabilities from the same V3 workbench and command palette.
+
+All v3 tools are authored as separate pure-analysis (`src/v3/core.js`) and UI (`src/v3/ui.js`, `src/v3/ui.css`) modules. The preexisting `src/v1.js` editor and runtime continue to own the workspace. V3 adds no fixed pixel geometry, keeps Android input sizes readable, and uses a two-column mobile action grid.
+
+### Verification
+
+- Run `npm run check` for the full Node regression suite, build and Pages asset verification.
+- Run `npm run smoke:wasm`, `npm run smoke:libraries` and `npm run smoke:v15` to exercise real Luau WASM, public `@` requires, FastNum/NanoNum/OmegaNum, and benchmark execution.
+- Layout geometry was checked in Chromium via injected local static CSS at 320, 360, 393, 800 and 1280 px. Full live-page interactive testing was blocked by local navigation restrictions, so this is not an end-to-end browser interaction signoff.
+- Github Actions is the Pages publishing source to use; avoid selecting the competing branch/Jekyll source in repository Pages settings.
+
+### Still requiring separate engineering and infrastructure
+
+This release **does not claim the entire proposed 80-feature roadmap is finished**. Secure GitHub write access needs OAuth/GitHub App infrastructure, personal Discord DMs need authenticated opt-in subscriptions, Roblox Studio synchronization needs a Studio plugin and securely authorized bridge, and true type-server features, code coverage, native profiling, and community accounts require more than a static GitHub Pages site. Avoid entering GitHub tokens or Discord bot/webhook credentials in the site. The existing GitHub Actions channel webhook remains server-side only.
+
+---
+
 # LuauForge v1.8.1 — Connect the Discord application and channel
 
 The Discord application ID is **1491648971041411163**, and the intended notification channel ID is **1558591089529851915**. These IDs are public identifiers, **not authentication credentials**.

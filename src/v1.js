@@ -15,10 +15,12 @@ import { mountDashboard } from './dashboard.js';
 import { mountCommunitySettings } from './community-settings.js';
 import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
+import { mountV3 } from './v3/ui.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
 let dashboard = null;
+let v3 = null;
 const state = { side: 'files', output: 'console', dialogs: false, busy: false, runToken: 0, checking: 0, problems: [], outputLogs: [], bytecode: null, bench: null, tests: null, liveCheck: false, lastFile: null, toastTimer: 0, liveTimer: 0, outputHeight: 202, sideWidth: 266, disposed: false };
 const settingsKey = 'luauforge:v1:settings';
 try { Object.assign(state, JSON.parse(localStorage.getItem(settingsKey) || '{}')); } catch { /* no saved settings */ }
@@ -470,6 +472,7 @@ function palette() {
     ['Run project tests', runTests], ['Create snapshot', snapshotNow], ['Restore snapshot', snapshotDialog],
     ['Export JSON', exportProject], ['Export source ZIP', exportZip], ['New file', newFile], ['Rename file', renameCurrent],
     ['Delete file', deleteCurrent], ['Toggle theme', toggleTheme], ['Toggle word wrap', toggleWrap],
+    ...(v3 ? v3.actions : []),
   ];
   modal('Command palette', body => {
     const input = createElement('input'); input.placeholder = 'Search commands or workspace files'; body.append(input);
@@ -573,7 +576,7 @@ function initialize() {
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
-  consoleLog('LuauForge v1.8.1 ready · Existing workspace restored.', 'system');
+  consoleLog('LuauForge v3.0.0 ready · Existing workspace restored.', 'system');
 }
 initialize();
 mountV15({ workspace, editor, runtime, notify, modal, promptModal, download, openFile, closeMobile });
@@ -593,3 +596,6 @@ const community = mountCommunitySettings({ notify, onOpenRelease: () => {
   if (dashboard?.isOpen()) dashboard.close();
   openMobile('inspector');
 }});
+
+// V3 modules are optional UI additions; existing execution paths stay unchanged.
+v3 = mountV3({workspace,editor,modal,closeModal,notify,download,openFile,runTests,checkCurrent,addPublicGithubModule,setSide,renderLibrary,importGithubSpecifier});
