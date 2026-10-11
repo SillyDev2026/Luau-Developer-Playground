@@ -44,9 +44,14 @@ export function mountFeedback({notify=()=>{},onOpenPage=()=>{}}={}){
   function currentApi(){
     return normalizeFeedbackApi(apiInput.value);
   }
+  function activeSession(){
+    try{return session?.api===currentApi()?session:null;}catch{return null;}
+  }
   function setProfile(){
-    $('feedback-profile-status').textContent=session?'Connected as '+session.name+' · session in this tab':'Not connected. Choose a display name.';
-    $('feedback-submit').disabled=!session||!configured||busy;
+    const active=activeSession();
+    $('feedback-profile-status').textContent=active?'Connected as '+active.name+' · session in this tab':
+      session?'Server address changed. Connect a profile for this server.':'Not connected. Choose a display name.';
+    $('feedback-submit').disabled=!active||!configured||busy;
   }
   const typeInputs=[...page.querySelectorAll('input[name="feedback-type"]')];
   function activeType(){return typeInputs.find(input=>input.checked)?.value||'suggestion';}
@@ -102,12 +107,12 @@ export function mountFeedback({notify=()=>{},onOpenPage=()=>{}}={}){
       const voteButton=(voteValue,icon,textCount)=>{
         const button=element('button','feedback-vote'+(post.myVote===voteValue?' active':''),icon+' '+textCount);
         button.type='button';
-        button.disabled=!session||busy;
-        button.title=session?'Vote '+(voteValue===1?'up':'down')+' (click again to undo)':'Connect a feedback profile to vote';
+        button.disabled=!activeSession()||busy;
+        button.title=activeSession()?'Vote '+(voteValue===1?'up':'down')+' (click again to undo)':'Connect a feedback profile to vote';
         button.setAttribute('aria-pressed',String(post.myVote===voteValue));
         button.addEventListener('click',()=>run(async()=>{
           const result=await feedbackRequest(currentApi(),'/api/feedback/posts/'+post.id+'/vote',{
-            method:'POST',token:session.token,body:{vote:voteValue}
+            method:'POST',token:activeSession().token,body:{vote:voteValue}
           });
           posts=posts.map(item=>item.id===post.id?result.post:item);
           render();
@@ -148,10 +153,10 @@ export function mountFeedback({notify=()=>{},onOpenPage=()=>{}}={}){
     message('Feedback profile connected as '+session.name+'. You can now submit and vote.');
   }
   async function submit(){
-    if(!session)throw Error('Connect your feedback profile before submitting.');
+    if(!activeSession())throw Error('Connect your feedback profile for this backend before submitting.');
     const type=activeType();
     const result=await feedbackRequest(session.api,'/api/feedback/posts',{
-      token:session.token,method:'POST',
+      token:activeSession().token,method:'POST',
       body:{type,title:titleInput.value.trim(),body:descInput.value.trim()}
     });
     titleInput.value='';descInput.value='';
@@ -173,6 +178,7 @@ export function mountFeedback({notify=()=>{},onOpenPage=()=>{}}={}){
   for(const id of ['feedback-page-btn','mobile-feedback'])$(id).addEventListener('click',open);
   $('feedback-back-editor').addEventListener('click',close);
   $('feedback-connect-btn').addEventListener('click',()=>run(connect));
+  apiInput.addEventListener('input',()=>{configured=false;setProfile();});
   $('feedback-reload').addEventListener('click',()=>run(load));
   $('feedback-form').addEventListener('submit',event=>{event.preventDefault();run(submit);});
   for(const id of ['feedback-search','feedback-category','feedback-sort']){
