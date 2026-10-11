@@ -8,7 +8,7 @@ const CORE = [
   './src/v1.js', './src/v1.css', './src/v3/ui.js', './src/v3/core.js', './src/v3/ui.css', './src/auto-require.css',
   './src/v1-editor.js', './src/v1-model.js', './src/v1-zip.js', './src/v1-graph.js',
   './src/store.js', './src/snapshots.js', './src/highlight.js', './src/editor-utils.js',
-  './src/auto-require.js', './src/completion-geometry.js', './src/intellisense.js', './src/editor-intelligence.js',
+  './src/auto-require.js', './src/completion-geometry.js', './src/intellisense.js', './src/editor-intelligence.js', './src/symbol-hover.js',
   './src/roblox-api.js', './src/module-bundle.js', './src/wasm-client.js',
   './src/wasm-worker.js', './src/builtin-libraries.js', './src/github-modules.js',
   './src/v15-ui.js', './src/v15.css', './src/v15-analysis.js', './src/v15-modules.js',
