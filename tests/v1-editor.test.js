@@ -13,8 +13,7 @@ test('bracket match finds pairs without searching out of bounds',()=>{
 
 test('bracket matching ignores quoted strings and comments',()=>{
  const source='print("( ignored )", (2 + 3)) -- ((\n';
- const outer=source.indexOf('(',source.indexOf('"')+13);
- assert.deepEqual(matchBracket(source,0),[5,source.indexOf(') --')]);
+ assert.deepEqual(matchBracket(source,5),[5,source.indexOf(') --')]);
  assert.equal(matchBracket(source,source.indexOf('( ignored')),null);
  assert.equal(matchBracket('-- (comment)',3),null);
  const inner=source.indexOf('(2 + 3)');
