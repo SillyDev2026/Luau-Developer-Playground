@@ -1,3 +1,12 @@
+## 3.1.1 — 2026-10-11
+
+- Create a full-width responsive Shared Scripts page and mobile/desktop navigation, with searchable/filterable script cards, source preview, script metadata controls, revision labels, and placement guidance.
+- Fix shared script file identity, stale refresh/create races, publish dirty-state visibility, and accidental replacement of unpublished local drafts.
+- Add owner-managed member removal and voluntary leave/revoke APIs, with permission checks.
+- Retry failed Studio sync with exponential delay and surface per-script failure details; newly edited revisions remain immediately eligible.
+- Harden Studio plugin endpoint validation, detect modified Studio source (including editor buffers), and destroy new tagged objects after failed source updates.
+- Expand Node API and static UI regression tests; preserve local-only editor, Luau formatting, plugins, WASM and old project schemas.
+
 ## 3.1.0 — 2026-10-11
 
 - Add opt-in Node collaboration service with persisted shared workspaces, owner/editor/viewer permissions, one-use 24-hour invites, bearer-token hashing, origin allowlisting, size limits and optimistic revision checks.
