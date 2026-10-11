@@ -1,3 +1,28 @@
+# LuauForge v3.0.6 — Exported Luau module types
+
+In a workspace ModuleScript (a .lua or .luau file), declare public types with export type. Ordinary type aliases remain private to that file. LuauForge uses the module's local table shape or a literal record type to complete properties on annotated variables in other scripts.
+
+Example in modules/PlayersData.luau:
+
+```luau
+local data = { Coins = 0, Rebirths = 0, Profile = { Level = 1 } }
+type InternalOnly = { Token: string }
+export type Data = typeof(data)
+return {}
+```
+
+Example in scripts/Run.luau:
+
+```luau
+local Module = require("../modules/PlayersData.luau")
+local data: Module.Data = PlayersData
+data.Coins
+```
+
+Typing Module. in a type annotation suggests Data (not InternalOnly). Typing data. suggests only Coins, Rebirths and Profile, and data.Profile. suggests Level. LuauForge also supports explicit record shapes such as export type Data = { Coins: number, Name: string }, typed local aliases, and nested folders. This is offline source-based IntelliSense for workspace modules, not a complete Roblox type checker; the Luau WASM checker remains the source of truth.
+
+---
+
 # LuauForge v3.0.5 — IntelliSense in every workspace script
 
 Autocomplete, type hints, signature help and hover now follow the active editor file when you create, open, rename, import, restore, or switch tabs. Any supported `.lua` or `.luau` script can use the editor intelligence features, including files in `scripts/`, `modules/`, and `tests/` folders. When another workspace module is imported with a relative `require(...)`, its exported functions are suggested after the module alias, with parameter and return signatures. Private helpers are not exposed as module completions. This is source-based editor intelligence, not a full Roblox Studio language server; Roblox engine APIs are reference metadata only.
