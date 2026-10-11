@@ -89,7 +89,7 @@ export function compareSources(before, after, { maxLines = 320 }={}) {
   const dp=Array.from({length:a.length+1},()=>new Uint16Array(b.length+1));
   for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
   const changes=[];let i=0,j=0,truncated=false;
-  const append=entry=>{append(entry);else truncated=true;};
+  const append=entry=>{if(changes.length<240)changes.push(entry);else truncated=true;};
   while(i<a.length||j<b.length){
     if(i<a.length&&j<b.length&&a[i]===b[j]){append({kind:'same',line:i+1,text:a[i]});i++;j++;}
     else if(j<b.length&&(i===a.length||dp[i][j+1]>=dp[i+1][j])){append({kind:'added',line:j+1,text:b[j]});j++;}
