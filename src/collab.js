@@ -47,6 +47,21 @@ export function mountCollabWorkspace({workspace,editor,notify,onOpenPage=()=>{}}
   const revealSecret=(label,value)=>{outputLabel.textContent=label;output.value=value;output.parentElement.classList.remove('hidden');};
   for(const type of TYPES)kind.append(el('option',{value:type,textContent:type}));
   for(const service of TARGETS)target.append(el('option',{value:service,textContent:service}));
+  function explainPlacement(){
+    const choice=kind.value+'|'+target.value;
+    const guidance={
+      'Script|ServerScriptService':'Server-side Script · runs on the server',
+      'LocalScript|StarterGui':'LocalScript · runs in the player GUI',
+      'LocalScript|StarterPlayerScripts':'LocalScript · runs for each player',
+      'ModuleScript|ReplicatedStorage':'ModuleScript · available to client and server require calls',
+      'ModuleScript|ServerScriptService':'ModuleScript · available to server scripts'
+    };
+    $('collab-target-help').textContent=guidance[choice]||
+      'This placement is supported, but this script class may not execute there. Check Roblox script execution rules.';
+  }
+  kind.addEventListener('change',explainPlacement);
+  target.addEventListener('change',explainPlacement);
+  explainPlacement();
   function openPage(){
     onOpenPage();
     visible=true;page.classList.remove('hidden');surface.classList.add('collab-page-active');
