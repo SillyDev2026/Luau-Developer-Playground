@@ -4,6 +4,7 @@ import { githubModuleTargets } from './github-modules.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, maskLuau, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
+import { hoverAt, sourceOffsetAtPoint } from './symbol-hover.js';
 
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
@@ -93,6 +94,34 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   menu.setAttribute('aria-label','Luau IntelliSense, AutoRequire and Roblox API suggestions');
   parent.append(menu);
   const help=document.createElement('div');help.id='signature-help';help.className='signature-help hidden';help.setAttribute('role','status');help.setAttribute('aria-live','off');parent.append(help);
+  const hover=document.createElement('div');hover.id='symbol-hover';hover.className='symbol-hover hidden';hover.setAttribute('role','tooltip');parent.append(hover);
+  const hoverCanvas=document.createElement('canvas'),hoverContext=hoverCanvas.getContext('2d');
+  let hoverFrame=0;
+  function hideHover(){hover.classList.add('hidden');}
+  function updateHover(event){
+    if(!enabled || !menu.classList.contains('hidden') || !hoverContext){hideHover();return;}
+    const project=getProject();
+    if(editor.dataset.path!==project.active){hideHover();return;}
+    const style=getComputedStyle(editor),rect=editor.getBoundingClientRect(),bounds=parent.getBoundingClientRect();
+    hoverContext.font=style.fontStyle+' '+style.fontWeight+' '+style.fontSize+' '+style.fontFamily;
+    const width=hoverContext.measureText('M').width;
+    if(!width){hideHover();return;}
+    const offset=sourceOffsetAtPoint(editor.value,{x:event.clientX-rect.left,y:event.clientY-rect.top},{
+      paddingLeft:parseFloat(style.paddingLeft)||0,paddingTop:parseFloat(style.paddingTop)||0,
+      charWidth:width,lineHeight:parseFloat(style.lineHeight)||22,scrollLeft:editor.scrollLeft,scrollTop:editor.scrollTop,
+      tabSize:parseInt(style.tabSize,10)||4
+    });
+    const result=offset===null?null:hoverAt(editor.value,offset,project,getRobloxAPI());
+    if(!result){hideHover();return;}
+    const title=document.createElement('strong');title.textContent=result.signature;
+    const origin=document.createElement('small');origin.textContent=result.origin;
+    hover.replaceChildren(title,origin);
+    hover.classList.remove('hidden');
+    const left=Math.min(Math.max(6,event.clientX-bounds.left+14),Math.max(6,parent.clientWidth-hover.offsetWidth-6));
+    const above=event.clientY-bounds.top-hover.offsetHeight-12;
+    hover.style.left=left+'px';
+    hover.style.top=(above>=6?above:Math.min(parent.clientHeight-hover.offsetHeight-6,event.clientY-bounds.top+18))+'px';
+  }
   const setting=document.createElement('div');
   setting.className='setting-group';
   const heading=document.createElement('div'); heading.className='setting-heading'; heading.textContent='INTELLISENSE + AUTO REQUIRE';
@@ -127,7 +156,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   window.visualViewport?.addEventListener('resize',relocate,{passive:true});
   function updateSignature(){
     if(!enabled||editor.selectionStart!==editor.selectionEnd){help.classList.add('hidden');return;}
-    const hint=signatureFor(editor.value,editor.selectionStart,getRobloxAPI());
+    const hint=signatureFor(editor.value,editor.selectionStart,getRobloxAPI(),getProject());
     if(!hint){help.classList.add('hidden');return;}
     const parts=formatSignature(hint.signature,hint.activeParameter);
     const left=document.createElement('span');left.textContent=parts.before;
@@ -206,6 +235,12 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     hide();editor.focus();
     if(wasImport)notify(result.created?'Module imported: '+result.variable:'Reused existing import: '+result.variable);
   }
+  editor.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch')return;
+    cancelAnimationFrame(hoverFrame);
+    hoverFrame=requestAnimationFrame(()=>updateHover(event));
+  });
+  for(const type of ['pointerleave','scroll','input','keydown','blur','click'])editor.addEventListener(type,hideHover);
   editor.addEventListener('input',()=>update());
   editor.addEventListener('click',()=>update());
   editor.addEventListener('keyup',()=>update());
@@ -218,7 +253,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     else if(event.key==='ArrowDown'||event.key==='ArrowUp'){selected=(selected+(event.key==='ArrowDown'?1:-1)+options.items.length)%options.items.length;renderMenu();}
     else choose();
   },true);
-  toggle.addEventListener('change',()=>{enabled=toggle.checked;try{localStorage.setItem(key,String(enabled));}catch{}if(!enabled)hide();else update();});
+  toggle.addEventListener('change',()=>{enabled=toggle.checked;try{localStorage.setItem(key,String(enabled));}catch{}if(!enabled){hide();hideHover();}else update();});
   document.addEventListener('click',event=>{if(event.target!==editor && !menu.contains(event.target))hide();});
   // Catalog buttons retain their full documentation action; add direct Import buttons.
   const catalog=document.querySelector('#builtin-catalog');

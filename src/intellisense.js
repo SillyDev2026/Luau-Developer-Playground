@@ -124,6 +124,29 @@ export function localsInScope(source, cursor) {
   return [...names().values()];
 }
 
+
+// Distinguish Luau type annotations from ordinary expressions before suggesting
+// value globals. Function parameters and return types are especially important:
+// "b: num" must complete to "number", never "tonumber".
+function typeContext(prefix) {
+  const line = prefix.split('\n').at(-1);
+  const word = line.match(/([A-Za-z_]\w*)?$/)?.[0] || '';
+  const head = line.slice(0, line.length - word.length);
+  const explicit = /(?:\blocal\s+[A-Za-z_]\w*\s*:\s*|\b(?:export\s+)?type\s+[A-Za-z_]\w*\s*=\s*|::\s*|\)\s*:\s*)$/.test(head);
+  if (explicit) return word;
+  const parameter = /(?:^|[,(\s])(?:[A-Za-z_]\w*)\s*(?:\?)?\s*:\s*$/.test(head);
+  if (parameter) {
+    // Only treat ':' as a parameter type inside an unclosed function header
+    // or as a record member in a type alias; not an arbitrary value expression.
+    const fn = prefix.match(/\bfunction(?:\s+[\w.:]+)?\s*\([^)]*$/);
+    const alias = prefix.match(/\b(?:export\s+)?type\s+\w+\s*=[^;\n]*$/);
+    if (fn || alias) return word;
+  }
+  // Unions and optional types: the nearest annotation must still be on this line.
+  if (/(?:\||&)\s*$/.test(head) && /(?:\blocal\s+\w+\s*:|::|\btype\s+\w+\s*=|\)\s*:|\bfunction\b.*\([^)]*\w\s*:)/.test(line)) return word;
+  return null;
+}
+
 export function completionContext(source,cursor) {
   const masked=maskLuau(source), prefix=masked.slice(0,cursor);
   const original=source.slice(0,cursor);
@@ -131,8 +154,8 @@ export function completionContext(source,cursor) {
   const endPart=original.split('\n').at(-1);
   // Do not complete while inside comments and string literals.
   if(part.trim()==='' && endPart.trim()!=='')return null;
-  const type=part.match(/(?:\blocal\s+\w+\s*:\s*|::\s*|\btype\s+\w+\s*=\s*)([A-Za-z_]\w*)?$/);
-  if(type)return {mode:'type',query:type[1]||'',from:cursor-(type[1]||'').length,to:cursor};
+  const type=typeContext(prefix);
+  if(type!==null)return {mode:'type',query:type,from:cursor-type.length,to:cursor};
   const member=part.match(/(?:^|[^\w])([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*([.:])\s*([A-Za-z_]\w*)?$/);
   if(member)return {mode:'member',base:member[1],separator:member[2],query:member[3]||'',from:cursor-(member[3]||'').length,to:cursor};
   const word=part.match(/(?:^|[^\w.])([A-Za-z_]\w*)$/);
@@ -185,7 +208,7 @@ export function staticCompletions(source,cursor,api) {
   const unique=new Map();
   for(const item of proposals)if(!unique.has(item.label)||unique.get(item.label).score<item.score)unique.set(item.label,item);
   const items=[...unique.values()].sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label)).slice(0,12);
-  return items.length?{...context,items}:null;
+  return items.length && !(context.mode==='type' && items.length===1 && items[0].label===context.query) ? {...context,items}:null;
 }
 
 export function applyCompletion(source,context,choice){
@@ -197,6 +220,9 @@ export function applyCompletion(source,context,choice){
 
 export function mergeCompletions(primary,wasm){
   if(!primary)return primary;
+  // WASM autocomplete can mix value/functions into a type-only context.
+  // The lexical type list is authoritative until typed WASM results are isolated.
+  if(primary.mode==='type')return primary;
   const matches=new Map(primary.items.map(x=>[x.label,x]));
   for(const item of wasm||[]){
     if(!item.label||!relevance(primary.query,item.label)||matches.has(item.label))continue;

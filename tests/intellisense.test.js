@@ -86,3 +86,26 @@ test('long strings and long comments never leak fake local symbols or slash impo
  assert.ok(!has(suggest(code),'hidden'));
  assert.equal(completionContext('local s = [=[\n/Math\n]=]',17),null);
 });
+
+
+test('Luau function parameter and return annotations offer types, never tonumber',()=>{
+  for(const code of [
+    'function Math.add(a: nu',
+    'function Math.add(a: number, b: nu',
+    'function Math.add(a: number, b: number): nu',
+    'local function calc(a: number): nu',
+    'type Callback = (value: nu',
+    'local result: nu',
+    'local result = value :: nu'
+  ]){
+    const context=completionContext(code,code.length);
+    assert.equal(context?.mode,'type',code);
+    const items=suggest(code);
+    assert.ok(has(items,'number'),code);
+    assert.ok(!has(items,'tonumber'),code);
+    const merged=mergeCompletions({ ...context,items },[{label:'tonumber',kind:'function',detail:'WASM value global'}]);
+    assert.ok(!has(merged.items,'tonumber'),code);
+  }
+  assert.equal(completionContext('local count = tonumber', 'local count = tonumber'.length)?.mode,'identifier');
+  assert.equal(staticCompletions('function Math.add(a: number','function Math.add(a: number'.length,CORE_API),null);
+});

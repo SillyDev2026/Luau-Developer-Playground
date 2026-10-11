@@ -2,6 +2,7 @@
 // WASM diagnostics remains the authority for type correctness.
 import { maskLuau, localsInScope } from './intellisense.js?v=0.4.0';
 import { getRobloxAPI, DEFAULT_PARENTS } from './roblox-api.js?v=0.4.0';
+import { lookupSignature } from './symbol-hover.js';
 
 const IDENT = /^[A-Za-z_]\w*$/;
 const BUILTIN_CALLS = {
@@ -65,7 +66,7 @@ function classForExpression(expression, source, cursor) {
   return type;
 }
 
-export function signatureFor(source,cursor,api=getRobloxAPI()) {
+export function signatureFor(source,cursor,api=getRobloxAPI(),project) {
   const context=argumentContext(source,cursor);
   if(!context) return null;
   const name=context.name,parts=name.split(/[.:]/);
@@ -87,6 +88,7 @@ export function signatureFor(source,cursor,api=getRobloxAPI()) {
       for(const match of before.matchAll(assignment))signature=name+'('+match[1]+')';
     }
   }
+  if(!signature)signature=lookupSignature(name,source,cursor,project,api)?.signature||'';
   if(!signature)return null;
   return {...context,signature};
 }

@@ -6,3 +6,11 @@
 .signature-help.hidden{display:none}
 .auto-require-menu:not(.hidden)~.signature-help:not(.hidden){bottom:10px;max-width:min(340px,calc(100% - 20px));}
 @media(max-width:650px){.signature-help{right:6px;bottom:8px;max-width:calc(100% - 12px);font-size:11px}.auto-require-menu:not(.hidden)~.signature-help:not(.hidden){bottom:8px;max-width:calc(100% - 12px)}}
+
+
+/* Read-only symbol signature tooltip, positioned by the pointer inside the code stack. */
+.symbol-hover{position:absolute;z-index:70;display:flex;flex-direction:column;gap:4px;max-width:min(520px,calc(100% - 12px));width:max-content;padding:10px 12px;border:1px solid var(--accent,#8298ff);border-radius:8px;background:var(--panel,#101826);color:var(--text,#e5eafa);box-shadow:0 10px 32px #000a;pointer-events:none;font:12px/1.5 'Cascadia Code',Consolas,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.symbol-hover strong{font-weight:650;color:var(--text,#e5eafa)}
+.symbol-hover small{font:10px/1.4 system-ui,sans-serif;color:var(--muted,#8492ad)}
+.symbol-hover.hidden{display:none}
+@media(max-width:650px){.symbol-hover{font-size:11px;max-width:calc(100% - 12px)}}
