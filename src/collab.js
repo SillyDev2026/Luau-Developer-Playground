@@ -235,7 +235,8 @@ export function mountCollabWorkspace({workspace,editor,notify,onOpenPage=()=>{}}
     const session=connection;
     const response=await call('/scripts','POST',{name:scriptName.value.trim(),type:kind.value,target:target.value},session);
     if(connection!==session)throw Error('Workspace changed after the script was created.');
-    infoModel=null;await refresh();
+    if(infoModel)infoModel.scripts.push(response.script);
+    await refresh();
     await openRemote(response.script.id);
     setStatus(response.script.type+' '+response.script.name+' created in '+response.script.target+'.');
   }
@@ -304,7 +305,7 @@ export function mountCollabWorkspace({workspace,editor,notify,onOpenPage=()=>{}}
   for(const name of ['collab-page-btn','mobile-collab'])$(name).addEventListener('click',openPage);
   openButton.addEventListener('click',openPage);
   $('collab-back-editor').addEventListener('click',()=>{closePage();editor.input.focus();});
-  for(const name of ['dashboard-btn','brand-home'])$(name).addEventListener('click',closePage,{capture:true});
+  for(const name of ['dashboard-btn','brand-home','mobile-dashboard'])$(name).addEventListener('click',closePage,{capture:true});
   editor.input.addEventListener('input',()=>{if(connection){setControls();if(visible)render();}});
   editor.input.addEventListener('luauforge:filechange',()=>{setControls();if(visible)render();});
   window.addEventListener('pagehide',()=>{if(timer)clearInterval(timer);});
