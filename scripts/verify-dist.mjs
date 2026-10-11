@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.0\.6"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.1\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -49,3 +49,5 @@ assert.match(html,/id="release-banner"/);
 // V3 workbench modules must ship with the interactive Pages artifact.
 for (const filename of ['src/v3/ui.js','src/v3/core.js','src/v3/ui.css']) await stat(join(out, filename));
 assert.match(html,/id="v3-actions"/);
+for (const filename of ['src/collab.js','src/collab.css']) await stat(join(out,filename));
+assert.match(html,/id="collab-settings"/);
