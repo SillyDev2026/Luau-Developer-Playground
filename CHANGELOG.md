@@ -1,3 +1,11 @@
+## 3.1.0 — 2026-10-11
+
+- Add opt-in Node collaboration service with persisted shared workspaces, owner/editor/viewer permissions, one-use 24-hour invites, bearer-token hashing, origin allowlisting, size limits and optimistic revision checks.
+- Integrate a collaboration panel into the existing .io editor for creating Script, LocalScript and ModuleScript files; choose ReplicatedStorage, ServerScriptService, StarterGui or StarterPlayerScripts destinations.
+- Build Studio plugin with user-approved token pairing, polling and ScriptEditorService-based managed script updates; protect unmanaged scripts and pause while Studio is running a game.
+- Ship Node/server tests, optional Render deployment template and security/setup documentation. Requires separate persistent HTTPS hosting; Pages remains a static frontend.
+- Keep local-only project storage, editor layout, IntelliSense, Luau WASM runtime and bundled libraries untouched by default.
+
 ## 3.0.6 — 2026-10-11
 
 - Add public exported Luau type aliases distinct from private type declarations.
