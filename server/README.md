@@ -1,3 +1,13 @@
+# v3.1.1 updates: Scripts page and safer Studio synchronization
+
+Open the new **Scripts** page from the top toolbar or mobile dock. Search and filter shared scripts, inspect published code, open the Luau editor, publish changed code, and (with editor permission) rename or move a script to another supported Studio destination. The workspace owner can remove invited developers with immediate token revocation; invited editors and viewers can use **Leave workspace** to revoke their own tokens. **Disconnect** only clears the browser tab, not the server token.
+
+A failed Studio update now exposes an error in the script page and retries after 15 seconds, increasing up to five minutes on repeated failure. A newer code revision skips the old backoff. Studio plugin revisions now keep a source checksum to detect changes made directly in Studio, including an open editor source buffer, before applying an update. If a new script cannot be populated, the plugin destroys its empty placeholder. For older managed scripts without a checksum, back up the place and manually inspect on first upgrade. The plugin does not auto-resolve source conflicts or class-change conflicts.
+
+All existing Node backend data files keep the same storage schema. GitHub Pages deployment still does not deploy Node hosting; set up an HTTPS backend and install the Studio plugin separately.
+
+---
+
 # LuauForge shared workspaces and Studio bridge (v3.1.0)
 
 The GitHub Pages .io website is a static frontend. It cannot run Node.js. You must deploy the opt-in collaboration backend on a separate HTTPS host. Existing local projects stay local; only scripts created or published into a shared workspace are uploaded.
