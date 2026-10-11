@@ -1,3 +1,13 @@
+# LuauForge v3.1.1 — Shared Scripts manager and collaboration fixes
+
+The redesigned **Scripts** page (top toolbar or mobile dock) opens a full-width workspace manager with script search, class/destination filters, revision status, published Luau preview, metadata editing, member administration, and Studio sync diagnostics. Open a script in the existing editor for full IntelliSense, then **Publish** when the source has changed. Draft changes are retained locally until published, and stale server revisions return a conflict rather than silently overwriting teammates' work.
+
+Backend improvements: workspace owners may revoke an invited member's access, editors/viewers may leave, and failed Studio updates back off rather than retrying on every polling cycle. The Studio plugin checks whether a managed script has been edited locally, rejects unsafe overwrites, and cleans up newly created objects if source insertion fails. Studio source sync remains one-way and requires real Studio validation.
+
+**Hosting note:** only the GitHub Pages frontend is deployed by the repository workflow. You must still deploy the separate Node backend with HTTPS and persistent storage and install/pair the Studio plugin. See [server/README.md](server/README.md).
+
+---
+
 # LuauForge v3.1.0 — Shared workspaces and Roblox Studio bridge
 
 Create private, invite-only collaborative Luau workspaces using an optional Node.js backend. The GitHub Pages website provides owner/editor/viewer roles, one-use invitations, Script / LocalScript / ModuleScript creation, Roblox Studio destination selection, versioned source publishing, and Studio pairing. A separate Studio plugin installs only tagged workspace scripts in ReplicatedStorage, ServerScriptService, StarterGui or StarterPlayer.StarterPlayerScripts. Source from ordinary existing local workspaces is never uploaded automatically. Studio syncing is one-way (website → Studio) and happens only when connected in Edit mode.

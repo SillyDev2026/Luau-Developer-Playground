@@ -7,22 +7,23 @@
   <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/v15.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/community.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/v3/ui.css?v=3.1.0" />
-  <link rel="stylesheet" href="./src/collab.css?v=3.1.0" />
-  <title>LuauForge 3.1.0 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/community.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.1.1" />
+  <link rel="stylesheet" href="./src/collab.css?v=3.1.1" />
+  <title>LuauForge 3.1.1 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.1.0</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.1.1</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
+      <button class="secondary-btn collab-header-link" id="collab-page-btn" type="button" title="Shared script workspace">◇ Scripts</button>
       <button class="icon-btn header-secondary" id="palette-btn" title="Command palette · Ctrl+P" aria-label="Command palette">⌕</button>
       <button class="icon-btn header-secondary" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       <button class="secondary-btn header-secondary" id="check-btn" title="Check Luau types">✓ Check</button>
@@ -36,6 +37,9 @@
     <button type="button" id="release-dismiss" aria-label="Dismiss release update">✕</button>
   </section>
   <div class="main-surface" id="main-surface">
+    <section id="collab-view" class="hidden" aria-label="Shared scripts workspace">
+      <div class="collab-page-inner"><header class="collab-page-heading"><div><span class="collab-eyebrow">LUAUFORGE · COLLABORATION</span><h1>Shared Scripts</h1><p>Create Luau scripts, manage team access, and publish updates to Roblox Studio.</p></div><button id="collab-back-editor" type="button" class="secondary-btn">← Back to editor</button></header><div id="collab-page-body"></div></div>
+    </section>
     <section id="dashboard-view" class="hidden" aria-label="Developer Dashboard">
       <div class="dash-shell">
         <header class="dash-heading"><div><h1>Developer Dashboard</h1><p>20 live workspace widgets · LuauForge v3.0</p></div>
@@ -109,17 +113,35 @@
           <label>Received invitation code <input id="collab-code" type="text" placeholder="Paste one-use invite" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
           <button type="button" class="wide-btn" id="collab-join">Join invited workspace</button>
           <p id="collab-info" class="inspector-note">Not connected to a shared workspace.</p>
+          <div id="collab-stats" class="collab-stats" aria-label="Workspace summary"><span>0 scripts</span><span>0 members</span><span>Studio offline</span></div>
           <div id="collab-members" class="collab-members" aria-label="Shared workspace members"></div>
+          <p class="inspector-note">Owners can remove other members. Removed tokens stop working immediately.</p>
           <div class="collab-actions">
             <button id="collab-refresh" type="button">Refresh</button>
-            <button id="collab-disconnect" type="button">Disconnect</button>
+            <button id="collab-disconnect" type="button">Disconnect</button><button id="collab-leave" type="button">Leave workspace</button>
           </div>
           <div class="setting-title">CREATE ROBLOX SCRIPT</div>
           <label>Script name <input id="collab-script-name" maxlength="50" placeholder="PlayersData" autocomplete="off"/></label>
           <label>Class <select id="collab-type"></select></label>
           <label>Studio destination <select id="collab-target"></select></label>
+          <p id="collab-target-help" class="inspector-note" role="status" aria-live="polite">Select a script class and destination to see how it runs in Studio.</p>
           <button type="button" class="wide-btn" id="collab-create-script">Create script in shared workspace</button>
+          <div class="collab-file-tools"><label>Search shared scripts<input id="collab-search" type="search" placeholder="Search name or creator…" autocomplete="off"/></label>
+            <label>Type<select id="collab-filter-type"><option value="">All script types</option><option value="Script">Script</option><option value="LocalScript">LocalScript</option><option value="ModuleScript">ModuleScript</option></select></label>
+            <label>Destination<select id="collab-filter-target"><option value="">All locations</option><option value="ReplicatedStorage">ReplicatedStorage</option><option value="ServerScriptService">ServerScriptService</option><option value="StarterGui">StarterGui</option><option value="StarterPlayerScripts">StarterPlayerScripts</option></select></label></div>
+          <p class="inspector-note" id="collab-list-summary">No shared scripts loaded</p>
           <div id="collab-files" class="collab-files" aria-label="Shared scripts"></div>
+          <div id="collab-script-details" class="collab-script-details hidden">
+            <div class="setting-title">SELECTED SCRIPT</div>
+            <p id="collab-selected-title" class="inspector-note"></p>
+            <label>Rename script<input id="collab-edit-name" type="text" maxlength="50" autocomplete="off"/></label>
+            <label>Class<select id="collab-edit-type"><option value="Script">Script</option><option value="LocalScript">LocalScript</option><option value="ModuleScript">ModuleScript</option></select></label>
+            <label>Studio destination<select id="collab-edit-target"><option value="ReplicatedStorage">ReplicatedStorage</option><option value="ServerScriptService">ServerScriptService</option><option value="StarterGui">StarterGui</option><option value="StarterPlayerScripts">StarterPlayerScripts</option></select></label>
+            <div class="collab-actions"><button id="collab-update-script" type="button">Save properties</button><button id="collab-open-editor" type="button">Open code editor ↗</button></div>
+            <p class="inspector-note">Class changes of scripts already installed in Studio require manual review.</p>
+            <div class="setting-title">PUBLISHED SOURCE PREVIEW</div>
+            <pre class="collab-preview" id="collab-preview" aria-label="Published Luau code preview"></pre>
+          </div>
           <button type="button" class="wide-btn" id="collab-save-script">Publish open shared script to team and Studio</button>
           <p class="inspector-note">Changes are published when you click Publish, not on every keystroke. Teammates' file lists refresh periodically. Revision conflicts require a manual reload.</p>
           <div class="setting-title">INVITATIONS + STUDIO PAIRING</div>
@@ -155,13 +177,13 @@
       </div>
     </aside>
   </div>
-  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button></nav>
+  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button></nav>
 </div>
 <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
   <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">Quick command</h2><button id="dialog-close" aria-label="Close dialog">✕</button></div><div id="dialog-body" class="dialog-body"></div></section>
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=3.1.0"></script>
+<script type="module" src="./src/v1.js?v=3.1.1"></script>
 </body>
 </html>

@@ -14,3 +14,60 @@
 .collab-settings #collab-status[data-warning="true"]{color:#f39c9c}
 .collab-settings .setting-title{margin-top:10px}
 @media(max-width:760px){.collab-script{align-items:flex-start}.collab-script-detail small{font-size:10px}.collab-script button{min-width:48px}}
+
+/* Full-size Script Manager view, keeping the Luau editor dimensions untouched. */
+.main-surface.collab-page-active > :not(#collab-view){display:none!important;}
+#collab-view{flex:1 1 100%;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;background:var(--bg,#0b111d);padding:clamp(12px,2vw,28px);scrollbar-width:thin;}
+.collab-page-inner{max-width:1380px;display:flex;flex-direction:column;gap:20px;margin:0 auto;}
+.collab-page-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:3px 0 9px;border-bottom:1px solid var(--border,#304057);}
+.collab-page-heading h1{font-size:clamp(23px,2.2vw,34px);font-weight:800;letter-spacing:-.8px;margin:4px 0;}
+.collab-page-heading p{font-size:13px;color:var(--muted,#93a2b8);line-height:1.5;margin:4px 0 0;}
+.collab-eyebrow{color:var(--accent,#8298ff);font-size:10px;font-weight:800;letter-spacing:1.4px;}
+#collab-page-body{width:100%;min-width:0;padding-bottom:28px;}
+#collab-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 17px;background:transparent;border:0;padding:0;}
+#collab-settings > .setting-title{grid-column:1/-1;background:var(--panel,#111d30);border:1px solid var(--border,#2f3e57);border-radius:9px;padding:12px 14px;margin:14px 0 0;font-size:11px;letter-spacing:1.1px;}
+#collab-settings > .inspector-note,#collab-settings > .collab-members,
+#collab-settings > .collab-stats,#collab-settings > .collab-actions,
+#collab-settings > .collab-file-tools,#collab-settings > .collab-files,
+#collab-settings > .collab-script-details,#collab-settings > .collab-secret,
+#collab-settings > a,#collab-settings > #collab-info,#collab-settings > #collab-list-summary,
+#collab-settings > #collab-status{grid-column:1/-1;}
+#collab-settings label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--text,#e7edfa);min-width:0;}
+#collab-settings label input,#collab-settings label select{width:100%;border:1px solid var(--border,#31435d);border-radius:8px;background:var(--panel2,#18243a);color:var(--text,#e9f1ff);min-height:40px;padding:9px 10px;font-size:12px;}
+#collab-settings button:not(.collab-chip button){border:1px solid var(--border,#31435d);border-radius:8px;background:var(--panel2,#1b2940);color:var(--text,#eef3ff);padding:9px 14px;min-height:39px;font-size:12px;font-weight:650;}
+#collab-settings button:hover:not(:disabled){border-color:var(--accent,#8e9ffe);background:var(--panel3,#263a56);}
+#collab-settings #collab-create,#collab-settings #collab-create-script,#collab-settings #collab-save-script{background:var(--accent2,#526ed8);color:#fff;border-color:transparent;}
+#collab-settings .collab-actions{display:flex;flex-wrap:wrap;gap:8px;}
+#collab-settings .collab-actions button{flex:1 1 150px;}
+.collab-header-link{min-height:34px;}
+.collab-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.collab-stats span{padding:13px 10px;text-align:center;border-radius:10px;background:var(--panel,#111d2e);border:1px solid var(--border,#2c3c55);font-size:12px;font-weight:750;}
+.collab-file-tools{display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(150px,1fr));gap:10px;}
+#collab-settings .collab-files{max-height:none;overflow:visible;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,295px),1fr));gap:10px;align-items:stretch;}
+#collab-settings .collab-script{display:flex;align-items:flex-start;min-height:140px;padding:15px;border-radius:12px;background:var(--panel,#111c2f);border:1px solid var(--border,#2d3e55);box-shadow:0 4px 14px #0002;}
+#collab-settings .collab-script.selected{border-color:var(--accent,#8298ff);}
+#collab-settings .collab-script-detail{font-size:13px;gap:7px;flex:1;}
+#collab-settings .collab-script-detail strong{font-size:15px;color:var(--text,#ecf2ff);}
+#collab-settings .collab-script-detail small{font-size:11px;line-height:1.4;}
+.collab-script-actions{display:grid;gap:7px;min-width:85px;}
+#collab-settings .collab-script-badge{display:inline-flex;align-self:start;justify-self:start;max-width:max-content;border:1px solid var(--border,#31435d);border-radius:30px;padding:4px 8px;color:var(--muted,#a2b1c7);font-size:10px;font-weight:750;}
+#collab-settings .collab-unsaved{color:#efbd73;border-color:#a47c40;}
+#collab-settings .collab-members{gap:8px;}
+#collab-settings .collab-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:11px;background:var(--panel2,#18263b);border-radius:7px;}
+#collab-settings .collab-chip button{background:none;border:0;color:#f5a7b0;font-size:17px;padding:0 2px;min-height:0;}
+.collab-script-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;padding:16px;background:var(--panel,#111d2e);border:1px solid var(--border,#2c3c55);border-radius:12px;}
+.collab-script-details > .setting-title,.collab-script-details > .inspector-note,.collab-script-details > .collab-actions,.collab-script-details > .collab-preview{grid-column:1/-1;}
+.collab-script-details .collab-preview{margin:0;padding:14px;max-height:400px;overflow:auto;min-height:110px;background:var(--bg,#0c1421);border:1px solid var(--border,#2f425b);border-radius:8px;font:12px/1.55 Consolas,monospace;white-space:pre;tab-size:4;}
+#collab-settings .collab-secret{background:var(--panel,#112035);padding:14px;}
+#collab-settings .collab-secret textarea{max-width:100%;font-size:12px;color:var(--text,#eef3ff);background:var(--bg,#101826);border-radius:7px;padding:10px;}
+.collab-shortcut{margin-top:10px;}
+@media(max-width:760px){
+  #collab-settings{grid-template-columns:minmax(0,1fr);}
+  .collab-file-tools{grid-template-columns:minmax(0,1fr);}
+  .collab-script-details{grid-template-columns:minmax(0,1fr);}
+  .collab-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  #collab-settings .collab-files{grid-template-columns:minmax(0,1fr);}
+  #collab-view{padding:12px;}
+  .collab-page-heading{align-items:flex-start;}
+  .collab-header-link{font-size:11px;padding:0 9px;}
+}

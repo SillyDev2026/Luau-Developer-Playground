@@ -99,7 +99,7 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
       response.setHeader('Access-Control-Allow-Origin',origin);
       response.setHeader('Vary','Origin');
       response.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type');
-      response.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, OPTIONS');
+      response.setHeader('Access-Control-Allow-Methods','GET, POST, PATCH, DELETE, OPTIONS');
     }
     if(request.method==='OPTIONS'){response.writeHead(204);response.end();return;}
     const pathname=new URL(request.url||'/', 'http://127.0.0.1').pathname;
@@ -108,7 +108,7 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
     try{
       if(pathname==='/health'&&method==='GET')return json(response,200,{ok:true,service:'luauforge-collab'});
       if(route[0]!=='api')throw failure(404,'Unknown endpoint');
-      if(!['GET','POST','PATCH'].includes(method))throw failure(405,'Method not allowed');
+      if(!['GET','POST','PATCH','DELETE'].includes(method))throw failure(405,'Method not allowed');
       // A small per-peer bound on account creation and invite redemption.
       if(method==='POST'&&(pathname==='/api/workspaces'||pathname==='/api/join')){
         const key=(request.socket.remoteAddress||'unknown')+':'+pathname,now=clock();
@@ -144,6 +144,19 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
       if(route[1]==='workspaces'&&route[2]){
         const workspace=findWorkspace(db,route[2]),member=requireSession(workspace,request);
         if(route.length===3&&method==='GET')return json(response,200,{workspace:view(workspace,member)});
+        if(route[3]==='leave'&&route.length===4&&method==='POST'){
+          if(member.role==='owner')throw failure(403,'The owner cannot leave the workspace');
+          delete workspace.members[member.id];save();
+          return json(response,200,{ok:true});
+        }
+        if(route[3]==='members'&&route.length===5&&method==='DELETE'){
+          owner(member);
+          const departing=workspace.members[route[4]];
+          if(!departing)throw failure(404,'Member not found');
+          if(departing.role==='owner')throw failure(403,'Cannot remove the workspace owner');
+          delete workspace.members[departing.id];save();
+          return json(response,200,{ok:true});
+        }
         if(route[3]==='invites'&&route.length===4&&method==='POST'){
           owner(member);
           const body=await parseBody(request);
@@ -163,9 +176,14 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
           return json(response,201,{token,workspaceId:workspace.id});
         }
         if(route[3]==='studio-status'&&route.length===4&&method==='GET'){
+          const failures=Object.values(workspace.scripts).flatMap(script=>{
+            const result=workspace.studio.applied[script.id];
+            return result?.success===false&&result.failedVersion===script.version?
+              [{scriptId:script.id,name:script.name,error:result.message,updatedAt:result.at,retryAt:result.retryAt}]:[];
+          });
           return json(response,200,{studio:{paired:Boolean(workspace.studio?.tokenHash),lastSeen:workspace.studio.lastSeen,
             applied:Object.values(workspace.studio.applied).filter(x=>x.success).length,
-            pending:Object.values(workspace.scripts).filter(script=>workspace.studio.applied[script.id]?.version!==script.version).length}});
+            pending:Object.values(workspace.scripts).filter(script=>workspace.studio.applied[script.id]?.version!==script.version).length,failures}});
         }
         if(route[3]==='scripts'){
           if(route.length===4&&method==='GET')return json(response,200,{scripts:Object.values(workspace.scripts).map(scriptSummary)});
@@ -202,7 +220,10 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
         requireStudio(workspace,request);
         if(route[3]==='changes'&&route.length===4&&method==='GET'){
           workspace.studio.lastSeen=clock();save();
-          const changes=Object.values(workspace.scripts).filter(script=>workspace.studio.applied[script.id]?.version!==script.version).slice(0,20);
+          const changes=Object.values(workspace.scripts).filter(script=>{
+            const last=workspace.studio.applied[script.id];
+            return last?.version!==script.version && !(last?.failedVersion===script.version && last?.retryAt>clock());
+          }).slice(0,20);
           return json(response,200,{workspaceId:workspace.id,changes});
         }
         if(route[3]==='ack'&&route.length===4&&method==='POST'){
@@ -211,7 +232,10 @@ export function createCollabServer({dataFile,allowedOrigins=[],clock=()=>Date.no
           if(!Number.isInteger(body.version)||body.version!==script.version)throw failure(409,'Stale Studio acknowledgement');
           if(body.success!==true && body.success!==false)throw failure(400,'Acknowledgement must report success');
           const success=body.success===true;
-          workspace.studio.applied[script.id]={version:success?script.version:0,success,
+          const previous=workspace.studio.applied[script.id];
+          const attempts=!success&&previous?.failedVersion===script.version ? Math.min(8,(previous.attempts||0)+1) : 1;
+          workspace.studio.applied[script.id]={version:success?script.version:0,failedVersion:success?null:script.version,
+            success,attempts:success?0:attempts,retryAt:success?null:clock()+Math.min(300000,15000*2**(attempts-1)),
             message:success?'':String(body.error||'Failed to apply').slice(0,180),at:clock()};
           workspace.studio.lastSeen=clock();save();
           return json(response,200,{ok:true});
