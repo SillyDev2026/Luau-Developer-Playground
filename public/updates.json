@@ -1,13 +1,14 @@
 {
-  "version": "3.0.1",
-  "title": "V3 console fixes, search reliability and official Discord",
+  "version": "3.0.2",
+  "title": "Editor and workbench bug fixes",
   "publishedAt": "2026-10-10",
   "changes": [
-    "Fixed v1 console welcome message: current LuauForge v3 version shown instead",
-    "Release settings and startup status now use the same version",
-    "Official Discord invite linked from Dashboard and Community settings",
-    "Fixed project-search truncation when results equal the maximum",
-    "Updated offline cache while preserving editor sizing and mobile geometry",
-    "Expanded version and search regression checks"
+    "Fixed empty autocomplete popups intercepting Enter, Tab and arrow keys",
+    "Fixed phantom Luau symbols and imports inside long strings and comments",
+    "Bracket pairing now ignores quoted text and comments",
+    "Source cleanup no longer overwrites a file edited after its preview",
+    "Verified exact commit, module path and expected size for lockfile imports",
+    "Corrected project audit and diff truncation indicators",
+    "Expanded automated regression tests without changing workspace storage format"
   ]
 }
