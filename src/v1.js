@@ -17,11 +17,14 @@ import { STUDIO_LIBRARIES, fetchStudioLibrary } from './studio-libraries.js';
 import { githubModuleTargets, previewGithubModule, saveGithubPin, removeGithubPin, readGithubPins } from './github-modules.js';
 import { mountV3 } from './v3/ui.js';
 import { mountCollabWorkspace } from './collab.js';
+import { mountFeedback } from './feedback.js';
 
 const $ = id => document.getElementById(id);
 const runtime = new LuauRuntime();
 let dashboard = null;
 let v3 = null;
+let feedbackUI = null;
+let collabUI = null;
 const state = { side: 'files', output: 'console', dialogs: false, busy: false, runToken: 0, checking: 0, problems: [], outputLogs: [], bytecode: null, bench: null, tests: null, liveCheck: false, lastFile: null, toastTimer: 0, liveTimer: 0, outputHeight: 202, sideWidth: 266, disposed: false };
 const settingsKey = 'luauforge:v1:settings';
 try { Object.assign(state, JSON.parse(localStorage.getItem(settingsKey) || '{}')); } catch { /* no saved settings */ }
@@ -573,7 +576,7 @@ function initialize() {
   window.addEventListener('pagehide', () => { workspace.dispose(); runtime.dispose(); state.disposed = true; });
   enableResizing();
   mountAutoRequire({ editor: editor.input, getProject: () => workspace.project, getRuntime: () => runtime, notify, catalogButtons: false });
-  mountCollabWorkspace({workspace,editor,notify,onOpenPage:()=>{if(dashboard?.isOpen())dashboard.close();closeMobile();}});
+  collabUI = mountCollabWorkspace({workspace,editor,notify,onOpenPage:()=>{feedbackUI?.close();if(dashboard?.isOpen())dashboard.close();closeMobile();}});
   // Catalog actions are owned by v1. AutoRequire provides editor completions.
   renderLibrary();
   if (matchMedia('(max-width:1200px)').matches) $('inspector').classList.add('is-hidden');
@@ -591,6 +594,7 @@ dashboard = mountDashboard({workspace,state,runtime,openEditor:()=>dashboard?.cl
   snapshotNow,snapshotDialog,createTemplate,exportZip,
   importProject:()=>document.getElementById('file-picker').click(),
   download,notify,showOutput:switchOutput});
+feedbackUI = mountFeedback({notify,onOpenPage:()=>{if(dashboard?.isOpen())dashboard.close();collabUI?.close();closeMobile();}});
 
 // Community preferences use an independent localStorage key. This code neither
 // touches existing workspace saves nor loads third-party scripts.
