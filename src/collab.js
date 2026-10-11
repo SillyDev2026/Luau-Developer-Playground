@@ -76,7 +76,7 @@ export function mountCollabWorkspace({workspace,editor,notify}){
   function render(){
     files.replaceChildren();members.replaceChildren();
     if(!infoModel){info.textContent='Not connected to a shared workspace.';setControls();return;}
-    info.textContent=infoModel.name+' · '+infoModel.role+' · '+infoModel.scripts.length+' scripts';
+    info.textContent=infoModel.name+' · '+infoModel.role+' · '+infoModel.scripts.length+' scripts · Studio workspace ID: '+infoModel.id;
     for(const member of infoModel.members){
       members.append(el('span',{className:'collab-chip',textContent:member.name+' ('+member.role+')'}));
     }
@@ -129,7 +129,7 @@ export function mountCollabWorkspace({workspace,editor,notify}){
   }
   function localPath(script){
     // Script IDs guarantee no collisions with a different shared script name.
-    return 'collab/'+connection.workspaceId+'/'+script.id+'.luau';
+    return 'collab/'+connection.workspaceId+'/'+script.name+'-'+script.id.slice(0,8)+'.luau';
   }
   async function openRemote(scriptId){
     const result=await call('/scripts/'+encodeURIComponent(scriptId));
@@ -137,6 +137,9 @@ export function mountCollabWorkspace({workspace,editor,notify}){
     const previous=bindings.get(path);
     if(previous&&workspace.project.files[path]!==previous.loadedSource){
       throw Error('Local edits are not published yet. Save the current script to the server before reloading.');
+    }
+    if(!previous&&Object.hasOwn(workspace.project.files,path)&&workspace.project.files[path]!==script.source){
+      throw Error('Existing local copy differs from the server. Rename or export the local file before reloading to avoid losing work.');
     }
     if(Object.hasOwn(workspace.project.files,path)){
       workspace.update(project=>({...project,files:{...project.files,[path]:script.source},active:path}));
