@@ -1,12 +1,12 @@
 {
-  "version": "3.0.3",
-  "title": "Luau type completion and hover signatures",
-  "publishedAt": "2026-10-10",
+  "version": "3.0.4",
+  "title": "Fix stuck typing after end and else",
+  "publishedAt": "2026-10-11",
   "changes": [
-    "Fixed function type annotation autocomplete suggesting tonumber instead of number",
-    "Added function hover signatures for local and imported workspace modules",
-    "Added signatures for documented bundled libraries and Roblox APIs",
-    "Extended parameter hints to functions exported by workspace modules",
-    "Preserved existing editor size and saved project format"
+    "Fixed automatic IntelliSense intercepting Enter instead of inserting new lines",
+    "Suppressed redundant autocomplete suggestions for complete Luau keywords",
+    "Normal arrow-key cursor movement works with passive suggestion menus",
+    "Tab completes unfinished suggestions; Ctrl+Space enables manual selection",
+    "Added regression tests without changing editor layout or saved projects"
   ]
 }
