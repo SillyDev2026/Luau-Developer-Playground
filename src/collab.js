@@ -19,6 +19,12 @@ async function apiCall(api,token,path,method='GET',data){
   if(!response.ok)throw Object.assign(Error(payload.error||'Server returned '+response.status),{status:response.status});
   return payload;
 }
+export function sharedScriptPath(workspaceId,script,files={}){
+  const prefix='collab/'+workspaceId+'/';
+  const legacy=prefix+script.name+'-'+script.id.slice(0,8)+'.luau';
+  return Object.hasOwn(files,legacy)?legacy:prefix+script.id+'.luau';
+}
+
 export function mountCollabWorkspace({workspace,editor,notify,onOpenPage=()=>{}}){
   const $=id=>document.getElementById(id),section=$('collab-settings');
   if(!section)return null;
@@ -74,10 +80,7 @@ export function mountCollabWorkspace({workspace,editor,notify,onOpenPage=()=>{}}
     catch{output.focus();output.select();setStatus('Select the code and copy it manually.');}
   }
   function localPath(script,session=connection){
-    const root='collab/'+session.workspaceId+'/';
-    const stable=root+script.id+'.luau';
-    const legacy=root+script.name+'-'+script.id.slice(0,8)+'.luau';
-    return Object.hasOwn(workspace.project.files,legacy)?legacy:stable;
+    return sharedScriptPath(session.workspaceId,script,workspace.project.files);
   }
   function currentBinding(){
     const entry=bindings.get(workspace.project.active);
