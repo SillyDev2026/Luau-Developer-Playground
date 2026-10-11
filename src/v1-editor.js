@@ -1,5 +1,6 @@
 import { highlightLuau } from './highlight.js';
 import { indentSelection, currentLineAndColumn, positionForLine } from './editor-utils.js';
+import { maskLuau } from './v15-analysis.js';
 
 const PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
 export function newlineIndent(source, cursor) {
@@ -9,18 +10,25 @@ export function newlineIndent(source, cursor) {
   return '\n' + indentation + (deeper ? '    ' : '');
 }
 export function matchBracket(source, cursor) {
-  const pairs = { '(': ')', '[': ']', '{': '}' }, reverse = { ')': '(', ']': '[', '}': '{' };
-  const at = /[()\[\]{}]/.test(source[cursor] || '') ? cursor : cursor - 1;
+  // Brackets inside strings or comments are not structural Luau syntax.
+  const clean = maskLuau(source);
+  const pairs = { '(': ')', '[': ']', '{': '}' };
+  const reverse = { ')': '(', ']': '[', '}': '{' };
+  const at = /[()\[\]{}]/.test(clean[cursor] || '') ? cursor : cursor - 1;
   if (at < 0) return null;
-  const ch = source[at], forward = Object.hasOwn(pairs, ch), other = forward ? pairs[ch] : reverse[ch];
+  const ch = clean[at];
+  const forward = Object.hasOwn(pairs, ch);
+  const other = forward ? pairs[ch] : reverse[ch];
   if (!other) return null;
   let depth = 1;
-  for (let i = at + (forward ? 1 : -1); i >= 0 && i < source.length; i += forward ? 1 : -1) {
-    if (source[i] === ch) depth++;
-    if (source[i] === other && --depth === 0) return [Math.min(at, i), Math.max(at, i)];
+  const step = forward ? 1 : -1;
+  for (let i = at + step; i >= 0 && i < clean.length; i += step) {
+    if (clean[i] === ch) depth++;
+    else if (clean[i] === other && --depth === 0) return [Math.min(at, i), Math.max(at, i)];
   }
   return null;
 }
+
 export class CodeEditor {
   constructor({ input, highlight, gutter, onChange, onCursor, onShortcut }) {
     Object.assign(this, { input, highlight, gutter, onChange, onCursor, onShortcut });
