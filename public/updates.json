@@ -1,13 +1,12 @@
 {
-  "version": "3.4.0",
-  "title": "Expanded Auto Require and smarter module IntelliSense",
+  "version": "3.4.1",
+  "title": "Android landscape Explorer and mobile navigation fix",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Auto Require recognizes seven Roblox Studio modules: NexusDataStore, ZonePlusNext, BufferUtil, Compression, Signal, Promise and NetStream",
-    "Scoped commands /studio/, /github/, /wasm/ and /file/ find the correct module type faster",
-    "Studio imports insert appropriate game:GetService ModuleScript paths and warn about Studio-only execution and dependencies",
-    "New standalone SignalLite and TableKit modules are included in the public Luau catalog and runnable in browser WASM",
-    "Public GitHub module previews record compact reviewed function signatures and comments for autocomplete and hover without storing downloaded source",
-    "Additional compatibility, data validation and real WASM tests protect existing editor and import behavior"
+    "Restore mobile bottom navigation on landscape touch-screen phones even when browser CSS width exceeds 820px",
+    "Add a prominent Files button in the editor toolbar to open Explorer directly on desktop and mobile",
+    "Correct mobile dock layout for all eight destinations and make it horizontally scroll on narrow screens",
+    "Synchronize mobile drawer visibility, backdrop, Escape key, orientation changes and accessibility state",
+    "Keep the existing Luau editor, Auto Require, workspace projects and server downloads unchanged"
   ]
 }
