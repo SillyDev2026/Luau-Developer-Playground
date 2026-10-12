@@ -1,13 +1,13 @@
 {
-  "version": "3.2.0",
-  "title": "Community feedback, Discord forums and voting",
+  "version": "3.3.0",
+  "title": "Download standalone Windows Node Server EXE",
   "publishedAt": "2026-10-11",
   "changes": [
-    "New dedicated responsive Feedback page with searchable suggestion and bug feeds",
-    "Create real Discord forum threads in separate suggestion and bug-report channels",
-    "React with thumbs up/down, undo votes, and view scores in the website",
-    "Mirror website vote tallies into the Discord forum starter post",
-    "Keep Discord bot credentials private in the separately hosted Node backend",
-    "Use per-session pseudonymous profiles, submission limits and safe error messages"
+    "Download LuauForge-Server-Windows-x64.exe directly from the website, no ZIP",
+    "Self-contained Windows Node server; no separate Node installation on user devices",
+    "New dedicated Windows server download and setup page",
+    "Persistent workspace and feedback data in %LOCALAPPDATA%\\LuauForgeServer",
+    "Local-only by default; configurable host, port and server-only Discord token",
+    "Automated Windows native EXE build, startup and real API smoke tests before GitHub Release"
   ]
 }
