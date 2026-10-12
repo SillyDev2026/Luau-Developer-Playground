@@ -108,3 +108,19 @@ test('public starter module sources and registry are published in the same repos
   const json=JSON.parse(registry);
   for(const name of ['SignalLite','TableKit'])assert.ok(json.modules.some(x=>x.name===name&&x.environment==='wasm'));
 });
+
+test('scoped slash search keeps Studio, GitHub, WASM and local files separate',()=>{
+  const examples=[
+    ['/studio/Net','studio','NetStream'],
+    ['/github/Signal','github','SignalLite'],
+    ['/wasm/Fast','builtin','FastNum'],
+    ['/file/Loc','module','modules/Local.luau']
+  ];
+  for(const [input,kind,id] of examples){
+    const options=suggestions(input,input.length,files,'main.luau');
+    assert.ok(options?.items?.length,'Missing scoped results '+input);
+    assert.ok(options.items.every(x=>x.kind===kind),input);
+    assert.ok(options.items.some(x=>x.id===id),input);
+  }
+  assert.equal(suggestions('-- /studio/Net',14,files,'main.luau'),null);
+});
