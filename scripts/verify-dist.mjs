@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.4\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.4\.1"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -37,6 +37,7 @@ for(const name of ['NexusDataStore','ZonePlusV2','BufferUtil','Compression','Sig
 for (const module of ['TestTools.luau','MathKit.luau','SignalLite.luau','TableKit.luau','registry.json']) await stat(join(out,'community',module));
 await stat(join(out,'src/github-modules.js'));
 await stat(join(out,'src/module-index.js'));
+await stat(join(out,'src/mobile-layout.js'));
 const moduleRegistry=JSON.parse(await readFile(join(out,'community/registry.json'),'utf8'));
 for(const name of ['SignalLite','TableKit'])assert.ok(moduleRegistry.modules.some(x=>x.name===name&&x.environment==='wasm'));
 

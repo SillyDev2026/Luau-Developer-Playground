@@ -1,3 +1,4 @@
+import { MOBILE_NAV_QUERY, usesMobileNavigation } from './mobile-layout.js';
 import { Workspace, findProjectTests, classifyScript } from './v1-model.js';
 import { CodeEditor, matchBracket } from './v1-editor.js';
 import { makeZip } from './v1-zip.js';
@@ -116,7 +117,7 @@ function renderLibrary() {
       const path = `examples/${lib.id.toLowerCase()}-example.luau`;
       try { Object.hasOwn(workspace.project.files, path) ? workspace.open(path) : workspace.create(path, lib.example); setSide('files'); closeMobile(); notify(lib.label + ' example is ready'); }
       catch (error) { notify(error.message, true); }
-    }), clickButton('API', () => libraryAPI(lib)), clickButton('Import', () => { importLibrary(lib); if (matchMedia('(max-width:820px)').matches) closeMobile(); }));
+    }), clickButton('API', () => libraryAPI(lib)), clickButton('Import', () => { importLibrary(lib); if (usesMobileNavigation()) closeMobile(); }));
     card.append(actions); catalog.append(card);
   }
   for(const lib of githubModuleTargets()) {
@@ -271,13 +272,50 @@ function setSide(side) {
   if (side === 'symbols') renderSymbols();
   if (side === 'libraries') renderLibrary();
 }
-function closeMobile() { $('sidebar').classList.remove('is-mobile-open'); $('inspector').classList.remove('is-mobile-open'); $('side-shade').classList.add('hidden'); }
+// Wide landscape phones still need the mobile drawer; CSS and JavaScript
+// deliberately share the same responsive conditions.
+
+function updateExplorerToggle() {
+  const open = $('sidebar').classList.contains('is-mobile-open');
+  $('explorer-toggle').setAttribute('aria-expanded', String(open));
+  $('mobile-files').setAttribute('aria-expanded', String(open && state.side === 'files'));
+  $('explorer-toggle').setAttribute('aria-label', open ? 'Close file explorer' : 'Open file explorer');
+}
+function closeMobile() {
+  $('sidebar').classList.remove('is-mobile-open');
+  $('inspector').classList.remove('is-mobile-open');
+  $('side-shade').classList.add('hidden');
+  updateExplorerToggle();
+}
 function openMobile(which) {
   closeMobile();
-  if (which === 'sidebar') { $('sidebar').classList.add('is-mobile-open'); $('side-shade').classList.remove('hidden'); }
-  if (which === 'inspector') { $('inspector').classList.remove('is-hidden'); $('inspector').classList.add('is-mobile-open'); $('side-shade').classList.remove('hidden'); }
+  if (which === 'sidebar') {
+    $('sidebar').classList.remove('is-hidden');
+    $('sidebar').classList.add('is-mobile-open');
+    $('side-shade').classList.remove('hidden');
+  }
+  if (which === 'inspector') {
+    $('inspector').classList.remove('is-hidden');
+    $('inspector').classList.add('is-mobile-open');
+    $('side-shade').classList.remove('hidden');
+  }
+  updateExplorerToggle();
 }
-function openFile(path) { try { workspace.open(path); if (matchMedia('(max-width:820px)').matches) closeMobile(); editor.input.focus(); } catch (error) { notify(error.message, true); } }
+function openExplorer() {
+  if (dashboard?.isOpen()) dashboard.close();
+  collabUI?.close();
+  feedbackUI?.close();
+  setSide('files');
+  if (usesMobileNavigation()) {
+    if ($('sidebar').classList.contains('is-mobile-open')) closeMobile();
+    else openMobile('sidebar');
+  } else {
+    closeMobile();
+    $('sidebar').classList.remove('is-hidden');
+    updateExplorerToggle();
+  }
+}
+function openFile(path) { try { workspace.open(path); if (usesMobileNavigation()) closeMobile(); editor.input.focus(); } catch (error) { notify(error.message, true); } }
 function switchOutput(view) {
   state.output = view; preserveSettings();
   document.querySelectorAll('[data-output]').forEach(button => button.classList.toggle('active', button.dataset.output === view));
@@ -514,7 +552,7 @@ function toggleTheme() { workspace.update({ theme: workspace.project.theme === '
 function resetLayout() { document.documentElement.style.setProperty('--sidebar-width', '266px'); document.documentElement.style.setProperty('--output-height', '202px'); workspace.update({ sidebarWidth: 266, outputHeight: 202, fontSize: 14 }); }
 function enableResizing() {
   let pointer = null;
-  const onDown = (kind, event) => { if (matchMedia('(max-width:820px)').matches) return; pointer = { kind, startX: event.clientX, startY: event.clientY, width: workspace.project.sidebarWidth, height: workspace.project.outputHeight }; event.target.setPointerCapture?.(event.pointerId); event.preventDefault(); };
+  const onDown = (kind, event) => { if (usesMobileNavigation()) return; pointer = { kind, startX: event.clientX, startY: event.clientY, width: workspace.project.sidebarWidth, height: workspace.project.outputHeight }; event.target.setPointerCapture?.(event.pointerId); event.preventDefault(); };
   $('sidebar-resizer').addEventListener('pointerdown', event => onDown('sidebar', event));
   $('output-resizer').addEventListener('pointerdown', event => onDown('output', event));
   document.addEventListener('pointermove', event => {
@@ -560,7 +598,10 @@ function initialize() {
   $('find-btn').addEventListener('click', openFind); $('find-input').addEventListener('input', updateFindCount); $('find-input').addEventListener('keydown', event => { if (event.key === 'Enter') findNext(); });
   $('find-next').addEventListener('click', findNext); $('replace-all').addEventListener('click', replaceAll); $('find-close').addEventListener('click', () => $('find-panel').classList.add('hidden'));
   $('clear-output').addEventListener('click', () => { state.outputLogs = []; renderOutputPanel(); });
-  $('mobile-files').addEventListener('click', () => { setSide('files'); openMobile('sidebar'); });
+  $('mobile-files').addEventListener('click', openExplorer);
+  $('explorer-toggle').addEventListener('click', openExplorer);
+  // Rotating a phone while a drawer is open must never leave a trapped shade.
+  matchMedia(MOBILE_NAV_QUERY).addEventListener?.('change', closeMobile);
   $('mobile-library').addEventListener('click', () => { setSide('libraries'); openMobile('sidebar'); });
   $('mobile-tools').addEventListener('click', () => { switchOutput('benchmarks'); openMobile('inspector'); });
   $('mobile-settings').addEventListener('click', () => openMobile('inspector')); $('mobile-dashboard').addEventListener('click',()=>dashboard?.open());

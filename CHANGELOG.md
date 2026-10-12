@@ -1,3 +1,11 @@
+## 3.4.1 — 2026-10-12
+
+- Fix missing Explorer and mobile dock on Android landscape phones whose CSS viewport is wider than the previous 820px breakpoint.
+- Add always-available top-toolbar **Files** control that reveals Explorer, including when the mobile navigation is hidden.
+- Correct the eight-item dock (previously allocated only seven grid columns) and add narrow-portrait horizontal dock scrolling with Files available near the start.
+- Synchronize responsive JavaScript breakpoints, drawer shade and accessibility state; close open drawers on orientation/layout transitions.
+- Keep Luau code, project files, Studio module catalog and downloadable v3.3.0 Windows Node server unaffected.
+
 ## 3.4.0 — 2026-10-12
 
 - Connect all seven existing Roblox Studio package entries to the Auto Require catalog, generating appropriate `require(game:GetService(...))` calls and warning about Studio-only runtime/dependency requirements.

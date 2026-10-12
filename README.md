@@ -1,3 +1,11 @@
+# LuauForge v3.4.1 — Android phone Explorer fix
+
+When Chrome on a phone switches to landscape, the CSS viewport can be wider than 820px and the original mobile bottom navigation disappears. The responsive layout now detects short, coarse-pointer, touch-device landscape viewports as mobile, even if they are wide. The **Files** button in the top toolbar is a persistent second way to open Explorer; the bottom Files navigation opens the same panel. The full eight-button dock fits in landscape and scrolls horizontally on small portrait screens, with Files near the beginning.
+
+Tap Files to show the .lua and .luau project tree; tap a script to edit it. Tap Files again, the overlay shade, the Explorer close button, or Escape to dismiss it. Rotating the phone closes any open drawer safely. Saved local projects, editor settings, GitHub modules, and Windows server EXE downloads are unchanged.
+
+---
+
 # LuauForge v3.4.0 — Expanded Auto Require & module intelligence
 
 Auto Require now knows the **seven curated Roblox Studio modules** already distributed with LuauForge: NexusDataStore, ZonePlusNext, BufferUtil, Compression, Signal, Promise, and NetStream. At the beginning of an editor line, type one of these shortcuts and press Tab on a suggestion:
