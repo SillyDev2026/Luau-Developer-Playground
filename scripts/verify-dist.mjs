@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.4\.4"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.4\.5"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -67,3 +67,5 @@ await stat(join(out,'src/server-download.css'));
 assert.match(serverDownload,/id="download-windows-exe"/);
 assert.match(serverDownload,/releases\/download\/v3\.3\.0\/LuauForge-Server-Windows-x64\.exe/);
 assert.match(html,/id="server-exe-download"/);
+
+await stat(join(out,'src/editor-line-layout.js'));
