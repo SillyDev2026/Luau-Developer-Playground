@@ -34,6 +34,7 @@ export class CodeEditor {
     Object.assign(this, { input, highlight, gutter, onChange, onCursor, onShortcut });
     this.source = null;
     this.raf = 0;
+    this.lastGutterCount = -1;
     input.addEventListener('input', () => { this.render(); this.onChange(input.value); this.onCursor(); });
     input.addEventListener('scroll', () => { highlight.parentElement.scrollTop = input.scrollTop; highlight.parentElement.scrollLeft = input.scrollLeft; gutter.scrollTop = input.scrollTop; });
     for (const type of ['click', 'keyup', 'select']) input.addEventListener(type, () => this.onCursor());
@@ -58,13 +59,21 @@ export class CodeEditor {
     // Let completion providers discard items belonging to the old source.
     this.input.dispatchEvent(new Event('luauforge:filechange'));
   }
+  // Update the gutter before painting highlighted tokens. This also handles
+  // Android IME events where the line count changes between animation frames.
+  syncLineNumbers() {
+    const count = Math.min(this.input.value.split('\n').length, 10000);
+    if (count !== this.lastGutterCount) {
+      this.lastGutterCount = count;
+      this.gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+    }
+    this.gutter.scrollTop = this.input.scrollTop;
+  }
   render() {
+    this.syncLineNumbers();
     cancelAnimationFrame(this.raf);
     this.raf = requestAnimationFrame(() => {
-      const text = this.input.value;
-      this.highlight.innerHTML = highlightLuau(text);
-      const count = Math.min(text.split('\n').length, 10000);
-      this.gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+      this.highlight.innerHTML = highlightLuau(this.input.value);
       this.highlight.parentElement.scrollTop = this.input.scrollTop;
       this.highlight.parentElement.scrollLeft = this.input.scrollLeft;
     });
