@@ -103,3 +103,9 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
   #mobile-enter{min-width:55px;}
   #wrap-indicator{font-size:9px;}
 }
+
+/* v3.4.5 — align line numbers with logical source lines even when a Luau
+   statement soft-wraps onto multiple screen rows on Android. */
+.editor-wrap-mirror{position:absolute;top:0;left:0;height:auto!important;max-height:none!important;box-sizing:border-box;visibility:hidden;pointer-events:none;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;z-index:-1;}
+.editor-wrap-mirror>div{display:block;min-height:1em;margin:0;border:0;padding:0;}
+.line-gutter .gutter-number-row{display:block;white-space:pre;min-height:0;line-height:inherit;font-size:inherit;overflow:hidden;}
