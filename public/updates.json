@@ -1,13 +1,13 @@
 {
-  "version": "3.4.4",
-  "title": "Android editor real-newline and line-number fix",
+  "version": "3.4.5",
+  "title": "Fix incorrect line numbers when Luau code wraps on phone",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Fix Android virtual Enter so insertParagraph and insertLineBreak create actual Luau newlines with existing auto-indentation",
-    "Add a dedicated ↵ Enter button to the mobile code toolbar so each tap inserts a real numbered line",
-    "Update gutter line numbers immediately when edits change the number of lines, instead of waiting for syntax highlighting",
-    "Keep highlighted code and editable textarea using identical wrapping rules when restoring a saved project",
-    "Show ↪ Wrap on when visual line wrapping is enabled, explaining why a wrapped row does not get another line number",
-    "Preserve source text and saved scripts; do not silently turn visually wrapped rows into newlines"
+    "Fix Android editor gutter displaying line 6 beside the seventh actual source line when a long line wraps",
+    "Measure per-source-line visual height so wrapped statements reserve their extra rows before the next line number",
+    "Keep line counts based on real newlines: a seven-line script is numbered 1 through 7 even with soft wrapping",
+    "Automatically recalculate numbered gutter positions when the editor width, word wrap or font settings change",
+    "Synchronize Luau syntax highlighting and editable textarea wrap behavior while preserving all saved script contents",
+    "Add regression tests for wrapped lines, phone width changes and disabled word wrap"
   ]
 }
