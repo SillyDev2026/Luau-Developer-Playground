@@ -1,3 +1,4 @@
+import { MOBILE_NAV_QUERY, usesMobileNavigation } from './mobile-layout.js';
 import { Workspace, findProjectTests, classifyScript } from './v1-model.js';
 import { CodeEditor, matchBracket } from './v1-editor.js';
 import { makeZip } from './v1-zip.js';
@@ -273,8 +274,7 @@ function setSide(side) {
 }
 // Wide landscape phones still need the mobile drawer; CSS and JavaScript
 // deliberately share the same responsive conditions.
-export const MOBILE_NAV_QUERY = '(max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px)';
-export const usesMobileNavigation = (match=matchMedia) => match(MOBILE_NAV_QUERY).matches;
+
 function updateExplorerToggle() {
   const open = $('sidebar').classList.contains('is-mobile-open');
   $('explorer-toggle').setAttribute('aria-expanded', String(open));
