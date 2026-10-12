@@ -1,13 +1,12 @@
 {
-  "version": "3.4.2",
-  "title": "Mobile Output panel and Explorer switching fix",
+  "version": "3.4.3",
+  "title": "Mobile code line and line-number alignment fix",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Add Output button beside Files in the top toolbar, plus dedicated mobile dock Output destination",
-    "Give execution output, problems, bytecode, benchmarks and tests a full-height view on short landscape phones",
-    "Make Output close the Explorer overlay cleanly, and add a return-to-editor button",
-    "Keep code and logs intact when switching between Explorer, editor and Output",
-    "Stop file selection from automatically opening the Android keyboard and hiding Output",
-    "When running or checking Luau code on mobile, automatically open the appropriate output tab"
+    "Align Luau code text, line numbers and syntax highlighting using one shared vertical padding and line-height specification",
+    "Remove obsolete oversized 120px/45px textarea padding that caused mismatched scrolling around the editor bottom",
+    "Use consistent compact mobile top/bottom padding with keyboard-friendly scroll padding",
+    "Make Android portrait and landscape display the same real effective editor font size",
+    "Preserve Files, Output, Auto Require, code editing, responsive dock, project storage and Windows server downloads"
   ]
 }

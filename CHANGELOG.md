@@ -1,3 +1,11 @@
+## 3.4.3 — 2026-10-12
+
+- Use shared editor line-height and padding CSS variables for the gutter, textarea, and syntax highlighting so mobile line positions stay aligned.
+- Replace old 120px/45px inconsistent bottom padding with a shared smaller inset and a separate 72px textarea scroll-padding-bottom for keyboard usability.
+- Keep the line number gutter, Luau code input and highlighted code at the same effective font size in Android portrait and landscape.
+- Correct the editor font-size status label on wide landscape phones and add focused mobile alignment regression tests.
+- Retain existing code, workspace saves, Files/Output navigation and published Windows Node server executable.
+
 ## 3.4.2 — 2026-10-12
 
 - Fix inability to access output after opening Explorer on Android landscape phones. Add direct **Output** buttons in toolbar and mobile dock.
