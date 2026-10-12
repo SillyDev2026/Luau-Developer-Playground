@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="theme-color" content="#0b111c"/>
+  <meta name="description" content="Download the standalone Windows LuauForge Node collaboration server. One .exe, no ZIP or Node.js install needed."/>
+  <title>Download Windows Server EXE · LuauForge v3.3.0</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="./src/server-download.css?v=3.3.0"/>
+</head>
+<body>
+  <main class="download-layout">
+    <header class="download-navbar">
+      <a href="./" class="download-logo"><span class="download-mark">{ }</span><span>Luau<span class="accent">Forge</span></span></a>
+      <a class="download-back" href="./">← Back to IDE</a>
+    </header>
+    <section class="download-hero">
+      <p class="eyebrow">WINDOWS x64 · NODE SERVER · v3.3.0</p>
+      <h1>Your server.<br/><span class="accent">One executable.</span></h1>
+      <p class="lead">Run LuauForge collaboration and feedback locally with a real Windows application. No ZIP extraction, no Node.js installation, and no terminal setup needed for the basic local server.</p>
+      <div class="download-actions">
+        <a id="download-windows-exe" class="download-main" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe">↓ Download Windows Server .exe <span>↗</span></a>
+        <a class="download-other" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/tag/v3.3.0" target="_blank" rel="noopener noreferrer">Release details</a>
+      </div>
+      <p class="download-note">Direct .exe release asset from GitHub · Windows 10/11 x64 · unsigned (Windows may show a SmartScreen warning)</p>
+    </section>
+    <section class="download-metrics" aria-label="Features">
+      <div><b>01</b><strong>One file</strong><p>The Node runtime is packaged inside the executable.</p></div>
+      <div><b>02</b><strong>Private by default</strong><p>Listens at 127.0.0.1 and saves to your Windows user profile.</p></div>
+      <div><b>03</b><strong>Two APIs</strong><p>Shared scripts and optional Discord feedback use the same local server.</p></div>
+    </section>
+    <section class="download-steps">
+      <p class="eyebrow">GET STARTED</p>
+      <h2>Running your server</h2>
+      <div class="step-grid">
+        <article><span class="step-number">1</span><h3>Download and run</h3><p>Click the .exe download above and open it on your Windows PC. Leave its console window open while using the server.</p></article>
+        <article><span class="step-number">2</span><h3>Connect LuauForge</h3><p>Open Shared Scripts or Feedback in the IDE and paste this local API origin:</p><code>http://127.0.0.1:8787</code></article>
+        <article><span class="step-number">3</span><h3>Create your workspace</h3><p>Create a shared workspace, add scripts, and connect the Studio plugin. Data is saved under <code>%LOCALAPPDATA%\LuauForgeServer</code>.</p></article>
+      </div>
+    </section>
+    <section class="download-warning">
+      <h2>Want to invite developers outside your PC?</h2>
+      <p>The .exe starts a <strong>local-only HTTP server</strong>. Running it does not publish a public HTTPS endpoint. For remote invitations or Discord feedback on the public website, configure a trusted HTTPS reverse proxy/tunnel or deploy the Node backend to a host with persistent storage. Do not expose an unprotected HTTP port to the internet.</p>
+      <p>Discord posting is optional and off until you set a private <code>DISCORD_BOT_TOKEN</code> environment variable for the server process. Never put the token into the website.</p>
+      <a href="https://github.com/SillyDev2026/Luau-Developer-Playground/blob/main/server/README.md" target="_blank" rel="noopener noreferrer">Read full hosting instructions ↗</a>
+    </section>
+    <footer><span>LuauForge v3.3.0 · Windows standalone Node server</span><a href="./">Open the IDE →</a></footer>
+  </main>
+</body>
+</html>
