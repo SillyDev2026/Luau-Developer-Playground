@@ -67,7 +67,7 @@ export function boundStudioVariable(source,expression){
   const re=/^[ \t]*local\s+([A-Za-z_]\w*)\s*=\s*require\s*\(\s*(game\s*:\s*GetService\s*\(\s*[\"'](?:ServerScriptService|ReplicatedStorage)[\"']\s*\)(?:\s*\.\s*[A-Za-z_]\w*)+)\s*\)/gm;
   const canonical=value=>value.replace(/\s+/g,'').replace(/'([A-Za-z]+)'/g,'\"$1\"');
   for(const match of source.matchAll(re)){
-    if(clean.slice(match.index,match.index+5)==='local'&&canonical(match[2])===canonical(expression))return match[1];
+    if(clean.slice(match.index,match.index+match[0].length).trimStart().startsWith('local')&&canonical(match[2])===canonical(expression))return match[1];
   }
   return null;
 }
