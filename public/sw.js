@@ -1,10 +1,10 @@
 /* LuauForge v3 offline app shell. Projects remain in localStorage and are
  * never uploaded. Cache is scoped to this GitHub Pages project, not the origin.
  */
-const CACHE = 'luauforge-v3.2.0';
+const CACHE = 'luauforge-v3.3.0';
 const APP = './';
 const CORE = [
-  './', './index.html', './favicon.svg', './manifest.webmanifest',
+  './', './index.html', './server-download.html', './src/server-download.css', './favicon.svg', './manifest.webmanifest',
   './src/v1.js', './src/v1.css', './src/v3/ui.js', './src/v3/core.js', './src/v3/ui.css', './src/auto-require.css',
   './src/v1-editor.js', './src/v1-model.js', './src/v1-zip.js', './src/v1-graph.js',
   './src/store.js', './src/snapshots.js', './src/highlight.js', './src/editor-utils.js',

@@ -7,25 +7,26 @@
   <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/v15.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/community.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/v3/ui.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/collab.css?v=3.2.0" />
-  <link rel="stylesheet" href="./src/feedback.css?v=3.2.0" />
-  <title>LuauForge 3.2.0 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/community.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/collab.css?v=3.3.0" />
+  <link rel="stylesheet" href="./src/feedback.css?v=3.3.0" />
+  <title>LuauForge 3.3.0 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.2.0</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.3.0</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
       <button class="secondary-btn collab-header-link" id="collab-page-btn" type="button" title="Shared script workspace">◇ Scripts</button>
       <button class="secondary-btn feedback-top-link" id="feedback-page-btn" type="button" title="Suggestions and bug reports">◉ Feedback</button>
+      <a class="secondary-btn server-exe-top" id="server-exe-download" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe" title="Download standalone Windows Node server EXE — no ZIP">↓ Server .exe</a>
       <button class="icon-btn header-secondary" id="palette-btn" title="Command palette · Ctrl+P" aria-label="Command palette">⌕</button>
       <button class="icon-btn header-secondary" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       <button class="secondary-btn header-secondary" id="check-btn" title="Check Luau types">✓ Check</button>
@@ -48,7 +49,7 @@
             <p>Share feature suggestions, report bugs, and vote on ideas. Submissions create Discord forum threads that developers can discuss.</p>
             <div class="feedback-hero-tags"><span>◉ Community feedback</span><span>◇ Discord forum threads</span><span>✓ Public votes</span></div>
           </div>
-          <button id="feedback-back-editor" type="button" class="feedback-back">← Back to editor</button>
+          <div class="server-download-actions"><a id="server-exe-feedback" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe" class="feedback-back" title="Download Windows server executable">↓ Download Server .exe</a><button id="feedback-back-editor" type="button" class="feedback-back">← Back to editor</button></div>
         </header>
         <div class="feedback-layout">
           <div class="feedback-main">
@@ -66,7 +67,7 @@
           <aside class="feedback-side" aria-label="Feedback submission">
             <div class="feedback-panel feedback-connect">
               <div class="feedback-panel-top"><span class="feedback-icon">⌁</span><div><span class="feedback-eyebrow">PROFILE</span><h2>Connect to feedback</h2></div></div>
-              <p>Use a display name to submit and vote. This is not Discord account sign-in.</p>
+              <p>Use a display name to submit and vote. This is not Discord account sign-in. <a href="./server-download.html">Windows server setup guide</a>.</p>
               <label>Node feedback server URL<input id="feedback-api" type="url" placeholder="https://your-node-server.example" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
               <label>Display name<input id="feedback-name" maxlength="32" placeholder="Your developer name" autocomplete="nickname"/></label>
               <button type="button" id="feedback-connect-btn" class="feedback-primary">Connect profile</button>
@@ -87,7 +88,7 @@
       </div>
     </section>
     <section id="collab-view" class="hidden" aria-label="Shared scripts workspace">
-      <div class="collab-page-inner"><header class="collab-page-heading"><div><span class="collab-eyebrow">LUAUFORGE · COLLABORATION</span><h1>Shared Scripts</h1><p>Create Luau scripts, manage team access, and publish updates to Roblox Studio.</p></div><button id="collab-back-editor" type="button" class="secondary-btn">← Back to editor</button></header><div id="collab-page-body"></div></div>
+      <div class="collab-page-inner"><header class="collab-page-heading"><div><span class="collab-eyebrow">LUAUFORGE · COLLABORATION</span><h1>Shared Scripts</h1><p>Create Luau scripts, manage team access, and publish updates to Roblox Studio.</p></div><div class="server-download-actions"><a id="server-exe-scripts" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe" class="secondary-btn" title="Download standalone Windows Node collaboration server">↓ Download Server .exe</a><button id="collab-back-editor" type="button" class="secondary-btn">← Back to editor</button></div></header><div id="collab-page-body"></div></div>
     </section>
     <section id="dashboard-view" class="hidden" aria-label="Developer Dashboard">
       <div class="dash-shell">
@@ -154,7 +155,7 @@
         <div class="setting-group"><div class="setting-title">PROJECT</div><div class="project-metrics" id="project-metrics"></div><button id="snapshot-btn" class="wide-btn">Create recovery snapshot</button><button id="history-btn" class="wide-btn">Restore snapshot</button><button id="export-json" class="wide-btn">Export project JSON</button><button id="export-zip" class="wide-btn">Export source ZIP</button><button id="github-import" class="wide-btn">Import public GitHub file</button><button id="reset-project" class="wide-btn danger">Reset project</button></div>
         <div class="setting-group collab-settings" id="collab-settings">
           <div class="setting-title">SHARED WORKSPACE + ROBLOX STUDIO</div>
-          <p class="inspector-note">Invite teammates, edit shared scripts, and place them in Studio. Requires your separately hosted HTTPS Node server. Sharing is opt-in: local projects are not uploaded automatically.</p>
+          <p class="inspector-note">Invite teammates, edit shared scripts, and place them in Studio. Download and run the Windows server for LOCAL testing, or use a separately hosted HTTPS Node server for remote teammates. Sharing is opt-in: local projects are not uploaded automatically. <a href="./server-download.html">Windows .exe setup guide</a>.</p>
           <label>Collaboration API origin <input id="collab-api" type="url" placeholder="https://your-node-server.example" spellcheck="false" autocapitalize="off" autocomplete="off"/></label>
           <label>Your display name <input id="collab-name" type="text" placeholder="Developer" maxlength="36" autocomplete="off"/></label>
           <label>New shared workspace name <input id="collab-title" type="text" placeholder="Our Roblox game" maxlength="80" autocomplete="off"/></label>
@@ -233,6 +234,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=3.2.0"></script>
+<script type="module" src="./src/v1.js?v=3.3.0"></script>
 </body>
 </html>

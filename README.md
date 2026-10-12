@@ -1,3 +1,13 @@
+# LuauForge v3.3.0 — Windows Node Server EXE download
+
+The website now offers **LuauForge-Server-Windows-x64.exe** as a direct download from the header, Shared Scripts and Feedback pages. There is also a dedicated [EXE setup page](server-download.html). This is a real Windows executable with Node bundled inside: **no ZIP and no Node.js installation required**.
+
+Double-click the EXE on Windows x64 and keep its console open. The local server starts at `http://127.0.0.1:8787` and saves workspace/feedback data in `%LOCALAPPDATA%\LuauForgeServer`. The default is LOCAL-only. Sharing with remote developers still requires a trusted HTTPS reverse proxy/tunnel or hosted Node deployment. Never expose the local HTTP port to the public internet.
+
+The actual Windows EXE is compiled by GitHub Actions with Node's native single-executable support, smoke-tested, and published as a direct GitHub Release asset. It is unsigned, so Windows may display a SmartScreen reputation warning. Discord bot tokens are not bundled; see [backend instructions](server/README.md).
+
+---
+
 # LuauForge v3.2.0 — Feedback, bug reports and Discord forum voting
 
 The new **Feedback** page is available from the desktop header and mobile navigation. Visitors can create a pseudonymous feedback profile, submit suggestions and bug reports to separate Discord forums, search public feedback, filter by type, sort by votes or date, and cast **👍 / 👎** website votes (click again to undo). Every successful submission links to its real Discord forum thread; website totals are shown in the forum post text. Native Discord reactions are separate from website tallies.

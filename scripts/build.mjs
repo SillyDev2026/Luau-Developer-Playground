@@ -18,6 +18,7 @@ if (!script.includes('createLuauModule') || !script.includes('export default')) 
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 await cp(join(root, 'index.html'), join(out, 'index.html'));
+await cp(join(root, 'server-download.html'), join(out, 'server-download.html'));
 await cp(join(root, 'src'), join(out, 'src'), { recursive: true });
 for (const entry of await readdir(join(root, 'public'), { withFileTypes: true })) {
   await cp(join(root, 'public', entry.name), join(out, entry.name), { recursive: entry.isDirectory() });

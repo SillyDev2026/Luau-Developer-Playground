@@ -11,3 +11,6 @@ server/*.json
 .env
 .env.*
 !*.example
+
+# Temporary Windows SEA binaries and build-time bundles are never committed.
+build/

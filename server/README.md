@@ -1,3 +1,30 @@
+# v3.3.0 — Standalone Windows EXE
+
+Download **LuauForge-Server-Windows-x64.exe** directly from the website's **Server .exe** button or [server-download.html](../server-download.html). No ZIP extraction or Node installation is needed.
+
+1. Double-click the EXE on a Windows x64 PC.
+2. Keep its console window open; the local API URL is `http://127.0.0.1:8787`.
+3. Enter that URL in the LuauForge **Shared Scripts** or **Feedback** page.
+4. Databases are stored in `%LOCALAPPDATA%\LuauForgeServer` and survive executable updates.
+
+This is a loopback-only HTTP server by default, not a remotely available HTTPS service. To invite someone from another device or connect remotely, use a trusted HTTPS reverse proxy/tunnel, or deploy the Node backend to a hosted HTTPS provider. **Do not publicly expose the HTTP listener.** The Discord bot remains disabled until its private `DISCORD_BOT_TOKEN` environment variable is set on the running server. No bot token is shipped in the EXE.
+
+For advanced PowerShell configuration before starting the EXE:
+
+```powershell
+$env:PORT = '8787'
+$env:HOST = '127.0.0.1'
+& '.\LuauForge-Server-Windows-x64.exe'
+```
+
+The binary is currently unsigned. Verify that it came from the project's GitHub Release; Windows may show a SmartScreen warning. Closing the console stops the server (it is not installed as an auto-starting Windows service).
+
+### Building the Windows executable
+
+The `.github/workflows/windows-server-exe.yml` workflow uses a Windows x64 runner, Node.js 26 `--build-sea`, and build-only esbuild. It starts the actual EXE to verify `/health`, workspace creation, feedback status and persistent user data before attaching the **raw .exe** directly to GitHub Release `v3.3.0`. No ZIP is provided by the website.
+
+---
+
 # v3.2.0 — Feedback Discord forums setup
 
 The site's new Feedback page requires this **separately hosted HTTPS Node backend**. It does not run on GitHub Pages. Suggestions and bug reports create actual threads in Discord forum channels using the bot's Discord REST API.

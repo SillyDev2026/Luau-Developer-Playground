@@ -1,0 +1,83 @@
+name: Build and release Windows Node server EXE
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'scripts/build-windows-server.mjs'
+      - '.github/workflows/windows-server-exe.yml'
+      - 'package.json'
+      - 'src/server-download.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-server-release
+  cancel-in-progress: false
+
+jobs:
+  windows-server:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js 26 for native single-executable packaging
+        uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          architecture: x64
+      - name: Install temporary bundler (not included in download)
+        run: npm install --no-save --no-package-lock esbuild@0.25.12
+      - name: Create real standalone .exe (not a ZIP)
+        run: node scripts/build-windows-server.mjs
+      - name: Run downloaded server as a Windows process and test API
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Join-Path (Get-Location) 'build/server-windows/LuauForge-Server-Windows-x64.exe'
+          $env:PORT = '18787'
+          $env:HOST = '127.0.0.1'
+          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'LuauForgeSmokeProfile'
+          $env:DISCORD_BOT_TOKEN = ''
+          $out = Join-Path $env:RUNNER_TEMP 'luauforge-server-stdout.log'
+          $err = Join-Path $env:RUNNER_TEMP 'luauforge-server-stderr.log'
+          $proc = Start-Process -FilePath $exe -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+          try {
+            $ready = $false
+            for ($i = 0; $i -lt 35; $i++) {
+              Start-Sleep -Milliseconds 350
+              try {
+                $health = Invoke-RestMethod -Uri 'http://127.0.0.1:18787/health' -TimeoutSec 2
+                if ($health.ok -eq $true) { $ready = $true; break }
+              } catch {}
+              if ($proc.HasExited) { break }
+            }
+            if (-not $ready) {
+              Get-Content $out -ErrorAction SilentlyContinue
+              Get-Content $err -ErrorAction SilentlyContinue
+              throw 'The standalone Windows executable did not start its API'
+            }
+            $workspace = Invoke-RestMethod -Uri 'http://127.0.0.1:18787/api/workspaces' -Method Post -ContentType 'application/json' -Body '{"name":"Smoke workspace","memberName":"Tester"}'
+            if (-not $workspace.workspace.id -or -not $workspace.token) { throw 'Workspace creation smoke test failed' }
+            $feedback = Invoke-RestMethod -Uri 'http://127.0.0.1:18787/api/feedback/status'
+            if ($feedback.configured -ne $false) { throw 'Discord secrets must not be bundled into EXE' }
+            if (-not (Test-Path (Join-Path $env:LOCALAPPDATA 'LuauForgeServer/workspaces.json'))) { throw 'Persistent workspace file not created' }
+            Write-Host 'PASS: Standalone EXE boot, /health, workspace creation, feedback status, persistent user data'
+          }
+          finally {
+            if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+          }
+      - name: Publish direct executable GitHub Release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v3.3.0
+          name: LuauForge v3.3.0 · Windows Node Server
+          body: |
+            Standalone Windows x64 Node collaboration + feedback server. Download the .exe directly: no ZIP, no separate Node.js installation. Run it to start your own LOCAL server. Data is stored under %LOCALAPPDATA%\\LuauForgeServer.
+            
+            The default server is local-only at http://127.0.0.1:8787. Sharing with remote teammates still requires your own HTTPS tunnel/reverse proxy and careful access controls. The executable is UNSIGNED and Windows SmartScreen may warn. The Discord bot is disabled until configured via environment variables.
+          files: build/server-windows/LuauForge-Server-Windows-x64.exe
+          fail_on_unmatched_files: true
+          make_latest: true
+          overwrite_files: true

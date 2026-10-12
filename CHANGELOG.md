@@ -1,3 +1,11 @@
+## 3.3.0 — 2026-10-11
+
+- Add direct Windows Node server .exe download links in site header, Shared Scripts, Feedback, and dedicated setup page.
+- Package the Node collaboration and Discord-feedback APIs into one Windows x64 standalone executable using Node 26 SEA and esbuild at build time.
+- Default to local-only `127.0.0.1:8787` and persistent user data under `%LOCALAPPDATA%\LuauForgeServer`.
+- Publish raw .exe in GitHub Release after Windows build/startup/API smoke tests (website does not download a ZIP).
+- Keep bot secrets and optional HTTPS hosting separately configured; preserve Node source deployment and existing LuauForge workflows.
+
 ## 3.2.0 — 2026-10-11
 
 - Introduce a full-width community Feedback page with separate suggestion and bug forms, search, filters, sorting, responsive post cards and direct Discord thread links.

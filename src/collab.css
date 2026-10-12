@@ -71,3 +71,11 @@
   .collab-page-heading{align-items:flex-start;}
   .collab-header-link{font-size:11px;padding:0 9px;}
 }
+
+/* Standalone Node EXE release links alongside workspace and feedback headers. */
+.server-download-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px;position:relative;z-index:2}
+.server-download-actions a{display:inline-flex;align-items:center;text-decoration:none;white-space:normal;text-align:center}
+.server-download-actions a:hover{text-decoration:none;border-color:var(--accent,#8a9cff);background:var(--panel3,#253651)}
+.server-exe-top{font-size:12px}
+@media(max-width:900px){.server-exe-top{display:none!important}}
+@media(max-width:560px){.server-download-actions{width:100%;justify-content:flex-start}.server-download-actions a,.server-download-actions button{min-height:38px;font-size:11px}}
