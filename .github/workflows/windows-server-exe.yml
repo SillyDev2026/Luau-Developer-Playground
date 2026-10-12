@@ -6,7 +6,7 @@ on:
       - 'server/**'
       - 'scripts/build-windows-server.mjs'
       - '.github/workflows/windows-server-exe.yml'
-      - 'package.json'
+      # Website-only version changes must not overwrite a published server EXE.
       - 'src/server-download.js'
   workflow_dispatch:
 
