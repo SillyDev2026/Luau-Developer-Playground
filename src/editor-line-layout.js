@@ -1,7 +1,7 @@
 // The gutter numbers logical (LF-separated) lines, not the screen rows caused
 // by wrapping. A wrapped line takes up multiple line-heights in the gutter.
-export function sourceLines(source,limit=10000) {
-  return String(source).split('\n').slice(0,limit);
+export function sourceLines(source) {
+  return String(source).split('\n');
 }
 export function gutterHeights(lines,measure,lineHeight) {
   const minimum=Number.isFinite(lineHeight)&&lineHeight>0?lineHeight:22;

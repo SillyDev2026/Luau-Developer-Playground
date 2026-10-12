@@ -1,3 +1,10 @@
+## 3.4.6 — 2026-10-12
+
+- Scroll Go to line using measured wrapped line heights, clamp out-of-range targets to the actual source, and synchronize the gutter and highlighting immediately.
+- Match the syntax overlay width to the textarea client width, including reserved desktop scrollbar space.
+- Remove the 10,000-line gutter truncation for large Luau modules.
+- Add failing-before-fix unit and Chromium browser regression coverage; verify seven-line scripts through resizing, font changes and bottom scrolling.
+
 ## 3.4.5 — 2026-10-12
 
 - Fix a 7-line script showing line 6 beside the last visual code line on narrow mobile screens when an earlier Luau source line soft-wraps.

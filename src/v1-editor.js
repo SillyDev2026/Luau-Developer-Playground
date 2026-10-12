@@ -39,6 +39,7 @@ export class CodeEditor {
     this.lastGutterMode = 'plain';
     this.wrapMirror = null;
     this.lastWrapWidth = 0;
+    this.lineHeights = null;
     input.addEventListener('input', () => { this.render(); this.onChange(input.value); this.onCursor(); });
     input.addEventListener('scroll', () => { highlight.parentElement.scrollTop = input.scrollTop; highlight.parentElement.scrollLeft = input.scrollLeft; gutter.scrollTop = input.scrollTop; });
     for (const type of ['click', 'keyup', 'select']) input.addEventListener(type, () => this.onCursor());
@@ -48,7 +49,7 @@ export class CodeEditor {
     // Resize may change how many screen rows a single source line occupies.
     if(typeof ResizeObserver==='function'){
       this.resizeObserver=new ResizeObserver(()=>{
-        if(isWrappingInput(this.input)&&this.input.clientWidth!==this.lastWrapWidth)this.syncLineNumbers();
+        if(this.input.clientWidth!==this.lastWrapWidth)this.syncLineNumbers();
       });
       this.resizeObserver.observe(input);
     }
@@ -75,6 +76,12 @@ export class CodeEditor {
   syncLineNumbers() {
     const lines=sourceLines(this.input.value);
     const count=lines.length;
+    // clientWidth excludes a reserved scrollbar. The overlay must wrap at
+    // the same width as the editable text, including in desktop browsers.
+    if(this.input.clientWidth>0 && this.highlight.style){
+      this.highlight.style.width=this.input.clientWidth+'px';
+    }
+    this.lastWrapWidth=this.input.clientWidth;
     const wrapping=isWrappingInput(this.input) && this.input.clientWidth>0 &&
       typeof getComputedStyle==='function' && !!this.input.ownerDocument;
     if(wrapping){
@@ -106,6 +113,7 @@ export class CodeEditor {
       mirror.replaceChildren(fragment);
       const lineHeight=parseFloat(computed.lineHeight)||22;
       const heights=gutterHeights(lines,(_,i)=>mirror.children[i].getBoundingClientRect().height,lineHeight);
+      this.lineHeights=heights;
       const gutterFragment=doc.createDocumentFragment();
       for(let i=0;i<count;i++){
         const row=doc.createElement('div');
@@ -118,6 +126,7 @@ export class CodeEditor {
       this.lastGutterCount=count;
       this.lastGutterMode='wrapped';
     }else{
+      this.lineHeights=null;
       if(this.lastGutterMode!=='plain'||count!==this.lastGutterCount){
         this.lastGutterCount=count;
         this.gutter.textContent=Array.from({length:count},(_,i)=>i+1).join('\n');
@@ -151,7 +160,20 @@ export class CodeEditor {
   selectLine(line) {
     const pos = positionForLine(this.input.value, line);
     this.input.focus(); this.input.setSelectionRange(pos, pos);
-    this.input.scrollTop = Math.max(0, (line - 5) * (parseFloat(getComputedStyle(this.input).lineHeight) || 21));
+    this.syncLineNumbers();
+    const style = getComputedStyle(this.input);
+    const lineHeight = parseFloat(style.lineHeight) || 22;
+    const paddingTop = parseFloat(style.paddingTop) || 0;
+    const index = this.position.line - 1;
+    const top = paddingTop + (this.lineHeights
+      ? this.lineHeights.slice(0,index).reduce((sum,height)=>sum+height,0)
+      : index*lineHeight);
+    const context = Math.min(4*lineHeight,Math.max(0,(this.input.clientHeight || 5*lineHeight)-lineHeight-paddingTop));
+    this.input.scrollTop = Math.max(0,top-context);
+    this.input.scrollLeft = 0;
+    this.gutter.scrollTop = this.input.scrollTop;
+    this.highlight.parentElement.scrollTop = this.input.scrollTop;
+    this.highlight.parentElement.scrollLeft = this.input.scrollLeft;
     this.onCursor();
   }
   keydown(event) {

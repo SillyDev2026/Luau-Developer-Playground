@@ -1,3 +1,13 @@
+# LuauForge v3.4.6 — Editor navigation and alignment fixes
+
+**Go to line** now includes wrapped screen rows when scrolling to a diagnostic or symbol, keeping the selected source line visible on narrow screens. Syntax highlighting uses the textarea's usable width, so a desktop scrollbar cannot make the visible code wrap differently from the typing area. Large modules retain their gutter numbers beyond line 10,000.
+
+Validation includes Chromium browser regressions for desktop and phone layouts, scrollbar widths, seven-line scripts, font changes and resizing, alongside the existing Node tests. Phone checks emulate a touch viewport; they do not replace testing on a physical Android keyboard.
+
+Run `npm run check` for the build and Node tests. For the browser checks, install the optional test tool with `npm install --no-save --package-lock=false playwright`, run `npx playwright install chromium`, then `npm run test:browser`. Set `CHROMIUM_PATH` to use an existing Chromium executable.
+
+---
+
 # LuauForge v3.4.5 — Accurate line numbers on Android
 
 Fixed the mobile Luau script editor showing a line number one behind your actual code when a long statement **soft-wraps** across two or more screen rows. The gutter now measures each logical source line's rendered height and reserves the same amount of space beside it, so **line 7 stays labeled 7** even if line 4 wraps onto multiple screen rows. The gutter remeasures automatically when the device rotates, the editor width changes, font size changes, or the Wrap setting changes. With Wrap off, the normal compact one-number-per-line gutter is retained.

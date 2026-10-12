@@ -97,3 +97,27 @@ test('layout remains synchronized on saved-wrap restore and width change',async(
  assert.match(editor,/ResizeObserver/);
  assert.match(editor,/mirror\.children\[i\]\.getBoundingClientRect\(\)\.height/);
 });
+
+test('large modules retain line numbers after line 10000',()=>{
+ const source=Array.from({length:10005},(_,i)=>`local value${i} = ${i}`).join('\n');
+ assert.equal(sourceLines(source).length,10005);
+ const h=domHarness(source);
+ try{
+   h.input.wrap='off';h.input.style.whiteSpace='pre';
+   h.editor.render();
+   assert.equal(h.gutter.textContent.split('\n').at(-1),'10005');
+ }finally{h.cleanup();}
+});
+
+test('Go to line scrolls past wrapped rows and immediately synchronizes the gutter',()=>{
+ const source=Array.from({length:40},()=> 'local longName = '+ 'a'.repeat(60)).join('\n');
+ const h=domHarness(source,{width:170,charsPerRow:10});
+ try{
+   h.editor.render();
+   const targetTop=h.gutter.children.slice(0,34).reduce((sum,row)=>sum+parseFloat(row.style.height),0);
+   h.editor.selectLine(35);
+   assert.deepEqual(h.editor.position,{line:35,column:1});
+   assert.ok(h.input.scrollTop>=targetTop-4*24,'wrapped rows must contribute to the scroll position');
+   assert.equal(h.gutter.scrollTop,h.input.scrollTop);
+ }finally{h.cleanup();}
+});

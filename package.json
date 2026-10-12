@@ -1,6 +1,6 @@
 {
   "name": "luau-developer-playground",
-  "version": "3.4.5",
+  "version": "3.4.6",
   "private": true,
   "type": "module",
   "description": "LuauForge IDE with optional collaboration, Discord forum feedback and Roblox Studio bridge",
@@ -19,7 +19,8 @@
     "fetch:studio": "node scripts/fetch-studio-libraries.mjs",
     "notify:discord": "node scripts/announce-discord.mjs",
     "collab:serve": "node server/index.mjs",
-    "build:windows-server": "node scripts/build-windows-server.mjs"
+    "build:windows-server": "node scripts/build-windows-server.mjs",
+    "test:browser": "node --test tests/browser/*.test.mjs"
   },
   "engines": {
     "node": ">=20"
