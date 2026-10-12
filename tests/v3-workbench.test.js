@@ -73,8 +73,8 @@ test('v3 UI is additive and versioned for offline deployment',async()=>{
  const sw=await readFile(new URL('../public/sw.js',import.meta.url),'utf8');
  const ui=await readFile(new URL('../src/v3/ui.js',import.meta.url),'utf8');
  for(const id of ['code-input','mobile-dock','dashboard-view','v3-actions'])assert.match(html,new RegExp(`id="${id}"`));
- assert.match(html,/v3\/ui\.css\?v=3\.4\.3/);
- assert.match(sw,/luauforge-v3\.4\.3/);assert.match(sw,/src\/v3\/ui\.js/);
+ assert.match(html,/v3\/ui\.css\?v=3\.4\.4/);
+ assert.match(sw,/luauforge-v3\.4\.4/);assert.match(sw,/src\/v3\/ui\.js/);
  assert.match(ui,/snapshot\(\)/);assert.match(ui,/source\(after\)/);
 });
 
