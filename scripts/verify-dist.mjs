@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.2\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.3\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -55,3 +55,10 @@ assert.match(html,/id="collab-settings"/);
 for(const filename of ['src/feedback.js','src/feedback.css']) await stat(join(out,filename));
 assert.match(html,/id="feedback-view"/);
 assert.match(html,/id="feedback-post-list"/);
+
+// Server installer/EXE is distributed as a direct GitHub Release asset, NOT a ZIP in dist/.
+const serverDownload = await readFile(join(out,'server-download.html'),'utf8');
+await stat(join(out,'src/server-download.css'));
+assert.match(serverDownload,/id="download-windows-exe"/);
+assert.match(serverDownload,/releases\/download\/v3\.3\.0\/LuauForge-Server-Windows-x64\.exe/);
+assert.match(html,/id="server-exe-download"/);
