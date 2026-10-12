@@ -1,3 +1,11 @@
+# LuauForge v3.4.5 — Accurate line numbers on Android
+
+Fixed the mobile Luau script editor showing a line number one behind your actual code when a long statement **soft-wraps** across two or more screen rows. The gutter now measures each logical source line's rendered height and reserves the same amount of space beside it, so **line 7 stays labeled 7** even if line 4 wraps onto multiple screen rows. The gutter remeasures automatically when the device rotates, the editor width changes, font size changes, or the Wrap setting changes. With Wrap off, the normal compact one-number-per-line gutter is retained.
+
+Wrapping does not create actual Luau newlines, and this patch does not change saved source text or line counts. Use **↵ Enter** to insert an actual new line; use the editor Wrap button to toggle soft wraps. All existing Files, Output, Auto Require, and server downloads remain available.
+
+---
+
 # LuauForge v3.4.4 — Android Enter and line numbers
 
 A soft-wrapped Luau line can appear on multiple screen rows even though it is still a single source line; its number should **not** increase until the source actually contains a newline. On Android phones, use your keyboard's Enter key or the new **↵ Enter** code-toolbar button to insert a real newline. The editor applies Luau indentation and immediately updates the line numbers and cursor indicator.

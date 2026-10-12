@@ -1,3 +1,11 @@
+## 3.4.5 — 2026-10-12
+
+- Fix a 7-line script showing line 6 beside the last visual code line on narrow mobile screens when an earlier Luau source line soft-wraps.
+- Give each gutter number the same total vertical height as its corresponding wrapped source line, based on a noninteractive, offscreen mirror with matching editor font, line-height, width, padding and tab size.
+- Keep logical line numbers and cursor status tied to actual LF source lines rather than visible screen rows.
+- Re-measure after editor resizes, font changes and Wrap toggling; retain original fast plain-text gutter when wrapping is off.
+- Add simulated Android wrap/layout tests and preserve existing code, autosave, editor navigation and server artifacts.
+
 ## 3.4.4 — 2026-10-12
 
 - Fix Android soft-keyboard Enter with beforeinput handling of `insertParagraph` and `insertLineBreak`, while retaining hardware Enter and Luau auto-indent.

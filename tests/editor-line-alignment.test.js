@@ -38,6 +38,6 @@ test('scrolling and file opening keep input, line numbers and syntax highlightin
  assert.match(editor,/highlight\.parentElement\.scrollLeft = input\.scrollLeft/);
  assert.match(editor,/gutter\.scrollTop = input\.scrollTop/);
  assert.match(editor,/this\.highlight\.parentElement\.scrollTop = this\.input\.scrollTop/);
- assert.match(editor,/this\.gutter\.textContent = Array\.from/);
+ assert.match(editor,/this\.gutter\.textContent\s*=\s*Array\.from/);
  assert.match(js,/function openFile\(path\).*workspace\.open\(path\)/);
 });
