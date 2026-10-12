@@ -32,7 +32,7 @@
       <button class="icon-btn header-secondary" id="palette-btn" title="Command palette · Ctrl+P" aria-label="Command palette">⌕</button>
       <button class="icon-btn header-secondary" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       <button class="secondary-btn header-secondary" id="check-btn" title="Check Luau types">✓ Check</button>
-      <button class="secondary-btn stop-btn" id="stop-btn" disabled>■ Stop</button>
+      <button class="secondary-btn stop-btn" id="stop-btn" aria-label="Stop code execution" title="Stop running script" disabled>■ Stop</button>
       <button class="primary-btn" id="run-btn" title="Run current file · Ctrl+Enter">▶ <span>Run</span></button>
     </div>
   </header>
@@ -126,7 +126,7 @@
       <div class="sidebar-footer"><span class="profile-dot">LF</span><div><strong>Local workspace</strong><small id="save-status" role="status">Ready</small></div><span class="saved-check">✓</span></div>
       <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Resize explorer" tabindex="0"></div>
     </aside>
-    <main class="workspace-main">
+    <main class="workspace-main" id="workspace-main">
       <div class="editor-header"><div class="editor-heading"><span class="path-label">workspace</span><span class="breadcrumb-arrow">›</span><strong id="breadcrumb-file">main.luau</strong></div><div class="editor-tools"><button id="find-btn" title="Find and replace">⌕ <span>Find</span></button><button id="outline-btn" title="Symbol outline">☷ <span>Outline</span></button><button id="wrap-btn" title="Toggle word wrap">⇥ <span>Wrap</span></button><button id="settings-btn" title="Inspector and settings">⚙</button></div></div>
       <div id="tabs" class="tabs" role="tablist" aria-label="Open files"></div>
       <div id="find-panel" class="find-panel hidden"><input id="find-input" placeholder="Find in file" aria-label="Find" type="search"/><span id="find-counter">0 results</span><button id="find-next" title="Next match">↓</button><input id="replace-input" placeholder="Replace with" aria-label="Replacement text"/><button id="replace-all">Replace all</button><button id="find-close" aria-label="Close search">✕</button></div>
