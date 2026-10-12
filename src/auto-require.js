@@ -74,7 +74,14 @@ export function boundStudioVariable(source,expression){
 export function suggestions(source,cursor,files,active) {
   const slash=slashAt(source,cursor);
   if (slash) {
-    const items=targets(files,active).map(item=>({...item,score:Math.max(fuzzy(slash.query,item.label),fuzzy(slash.query,item.id),fuzzy(slash.query,item.detail))})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,9);
+    // Slash-scoped discovery: /studio/..., /github/..., /wasm/..., /file/...
+    // No remote request is made during typing; all options are local metadata.
+    const match=/^(studio|github|wasm|file)\/(.*)$/i.exec(slash.query);
+    const kind=match?({studio:'studio',github:'github',wasm:'builtin',file:'module'})[match[1].toLowerCase()]:null;
+    const query=match?match[2]:slash.query;
+    const items=targets(files,active).filter(item=>!kind||item.kind===kind)
+      .map(item=>({...item,score:Math.max(fuzzy(query,item.label),fuzzy(query,item.id),fuzzy(query,item.detail))}))
+      .filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,9);
     return items.length?{mode:'require',from:slash.from,to:slash.to,items}:null;
   }
   const from=source.lastIndexOf('\n',cursor-1)+1;
@@ -174,7 +181,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   const copy=document.createElement('span'); copy.textContent='Local variables, type information, Roblox API and / imports';
   label.append(toggle,copy);
   const hint=document.createElement('small');
-  hint.textContent='Autocomplete: Tab accepts a suggestion; Enter makes a new line. Ctrl+Space activates arrow-key selection; Esc closes the list.';
+  hint.textContent='Type /studio/NetStream, /github/TableKit, /wasm/FastNum or /file/Math for scoped Auto Require. Tab accepts; Enter creates a normal line. Ctrl+Space selects; Esc dismisses.';
   setting.append(heading,label,hint);
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
