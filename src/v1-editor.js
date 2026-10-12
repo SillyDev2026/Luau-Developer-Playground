@@ -38,6 +38,14 @@ export class CodeEditor {
     input.addEventListener('scroll', () => { highlight.parentElement.scrollTop = input.scrollTop; highlight.parentElement.scrollLeft = input.scrollLeft; gutter.scrollTop = input.scrollTop; });
     for (const type of ['click', 'keyup', 'select']) input.addEventListener(type, () => this.onCursor());
     input.addEventListener('keydown', event => this.keydown(event));
+    // Android virtual keyboards may emit beforeinput without a reliable
+    // keydown Enter. Use the same newline insertion as hardware keyboards.
+    input.addEventListener('beforeinput', event => {
+      if ((event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph') && event.cancelable && !event.isComposing) {
+        event.preventDefault();
+        this.insertNewline();
+      }
+    });
   }
   load(text, path) {
     this.source = path;
@@ -60,6 +68,12 @@ export class CodeEditor {
       this.highlight.parentElement.scrollTop = this.input.scrollTop;
       this.highlight.parentElement.scrollLeft = this.input.scrollLeft;
     });
+  }
+  // A real LF is required to create the next numbered Luau line. Soft word
+  // wrapping only changes presentation and must never modify source code.
+  insertNewline() {
+    const start=this.input.selectionStart, end=this.input.selectionEnd;
+    this.replace(start,end,newlineIndent(this.input.value,start));
   }
   replace(start, end, value, cursor = start + value.length) {
     this.input.focus();
@@ -86,8 +100,7 @@ export class CodeEditor {
       return;
     }
     if (event.key === 'Enter' && !ctrl && !event.altKey && !event.isComposing) {
-      event.preventDefault(); const a = input.selectionStart, b = input.selectionEnd;
-      this.replace(a, b, newlineIndent(input.value, a)); return;
+      event.preventDefault(); this.insertNewline(); return;
     }
     if (input.selectionStart === input.selectionEnd && !ctrl && !event.altKey && !event.isComposing) {
       const a = input.selectionStart;
