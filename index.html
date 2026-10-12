@@ -25,6 +25,7 @@
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
       <button class="explorer-header-btn" id="explorer-toggle" type="button" aria-label="Open file explorer" aria-controls="sidebar" aria-expanded="false" title="Open files and folders">▤ <span>Files</span></button>
+      <button class="explorer-header-btn output-header-btn" id="output-toggle" type="button" aria-label="Expand output panel" aria-controls="output-panel" aria-expanded="false" title="Open console, problems and execution output">▣ <span>Output</span></button>
       <button class="secondary-btn collab-header-link" id="collab-page-btn" type="button" title="Shared script workspace">◇ Scripts</button>
       <button class="secondary-btn feedback-top-link" id="feedback-page-btn" type="button" title="Suggestions and bug reports">◉ Feedback</button>
       <a class="secondary-btn server-exe-top" id="server-exe-download" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe" title="Download standalone Windows Node server EXE — no ZIP">↓ Server .exe</a>
@@ -143,6 +144,7 @@
         </section>
         <div id="output-resizer" class="output-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0"></div>
         <section class="output-panel" id="output-panel" aria-label="Execution output and developer tools">
+          <div class="output-focus-heading"><strong>Execution output</strong><button id="output-back" type="button" aria-label="Return to code editor">← Editor</button></div>
           <div class="output-tabs" role="tablist" aria-label="Output panels"><button class="active" data-output="console">Console</button><button data-output="problems">Problems <span id="problem-count">0</span></button><button data-output="bytecode">Bytecode</button><button data-output="benchmarks">Benchmarks</button><button data-output="tests">Tests</button><button class="clear-output" id="clear-output" aria-label="Clear console" title="Clear output">⌫</button></div>
           <div class="output-content" id="output-content" aria-live="polite"></div>
         </section>
@@ -228,7 +230,7 @@
       </div>
     </aside>
   </div>
-  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button><button id="mobile-feedback" aria-label="Community feedback">◉<span>Feedback</span></button></nav>
+  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-output" aria-label="Open output" aria-controls="output-panel" aria-expanded="false">▣<span>Output</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button><button id="mobile-feedback" aria-label="Community feedback">◉<span>Feedback</span></button></nav>
 </div>
 <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
   <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">Quick command</h2><button id="dialog-close" aria-label="Close dialog">✕</button></div><div id="dialog-body" class="dialog-body"></div></section>
