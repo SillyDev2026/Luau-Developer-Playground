@@ -93,3 +93,13 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
   .top-actions .secondary-btn.stop-btn{font-size:0!important;padding-inline:3px!important;min-width:30px;max-width:30px;}
   .top-actions .secondary-btn.stop-btn:before{content:"■";font-size:13px;}
 }
+
+/* v3.4.4: separate the real Enter action from visual word wrapping. */
+#wrap-indicator{color:#acbcff;font-weight:700;white-space:nowrap;}
+#mobile-enter{flex:1 0 48px;border-color:#526bb3;background:#263f69;color:#e1eaff;display:inline-flex;align-items:center;justify-content:center;gap:3px;font-weight:800;}
+#mobile-enter:hover,#mobile-enter:focus-visible{background:#35548d;border-color:#a4b7ff;}
+#mobile-enter span{font:10px/1 system-ui,sans-serif;letter-spacing:.1px;color:#cbdafa;}
+@media (max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px) {
+  #mobile-enter{min-width:55px;}
+  #wrap-indicator{font-size:9px;}
+}

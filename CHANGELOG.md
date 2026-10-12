@@ -1,3 +1,11 @@
+## 3.4.4 — 2026-10-12
+
+- Fix Android soft-keyboard Enter with beforeinput handling of `insertParagraph` and `insertLineBreak`, while retaining hardware Enter and Luau auto-indent.
+- Add an explicit **↵ Enter** button to the mobile code shortcut bar that inserts a real LF at the cursor instead of relying on visual wrapping.
+- Update gutter numbers synchronously when the number of actual source lines changes; preserve scroll synchronization with syntax highlighting.
+- Restore consistent textarea/highlight whitespace on project load and show a **↪ Wrap on** status hint when a long source line only appears to occupy additional visual rows.
+- Add simulated Android input event tests, source line and cursor checks and UI regression tests. Keep all saved scripts untouched.
+
 ## 3.4.3 — 2026-10-12
 
 - Use shared editor line-height and padding CSS variables for the gutter, textarea, and syntax highlighting so mobile line positions stay aligned.

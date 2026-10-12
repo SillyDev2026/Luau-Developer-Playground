@@ -1,6 +1,6 @@
 {
   "name": "luau-developer-playground",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "private": true,
   "type": "module",
   "description": "LuauForge IDE with optional collaboration, Discord forum feedback and Roblox Studio bridge",

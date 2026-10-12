@@ -7,20 +7,20 @@
   <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/v15.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/community.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/v3/ui.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/collab.css?v=3.4.3" />
-  <link rel="stylesheet" href="./src/feedback.css?v=3.4.3" />
-  <title>LuauForge 3.4.3 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/community.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/collab.css?v=3.4.4" />
+  <link rel="stylesheet" href="./src/feedback.css?v=3.4.4" />
+  <title>LuauForge 3.4.4 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.4.3</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.4.4</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
@@ -139,8 +139,8 @@
               <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Luau script editor" aria-autocomplete="list" aria-expanded="false" wrap="off"></textarea>
             </div>
           </div>
-          <div class="editor-status"><div class="editor-status-left"><span id="cursor-indicator">Ln 1, Col 1</span><span id="line-indicator">1 line</span><span id="bracket-indicator"></span></div><div><span id="font-label">14px</span> · Luau · UTF-8</div></div>
-          <div id="mobile-code-tools" class="code-mobile-tools" aria-label="Mobile code editing shortcuts"><button data-insert="    ">Tab</button><button data-insert="()">( )</button><button data-insert="{}">{ }</button><button data-insert="[]">[ ]</button><button data-insert="=">=</button><button data-insert="&quot;&quot;">" "</button><button id="code-undo">↶</button><button id="mobile-complete">⌕</button></div>
+          <div class="editor-status"><div class="editor-status-left"><span id="cursor-indicator">Ln 1, Col 1</span><span id="line-indicator">1 line</span><span id="wrap-indicator" class="hidden" title="Visual wrapping does not create a new line. Press Enter to insert a numbered line.">↪ Wrap on</span><span id="bracket-indicator"></span></div><div><span id="font-label">14px</span> · Luau · UTF-8</div></div>
+          <div id="mobile-code-tools" class="code-mobile-tools" aria-label="Mobile code editing shortcuts"><button data-insert="    ">Tab</button><button data-insert="()">( )</button><button data-insert="{}">{ }</button><button data-insert="[]">[ ]</button><button data-insert="=">=</button><button data-insert="&quot;&quot;">" "</button><button id="mobile-enter" type="button" aria-label="Insert new numbered line" title="Enter: insert a real new line">↵<span>Enter</span></button><button id="code-undo">↶</button><button id="mobile-complete">⌕</button></div>
         </section>
         <div id="output-resizer" class="output-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0"></div>
         <section class="output-panel" id="output-panel" aria-label="Execution output and developer tools">
@@ -237,6 +237,6 @@
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=3.4.3"></script>
+<script type="module" src="./src/v1.js?v=3.4.4"></script>
 </body>
 </html>

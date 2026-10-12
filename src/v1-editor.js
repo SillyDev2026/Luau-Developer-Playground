@@ -34,10 +34,19 @@ export class CodeEditor {
     Object.assign(this, { input, highlight, gutter, onChange, onCursor, onShortcut });
     this.source = null;
     this.raf = 0;
+    this.lastGutterCount = -1;
     input.addEventListener('input', () => { this.render(); this.onChange(input.value); this.onCursor(); });
     input.addEventListener('scroll', () => { highlight.parentElement.scrollTop = input.scrollTop; highlight.parentElement.scrollLeft = input.scrollLeft; gutter.scrollTop = input.scrollTop; });
     for (const type of ['click', 'keyup', 'select']) input.addEventListener(type, () => this.onCursor());
     input.addEventListener('keydown', event => this.keydown(event));
+    // Android virtual keyboards may emit beforeinput without a reliable
+    // keydown Enter. Use the same newline insertion as hardware keyboards.
+    input.addEventListener('beforeinput', event => {
+      if ((event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph') && event.cancelable && !event.isComposing) {
+        event.preventDefault();
+        this.insertNewline();
+      }
+    });
   }
   load(text, path) {
     this.source = path;
@@ -50,16 +59,30 @@ export class CodeEditor {
     // Let completion providers discard items belonging to the old source.
     this.input.dispatchEvent(new Event('luauforge:filechange'));
   }
+  // Update the gutter before painting highlighted tokens. This also handles
+  // Android IME events where the line count changes between animation frames.
+  syncLineNumbers() {
+    const count = Math.min(this.input.value.split('\n').length, 10000);
+    if (count !== this.lastGutterCount) {
+      this.lastGutterCount = count;
+      this.gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+    }
+    this.gutter.scrollTop = this.input.scrollTop;
+  }
   render() {
+    this.syncLineNumbers();
     cancelAnimationFrame(this.raf);
     this.raf = requestAnimationFrame(() => {
-      const text = this.input.value;
-      this.highlight.innerHTML = highlightLuau(text);
-      const count = Math.min(text.split('\n').length, 10000);
-      this.gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+      this.highlight.innerHTML = highlightLuau(this.input.value);
       this.highlight.parentElement.scrollTop = this.input.scrollTop;
       this.highlight.parentElement.scrollLeft = this.input.scrollLeft;
     });
+  }
+  // A real LF is required to create the next numbered Luau line. Soft word
+  // wrapping only changes presentation and must never modify source code.
+  insertNewline() {
+    const start=this.input.selectionStart, end=this.input.selectionEnd;
+    this.replace(start,end,newlineIndent(this.input.value,start));
   }
   replace(start, end, value, cursor = start + value.length) {
     this.input.focus();
@@ -86,8 +109,7 @@ export class CodeEditor {
       return;
     }
     if (event.key === 'Enter' && !ctrl && !event.altKey && !event.isComposing) {
-      event.preventDefault(); const a = input.selectionStart, b = input.selectionEnd;
-      this.replace(a, b, newlineIndent(input.value, a)); return;
+      event.preventDefault(); this.insertNewline(); return;
     }
     if (input.selectionStart === input.selectionEnd && !ctrl && !event.altKey && !event.isComposing) {
       const a = input.selectionStart;
