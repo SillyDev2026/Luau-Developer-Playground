@@ -1,3 +1,11 @@
+# LuauForge v3.4.3 — Mobile code-line alignment fix
+
+This patch synchronizes the line-number gutter, syntax-highlighted code, and actual Luau editor text using the same CSS line-height and top/bottom padding. On Android Chrome, portrait and landscape both use 16px minimum editor text to prevent unwanted browser zoom, along with consistent 11px top and 18px bottom padding and keyboard-friendly scroll padding. The previous mismatched 120px and 45px bottom padding values are removed, improving line positioning near the bottom of the editor.
+
+The patch does not change workspace files, autosave, code intelligence, the Files and Output buttons, or the downloadable Windows server EXE. Refresh the site to load v3.4.3 and test the line numbers beside your code.
+
+---
+
 # LuauForge v3.4.2 — Mobile Explorer and Output navigation
 
 LuauForge now has **Files** and **Output** controls side by side in the top toolbar, as well as both destinations in the mobile bottom dock. This fixes a short-landscape Android issue where the Files drawer covered the editor and the Output console was too small to reach.
