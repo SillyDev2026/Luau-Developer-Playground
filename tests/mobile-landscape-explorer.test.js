@@ -31,7 +31,7 @@ test('Explorer control stays available on desktop and phone landscape and opens 
   assert.match(js,/function openExplorer\(\) \{/);
   assert.match(js,/setSide\('files'\)/);
   assert.match(js,/if \(usesMobileNavigation\(\)\) \{/);
-  assert.match(js,/matchMedia\(MOBILE_NAV_QUERY\)\.addEventListener\?\.\('change', closeMobile\)/);
+  assert.match(js,/matchMedia\(MOBILE_NAV_QUERY\)\.addEventListener\?\.\('change',\(\)=>\{closeMobile\(\);setOutputExpanded\(false\);\}\)/);
   assert.match(css,/\.explorer-header-btn\s*\{display:inline-flex/);
   assert.match(css,/\.explorer-header-btn:focus-visible/);
   assert.match(js,/\$\('side-shade'\)\.addEventListener\('click', closeMobile\)/);
@@ -53,7 +53,7 @@ test('mobile bottom navigation fits nine destinations including Files and Output
 test('mobile changes do not remove editor actions or modify project persistence',async()=>{
   const [html,js]=await Promise.all(['index.html','src/v1.js'].map(read));
   for(const id of ['run-btn','stop-btn','new-file','import-file','file-filter','code-input','mobile-library','mobile-run','mobile-dashboard','mobile-settings'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(js,/function openFile\(path\).*if \(usesMobileNavigation\(\)\) closeMobile\(\)/);
+  assert.match(js,/function openFile\(path\).*workspace\.open\(path\); closeMobile\(\); setOutputExpanded\(false\); if\(!usesMobileNavigation\(\)\)editor\.input\.focus\(\)/);
   assert.match(js,/workspace\.open\(path\)/);
   assert.match(js,/workspace\.project/);
 });
