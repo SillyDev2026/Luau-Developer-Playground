@@ -64,5 +64,5 @@ assert.match(html,/id="feedback-post-list"/);
 const serverDownload = await readFile(join(out,'server-download.html'),'utf8');
 await stat(join(out,'src/server-download.css'));
 assert.match(serverDownload,/id="download-windows-exe"/);
-assert.match(serverDownload,/releases\/download\/v3\.4\.0\/LuauForge-Server-Windows-x64\.exe/);
+assert.match(serverDownload,/releases\/download\/v3\.3\.0\/LuauForge-Server-Windows-x64\.exe/);
 assert.match(html,/id="server-exe-download"/);
