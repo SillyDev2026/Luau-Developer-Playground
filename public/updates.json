@@ -1,12 +1,13 @@
 {
-  "version": "3.4.3",
-  "title": "Mobile code line and line-number alignment fix",
+  "version": "3.4.4",
+  "title": "Android editor real-newline and line-number fix",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Align Luau code text, line numbers and syntax highlighting using one shared vertical padding and line-height specification",
-    "Remove obsolete oversized 120px/45px textarea padding that caused mismatched scrolling around the editor bottom",
-    "Use consistent compact mobile top/bottom padding with keyboard-friendly scroll padding",
-    "Make Android portrait and landscape display the same real effective editor font size",
-    "Preserve Files, Output, Auto Require, code editing, responsive dock, project storage and Windows server downloads"
+    "Fix Android virtual Enter so insertParagraph and insertLineBreak create actual Luau newlines with existing auto-indentation",
+    "Add a dedicated ↵ Enter button to the mobile code toolbar so each tap inserts a real numbered line",
+    "Update gutter line numbers immediately when edits change the number of lines, instead of waiting for syntax highlighting",
+    "Keep highlighted code and editable textarea using identical wrapping rules when restoring a saved project",
+    "Show ↪ Wrap on when visual line wrapping is enabled, explaining why a wrapped row does not get another line number",
+    "Preserve source text and saved scripts; do not silently turn visually wrapped rows into newlines"
   ]
 }
