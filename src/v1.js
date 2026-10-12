@@ -251,6 +251,8 @@ function refresh() {
   $('code-input').wrap = p.wordWrap ? 'soft' : 'off';
   // Keep the textarea and highlighted overlay in the same wrapping mode.
   $('code-input').style.whiteSpace = p.wordWrap ? 'pre-wrap' : 'pre';
+  $('code-input').style.overflowWrap = p.wordWrap ? 'anywhere' : 'normal';
+  $('syntax-code').style.overflowWrap = p.wordWrap ? 'anywhere' : 'normal';
   $('wrap-btn').setAttribute('aria-pressed', String(p.wordWrap));
   $('wrap-indicator').classList.toggle('hidden', !p.wordWrap);
   $('syntax-code').style.whiteSpace = p.wordWrap ? 'pre-wrap' : 'pre';
@@ -259,6 +261,8 @@ function refresh() {
   $('optimization-select').value = String(p.optimization);
   $('font-slider').value = String(p.fontSize);
   $('wrap-select').checked = p.wordWrap;
+  // Recalculate wrapping after the actual textarea width and wrap state update.
+  editor.render();
   metrics(); renderFiles(); renderTabs(); renderSymbols(); updateCursor();
 }
 function updateCursor() {
