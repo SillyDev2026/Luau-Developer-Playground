@@ -249,6 +249,10 @@ function refresh() {
   }
   document.documentElement.style.setProperty('--editor-font', p.fontSize + 'px');
   $('code-input').wrap = p.wordWrap ? 'soft' : 'off';
+  // Keep the textarea and highlighted overlay in the same wrapping mode.
+  $('code-input').style.whiteSpace = p.wordWrap ? 'pre-wrap' : 'pre';
+  $('wrap-btn').setAttribute('aria-pressed', String(p.wordWrap));
+  $('wrap-indicator').classList.toggle('hidden', !p.wordWrap);
   $('syntax-code').style.whiteSpace = p.wordWrap ? 'pre-wrap' : 'pre';
   $('highlight-scroll').style.whiteSpace = p.wordWrap ? 'pre-wrap' : 'pre';
   $('mode-select').value = p.mode;
@@ -569,7 +573,7 @@ function createTemplate(kind) {
   const requested = Object.hasOwn(workspace.project.files, path) ? path.replace(/\.luau$/, '-' + Math.floor(Date.now() / 1000) + '.luau') : path;
   try { workspace.create(requested, source); closeMobile(); notify('Created ' + requested); } catch (error) { notify(error.message, true); }
 }
-function toggleWrap() { workspace.update({ wordWrap: !workspace.project.wordWrap }); $('code-input').style.whiteSpace = workspace.project.wordWrap ? 'pre-wrap' : 'pre'; editor.render(); }
+function toggleWrap() { workspace.update({ wordWrap: !workspace.project.wordWrap }); editor.render(); }
 function toggleTheme() { workspace.update({ theme: workspace.project.theme === 'dark' ? 'light' : 'dark' }); document.body.dataset.theme = workspace.project.theme; }
 function resetLayout() { document.documentElement.style.setProperty('--sidebar-width', '266px'); document.documentElement.style.setProperty('--output-height', '202px'); workspace.update({ sidebarWidth: 266, outputHeight: 202, fontSize: 14 }); }
 function enableResizing() {
@@ -634,6 +638,9 @@ function initialize() {
   $('dialog-close').addEventListener('click', closeModal); $('modal-backdrop').addEventListener('pointerdown', e => { if (e.target === $('modal-backdrop')) closeModal(); });
   $('code-undo').addEventListener('click', () => { editor.input.focus(); document.execCommand('undo'); });
   $('mobile-complete').addEventListener('click', () => { editor.input.focus(); editor.input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, ctrlKey: true, key: ' ' })); });
+  // Pointer down must not blur the textarea before selectionStart is read.
+  $('mobile-enter').addEventListener('pointerdown', event => event.preventDefault());
+  $('mobile-enter').addEventListener('click', () => editor.insertNewline());
   for (const button of document.querySelectorAll('[data-insert]')) button.addEventListener('click', () => {
     const value = button.dataset.insert, start = editor.input.selectionStart, end = editor.input.selectionEnd;
     editor.replace(start, end, value, start + (value.length === 2 ? 1 : value.length));
