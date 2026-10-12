@@ -9,7 +9,7 @@ mkdirSync(out,{recursive:true});
 const exeName='LuauForge-Server-Windows-x64.exe';
 const executable=join(out,exeName);
 function run(command,args){
-  const result=spawnSync(command,args,{cwd:root,stdio:'inherit',shell:process.platform==='win32'});
+  const result=spawnSync(command,args,{cwd:root,stdio:'inherit',shell:false});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(command+' failed with exit code '+result.status);
 }
