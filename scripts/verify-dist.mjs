@@ -12,7 +12,7 @@ assert.match(bundle, /bundleProject/);
 const glue = await readFile(join(out, 'wasm/luau-module.js'), 'utf8');
 const binary = await readFile(join(out, 'wasm/luau.wasm'));
 assert.match(html, /href="\.\/favicon\.svg"/);
-assert.match(html, /src="\.\/src\/v1\.js\?v=3\.3\.0"/);
+assert.match(html, /src="\.\/src\/v1\.js\?v=3\.4\.0"/);
 assert.match(worker, /new URL\('\.\.\/wasm\/', import\.meta\.url\)/);
 assert.match(worker, /new URL\('\.\.\/public\/wasm\/', import\.meta\.url\)/);
 
@@ -34,8 +34,12 @@ for(const name of ['NexusDataStore','ZonePlusV2','BufferUtil','Compression','Sig
   assert.ok(studio.length > 4000,`Missing pinned Studio package: ${name}`);
 }
 
-for (const module of ['TestTools.luau','MathKit.luau','registry.json']) await stat(join(out,'community',module));
+for (const module of ['TestTools.luau','MathKit.luau','SignalLite.luau','TableKit.luau','registry.json']) await stat(join(out,'community',module));
 await stat(join(out,'src/github-modules.js'));
+await stat(join(out,'src/module-index.js'));
+const moduleRegistry=JSON.parse(await readFile(join(out,'community/registry.json'),'utf8'));
+for(const name of ['SignalLite','TableKit'])assert.ok(moduleRegistry.modules.some(x=>x.name===name&&x.environment==='wasm'));
+
 
 await stat(join(out,'community/tests/MathKitTests.luau'));
 
@@ -60,5 +64,5 @@ assert.match(html,/id="feedback-post-list"/);
 const serverDownload = await readFile(join(out,'server-download.html'),'utf8');
 await stat(join(out,'src/server-download.css'));
 assert.match(serverDownload,/id="download-windows-exe"/);
-assert.match(serverDownload,/releases\/download\/v3\.3\.0\/LuauForge-Server-Windows-x64\.exe/);
+assert.match(serverDownload,/releases\/download\/v3\.4\.0\/LuauForge-Server-Windows-x64\.exe/);
 assert.match(html,/id="server-exe-download"/);
