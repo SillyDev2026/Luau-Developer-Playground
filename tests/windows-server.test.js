@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { windowsDataDirectory,windowsServerConfig } from '../server/windows-entry.mjs';
+import { windowsDataDirectory,windowsServerConfig } from '../server/windows-config.mjs';
 
 test('Windows EXE defaults to loopback and persistent per-user storage',()=>{
  const env={LOCALAPPDATA:'C:\\Users\\Example\\AppData\\Local'};
