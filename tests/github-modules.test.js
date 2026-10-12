@@ -64,7 +64,7 @@ test('approved external modules fetch only pinned SHA and resolve relative depen
   assert.equal(Object.keys(ready.files).length,3);
   assert.equal(bundleProject(ready).dependencies.length,2);
   assert.ok(seen.every(url=>url.includes(fakeSha)));
-  assert.equal(githubModuleTargets(db).length,4);
+  assert.equal(githubModuleTargets(db).length,6); // five local examples plus one reviewed pin
 });
 test('dependency traversal cannot escape a public repository root',async()=>{
   const db=storage();saveGithubPin({specifier:'@Alice/Repo/Math.luau',sha:fakeSha},db);
@@ -81,5 +81,5 @@ test('site documentation wires up public module controls and HTML has no duplica
   for(const id of ['github-module-add','github-module-publish'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(ui,/previewGithubModule/);
   assert.match(ui,/checkbox\.checked/);
-  assert.match(html,/v=3\.3\.0/);
+  assert.match(html,/v=3\.4\.0/);
 });

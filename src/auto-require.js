@@ -1,12 +1,22 @@
 import { textareaCaretOffset, placeCompletionPopup } from './completion-geometry.js';
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
 import { githubModuleTargets } from './github-modules.js';
+import { STUDIO_LIBRARIES } from './studio-libraries.js';
 import { getRobloxAPI, loadRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { staticCompletions, applyCompletion, mergeCompletions, completionContext, localsInScope, maskLuau, GLOBALS } from './intellisense.js?v=0.4.0';
 import { signatureFor, formatSignature, definitionAt } from './editor-intelligence.js?v=0.4.0';
 import { hoverAt, sourceOffsetAtPoint, moduleMemberCompletions } from './symbol-hover.js';
 import { workspaceTypeSuggestions } from './module-types.js';
 
+// The service placement matches the example snippets in the vetted Studio catalog.
+// Importing a service ModuleScript does not install it; Studio packages must be
+// downloaded and placed with all their dependencies before this call can run.
+export function studioRequireExpression(lib) {
+  if(!STUDIO_LIBRARIES.includes(lib))throw Error('Unknown Roblox Studio module');
+  if(lib.id==='NexusDataStore')return 'game:GetService("ServerScriptService").NexusDataStore';
+  if(lib.id==='NetStream')return 'game:GetService("ReplicatedStorage").NetworkHandler.NetStream';
+  return 'game:GetService("ReplicatedStorage").'+(lib.id==='ZonePlusV2'?'ZonePlusNext':lib.id);
+}
 const reserved = new Set('and break continue do else elseif end false for function if in local nil not or repeat return then true until while'.split(' '));
 const safeVar = label => {
   let name = label.replace(/[^A-Za-z0-9_]/g, '_');
@@ -33,6 +43,7 @@ export function targets(files, active) {
   return [
     ...BUILTIN_LIBRARIES.map(lib=>({kind:'builtin',id:lib.id,label:lib.label,variable:lib.local,specifier:'@'+lib.id,detail:'Bundled v'+lib.version})),
     ...githubModuleTargets().map(lib=>({kind:'github',id:lib.specifier,label:lib.label,variable:safeVar(lib.label),specifier:lib.specifier,detail:'Public GitHub · '+(lib.description||'pinned')})),
+    ...STUDIO_LIBRARIES.map(lib=>({kind:'studio',id:lib.id,label:lib.label,variable:safeVar(lib.label),specifier:studioRequireExpression(lib),detail:'Roblox Studio only · '+lib.purpose,dependencies:lib.dependencies})), 
     ...Object.keys(files).filter(path=>path!==active && /\.lua(u)?$/i.test(path)).map(path=>({kind:'module',id:path,label:path.split('/').at(-1).replace(/\.lua(u)?$/i,''),variable:safeVar(path.split('/').at(-1).replace(/\.lua(u)?$/i,'')),specifier:relative(active,path),detail:path}))
   ];
 }
@@ -49,10 +60,28 @@ export function boundVariable(source, specifier) {
   }
   return null;
 }
+// A Studio require has an expression, unlike a virtual WASM @-specifier.
+// Match only a complete, visible declaration to avoid a fake match in comments.
+export function boundStudioVariable(source,expression){
+  const clean=maskLuau(source);
+  const re=/^[ \t]*local\s+([A-Za-z_]\w*)\s*=\s*require\s*\(\s*(game\s*:\s*GetService\s*\(\s*[\"'](?:ServerScriptService|ReplicatedStorage)[\"']\s*\)(?:\s*\.\s*[A-Za-z_]\w*)+)\s*\)/gm;
+  const canonical=value=>value.replace(/\s+/g,'').replace(/'([A-Za-z]+)'/g,'\"$1\"');
+  for(const match of source.matchAll(re)){
+    if(clean.slice(match.index,match.index+match[0].length).trimStart().startsWith('local')&&canonical(match[2])===canonical(expression))return match[1];
+  }
+  return null;
+}
 export function suggestions(source,cursor,files,active) {
   const slash=slashAt(source,cursor);
   if (slash) {
-    const items=targets(files,active).map(item=>({...item,score:Math.max(fuzzy(slash.query,item.label),fuzzy(slash.query,item.id),fuzzy(slash.query,item.detail))})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,9);
+    // Slash-scoped discovery: /studio/..., /github/..., /wasm/..., /file/...
+    // No remote request is made during typing; all options are local metadata.
+    const match=/^(studio|github|wasm|file)\/(.*)$/i.exec(slash.query);
+    const kind=match?({studio:'studio',github:'github',wasm:'builtin',file:'module'})[match[1].toLowerCase()]:null;
+    const query=match?match[2]:slash.query;
+    const items=targets(files,active).filter(item=>!kind||item.kind===kind)
+      .map(item=>({...item,score:Math.max(fuzzy(query,item.label),fuzzy(query,item.id),fuzzy(query,item.detail))}))
+      .filter(item=>item.score>0).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,9);
     return items.length?{mode:'require',from:slash.from,to:slash.to,items}:null;
   }
   const from=source.lastIndexOf('\n',cursor-1)+1;
@@ -78,15 +107,15 @@ export function complete(source,cursor,choice,files,active) {
   }
   const found=targets(files,active).find(t=>t.kind===choice.kind && t.id===choice.id);
   if(!found || context.mode!=='require') return null;
-  const existing=boundVariable(source,found.specifier);
+  const existing=found.kind==='studio' ? boundStudioVariable(source,found.specifier) : boundVariable(source,found.specifier);
   let variable=existing||found.variable;
   if(!existing) {
     const declared=new Set([...maskLuau(source).matchAll(/\blocal\s+([A-Za-z_]\w*)/g)].map(m=>m[1]));
     const name=variable; let suffix=2;
     while(declared.has(variable)) variable=name+suffix++;
   }
-  const text=existing?variable:'local '+variable+' = require('+JSON.stringify(found.specifier)+')';
-  return {source:source.slice(0,context.from)+text+source.slice(context.to),cursor:context.from+text.length,created:!existing,variable};
+  const text=existing?variable:'local '+variable+' = require('+(found.kind==='studio'?found.specifier:JSON.stringify(found.specifier))+')';
+  return {source:source.slice(0,context.from)+text+source.slice(context.to),cursor:context.from+text.length,created:!existing,variable,studioOnly:found.kind==='studio',dependencies:found.kind==='studio'?found.dependencies:[]};
 }
 // Keep normal editor navigation and newline insertion independent of a passive
 // autocomplete popup. Ctrl+Space explicitly activates keyboard selection.
@@ -152,7 +181,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
   const copy=document.createElement('span'); copy.textContent='Local variables, type information, Roblox API and / imports';
   label.append(toggle,copy);
   const hint=document.createElement('small');
-  hint.textContent='Autocomplete: Tab accepts a suggestion; Enter makes a new line. Ctrl+Space activates arrow-key selection; Esc closes the list.';
+  hint.textContent='Type /studio/NetStream, /github/TableKit, /wasm/FastNum or /file/Math for scoped Auto Require. Tab accepts; Enter creates a normal line. Ctrl+Space selects; Esc dismisses.';
   setting.append(heading,label,hint);
   const inspector=document.querySelector('#inspector .setting-group');
   inspector?.before(setting);
@@ -199,7 +228,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     selected=Math.min(selected,options.items.length-1);
     menu.replaceChildren();
     const head=document.createElement('div');head.className='auto-require-caption';
-    const label=options.mode==='require'?'AUTO REQUIRE':options.mode==='method'?'LIBRARY API':'LUAU INTELLISENSE';
+    const label=options.mode==='require'?'AUTO REQUIRE · STUDIO + WASM':options.mode==='method'?'LIBRARY API':'LUAU INTELLISENSE';
     head.textContent=label+(manuallyInvoked?' • ↑/↓ select · Enter / Tab accepts':' • Tab completes · Enter new line');
     menu.append(head);
     options.items.forEach((item,index)=>{
@@ -261,6 +290,7 @@ export function mountAutoRequire({editor,getProject,getRuntime,notify,catalogBut
     const project=getProject(),item=options.items[index],wasImport=options.mode==='require';
     const result=options.mode==='require'||options.mode==='method' ? complete(editor.value,editor.selectionStart,item,project.files,project.active) : applyCompletion(editor.value,options,item);
     if(!result){hide();return;}
+    if(result.studioOnly)notify('Roblox Studio only: place the module and its dependencies in Studio before running. The browser WASM runtime cannot execute Roblox services.',true);
     editor.value=result.source;
     editor.setSelectionRange(result.cursor,result.cursor);
     editor.dispatchEvent(new Event('input',{bubbles:true}));

@@ -1,3 +1,22 @@
+# LuauForge v3.4.0 — Expanded Auto Require & module intelligence
+
+Auto Require now knows the **seven curated Roblox Studio modules** already distributed with LuauForge: NexusDataStore, ZonePlusNext, BufferUtil, Compression, Signal, Promise, and NetStream. At the beginning of an editor line, type one of these shortcuts and press Tab on a suggestion:
+
+- `/studio/NetStream` — inserts `local NetStream = require(game:GetService("ReplicatedStorage").NetworkHandler.NetStream)`. Install the full NetStream/NetworkHandler package in Studio first.
+- `/studio/NexusDataStore` — inserts `local NexusDataStore = require(game:GetService("ServerScriptService").NexusDataStore)`. Install its required child modules.
+- `/github/TableKit` — imports the new pure Luau table helpers via the site's explicit public GitHub module specifier.
+- `/github/SignalLite` — imports a new lightweight pure Luau signal/event helper.
+- `/wasm/FastNum` — imports a bundled WASM-compatible big-number module.
+- `/file/Math` — imports a local workspace file using a relative path.
+
+The normal `/Name` discovery still works. The menu labels **Roblox Studio only** modules separately from runnable WASM modules and displays their dependencies. **Studio-only modules do not run inside the browser Luau WASM runtime.** Download/package the module and dependencies into Roblox Studio before running its generated Roblox require line. NetStream needs its entire NetworkHandler folder.
+
+The new `SignalLite.luau` and `TableKit.luau` source modules are shipped in [public/community](public/community/) and work in the browser. Their documented methods appear in IntelliSense and hover when imported.
+
+For third-party public GitHub imports, LuauForge still requires an explicit source preview, review and immutable SHA pin. v3.4.0 additionally keeps a **small index of exported method names, type annotations and leading comments**, not a copy of the source, so `Module.` completion and hover can work in the editor after pinning. Existing pins made before v3.4.0 remain usable; unpin/review/re-pin them to build an index. These static suggestions are advisory, not a substitute for Luau typechecking. No unreviewed remote modules are executed or loaded automatically.
+
+---
+
 # LuauForge v3.3.0 — Windows Node Server EXE download
 
 The website now offers **LuauForge-Server-Windows-x64.exe** as a direct download from the header, Shared Scripts and Feedback pages. There is also a dedicated [EXE setup page](server-download.html). This is a real Windows executable with Node bundled inside: **no ZIP and no Node.js installation required**.

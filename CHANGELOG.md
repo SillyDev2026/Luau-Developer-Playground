@@ -1,3 +1,12 @@
+## 3.4.0 — 2026-10-12
+
+- Connect all seven existing Roblox Studio package entries to the Auto Require catalog, generating appropriate `require(game:GetService(...))` calls and warning about Studio-only runtime/dependency requirements.
+- Add scoped import commands `/studio/`, `/github/`, `/wasm/` and `/file/` while preserving the original `/Name` flow and keyboard navigation.
+- Add two original standalone Luau example packages—SignalLite and TableKit—with source, registered public specifiers, documented APIs, cache entries and real WASM execution tests.
+- Persist only a bounded index of reviewed GitHub module exports, signatures and documentation for editor completion/hover; immutable pinned source continues to load solely at runtime after user review.
+- Add type/source and import regression tests; keep source-only Studio code from executing in browser WASM.
+- Leave the independently published Windows Server v3.3.0 EXE unchanged and preserve its working download links; future frontend releases do not republish the unchanged binary.
+
 ## 3.3.0 — 2026-10-11
 
 - Add direct Windows Node server .exe download links in site header, Shared Scripts, Feedback, and dedicated setup page.

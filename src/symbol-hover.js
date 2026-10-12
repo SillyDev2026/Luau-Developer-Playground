@@ -3,6 +3,8 @@
 import { maskLuau, localsInScope } from './intellisense.js?v=0.4.0';
 import { DEFAULT_PARENTS, getRobloxAPI } from './roblox-api.js?v=0.4.0';
 import { BUILTIN_LIBRARIES } from './builtin-libraries.js';
+import { githubModuleTargets } from './github-modules.js';
+import { STUDIO_LIBRARIES } from './studio-libraries.js';
 
 function tokenAt(source, offset) {
   if (!Number.isInteger(offset) || offset<0 || offset>=source.length) return null;
@@ -107,8 +109,26 @@ export function importedModule(source,base,cursor,project) {
     if(clean.slice(m.index,m.index+5)!=='local'||m[1]!==base)continue;
     specifier=m[3];
   }
-  if(!specifier)return null;
-  if(specifier.startsWith('@'))return {kind:'builtin',specifier};
+  if(!specifier){
+    // Roblox Studio requires a ModuleScript Instance expression rather than
+    // a virtual @specifier; recognize only known catalog service paths.
+    const re=/\blocal\s+([A-Za-z_]\w*)\s*=\s*require\s*\(\s*game\s*:\s*GetService\s*\(\s*(["'])(ServerScriptService|ReplicatedStorage)\2\s*\)\s*((?:\.\s*[A-Za-z_]\w*)+)\s*\)/g;
+    let library=null;
+    for(const m of source.matchAll(re)){
+      if(m.index>=cursor)break;
+      if(clean.slice(m.index,m.index+5)!=='local'||m[1]!==base)continue;
+      const node=m[4].replace(/\s/g,'');
+      library=STUDIO_LIBRARIES.find(lib=>{
+        const target=lib.id==='NexusDataStore'?'.NexusDataStore':lib.id==='NetStream'?'.NetworkHandler.NetStream':'.'+(lib.id==='ZonePlusV2'?'ZonePlusNext':lib.id);
+        return m[3]===(lib.id==='NexusDataStore'?'ServerScriptService':'ReplicatedStorage')&&node===target;
+      })||null;
+    }
+    return library?{kind:'studio',library}:null;
+  }
+  if(specifier.startsWith('@')){
+    const found=githubModuleTargets().find(x=>x.specifier===specifier);
+    return found?{kind:'indexed',specifier,api:found.api||[],origin:found.local?'Bundled public example':'Pinned GitHub revision'}:{kind:'builtin',specifier};
+  }
   if(!specifier.startsWith('.'))return null;
   const current=project.active||'main.luau';
   const basePath=normalize(current.split('/').slice(0,-1).concat(specifier.split('/')).join('/'));
@@ -138,10 +158,13 @@ function exportedSignatures(source) {
 export function moduleMemberCompletions(source,cursor,context,project) {
   if(context?.mode!=='member' || !/^[A-Za-z_]\w*$/.test(context.base||''))return [];
   const imported=importedModule(source,context.base,cursor,project);
-  if(imported?.kind!=='file')return [];
+  if(!imported)return [];
   const query=context.query.toLowerCase();
-  return exportedSignatures(imported.source)
-    .map(entry=>({label:entry.name.split('.').at(-1),kind:'function',detail:entry.signature+' · '+imported.path,documentation:entry.documentation,origin:imported.path,score:0}))
+  const entries=imported.kind==='file'?exportedSignatures(imported.source):
+    imported.kind==='indexed'?imported.api:
+    imported.kind==='studio'?imported.library.methods.filter(x=>/^[A-Za-z_]\w*\(/.test(x)).map(signature=>({name:signature.split('(')[0],signature,documentation:'Roblox Studio only · '+imported.library.purpose})):[];
+  return entries
+    .map(entry=>({label:entry.name.split('.').at(-1),kind:'function',detail:entry.signature+' · '+(imported.path||imported.library?.label||imported.origin||'module'),documentation:entry.documentation,origin:imported.path||imported.library?.label||imported.origin,score:0}))
     .filter(item=>(context.separator!==':'||item.kind==='function') && item.label.toLowerCase().startsWith(query))
     .map(item=>({...item,score:item.label.toLowerCase()===query?115:85}))
     .sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label)).slice(0,12);
@@ -160,6 +183,14 @@ export function lookupSignature(name,source,cursor,project,api=getRobloxAPI()) {
   }
   const root=parts[0],method=parts.at(-1);
   const imported=importedModule(source,root,cursor,project);
+  if(imported?.kind==='indexed'){
+    const entry=imported.api.findLast(x=>x.name===method);
+    if(entry)return {signature:entry.signature,documentation:entry.documentation,origin:imported.origin};
+  }
+  if(imported?.kind==='studio'){
+    const entry=imported.library.methods.find(x=>x.startsWith(method+'('));
+    if(entry)return {signature:entry,documentation:'Roblox Studio only · '+imported.library.purpose,origin:imported.library.label+' · Studio catalog'};
+  }
   if(imported?.kind==='builtin'){
     const library=BUILTIN_LIBRARIES.find(x=>'@'+x.id===imported.specifier);
     const entry=library?.categories.flatMap(x=>x.methods).find(x=>x.startsWith(method+'('));

@@ -1,6 +1,7 @@
 // Public GitHub modules for standalone Luau WASM. No user tokens, no write API,
 // no arbitrary URLs. Public source is reviewed in the UI before local pinning.
 import { findRequires } from './module-bundle.js';
+import { indexPublicModule, validateModuleIndex } from './module-index.js';
 
 export const GITHUB_PINS_KEY = 'luauforge:github-pins:v1';
 export const GITHUB_VIRTUAL_ROOT = '__luauforge_github__/';
@@ -14,9 +15,11 @@ const EXTENSION = /\.lua(u)?$/i;
 const EXAMPLE_REPO = 'SillyDev2026/Luau-Developer-Playground';
 
 export const PUBLIC_GITHUB_EXAMPLES = Object.freeze([
-  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/TestTools.luau', label:'TestTools', description:'Assertions and small test cases', local:true }),
-  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/MathKit.luau', label:'MathKit', description:'Small, self-contained math module', local:true }),
-  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/tests/MathKitTests.luau', label:'MathKitTests', description:'Require this test suite and run MathKitTests.run()', local:true }),
+  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/TestTools.luau', label:'TestTools', description:'Assertions and small test cases', local:true,api:[{name:'equal',signature:'equal(actual: any, expected: any, message: string?)',documentation:'Assert values are equal'}, {name:'truthy',signature:'truthy(value: any, message: string?)',documentation:'Assert a value is truthy'}, {name:'run',signature:'run(name: string, test: () -> ())',documentation:'Run a named test function'}] }),
+  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/MathKit.luau', label:'MathKit', description:'Small, self-contained math module', local:true,api:[{name:'add',signature:'add(a: number, b: number): number',documentation:'Add two numbers'}, {name:'multiply',signature:'multiply(a: number, b: number): number',documentation:'Multiply two numbers'}] }),
+  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/tests/MathKitTests.luau', label:'MathKitTests', description:'Require this test suite and run MathKitTests.run()', local:true,api:[{name:'run',signature:'run()',documentation:'Run the bundled MathKit tests'}] }),
+  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/SignalLite.luau', label:'SignalLite', description:'Small typed events that work in standalone Luau', local:true,api:[{name:'new',signature:'new()',documentation:'Create a lightweight signal with Connect and Fire methods'}] }),
+  Object.freeze({ owner:'SillyDev2026', repo:'Luau-Developer-Playground', path:'community/TableKit.luau', label:'TableKit', description:'Copy, shallow merge and inspect Lua tables', local:true,api:[{name:'copy',signature:'copy(source: {[any]: any}): {[any]: any}',documentation:'Create a shallow copy without mutating the input'}, {name:'merge',signature:'merge(left: {[any]: any}, right: {[any]: any}): {[any]: any}',documentation:'Merge two tables into a new table without mutating either'}, {name:'keys',signature:'keys(source: {[any]: any}): {any}',documentation:'Return an array of table keys'}] }),
 ]);
 function error(message) { throw new Error(message); }
 function validatePath(input) {
@@ -113,7 +116,7 @@ export function validatePin(pin) {
   const info=parseGithubSpecifier(pin.specifier);
   if(!info||!SHA.test(pin.sha||'')||pin.studioOnly===true) return null;
   if(!EXTENSION.test(info.path)) return null;
-  return {...info,sha:pin.sha.toLowerCase(),size:Number(pin.size)||0};
+  return {...info,sha:pin.sha.toLowerCase(),size:Number(pin.size)||0,api:validateModuleIndex(pin.api)};
 }
 export function readGithubPins(storage=globalThis.localStorage) {
   try {const obj=JSON.parse(storage?.getItem(GITHUB_PINS_KEY)||'[]');return Array.isArray(obj)?obj.slice(0,MAX_MODULES).map(validatePin).filter(Boolean):[];}catch{return [];}
@@ -122,6 +125,9 @@ export function saveGithubPin(preview,storage=globalThis.localStorage) {
   if(preview.studioOnly) error('This module uses Roblox Studio services; download its source for Studio instead of browser WASM.');
   const pin=validatePin(preview);
   if(!pin) error('Invalid module source or GitHub revision.');
+  // Keep a bounded, non-executable API snapshot of the reviewed revision.
+  // The executable source is still fetched from the immutable SHA at runtime.
+  pin.api=typeof preview.source==='string'?indexPublicModule(preview.source):validateModuleIndex(preview.api);
   const previous=readGithubPins(storage).filter(x=>x.specifier!==pin.specifier);
   if(previous.length>=MAX_MODULES) error(`Maximum ${MAX_MODULES} public modules per device.`);
   storage.setItem(GITHUB_PINS_KEY,JSON.stringify([...previous,pin]));
@@ -135,7 +141,7 @@ export function removeGithubPin(specifier,storage=globalThis.localStorage) {
 export function githubModuleTargets(storage=typeof localStorage==='undefined'?null:localStorage) {
   const pins=readGithubPins(storage);
   const builtin=PUBLIC_GITHUB_EXAMPLES.map(x=>({...x,specifier:moduleSpec(x.owner,x.repo,x.path)}));
-  return [...builtin,...pins.filter(x=>!builtin.some(y=>y.specifier===x.specifier)).map(x=>({...x,label:x.path.split('/').at(-1).replace(EXTENSION,''),description:`Pinned ${x.sha.slice(0,9)}`}))];
+  return [...builtin,...pins.filter(x=>!builtin.some(y=>y.specifier===x.specifier)).map(x=>({...x,label:x.path.split('/').at(-1).replace(EXTENSION,''),description:`Pinned ${x.sha.slice(0,9)}`,api:x.api}))];
 }
 function ownExample(specifier) {return PUBLIC_GITHUB_EXAMPLES.find(x=>moduleSpec(x.owner,x.repo,x.path)===specifier);}
 export async function loadGithubForProject(project,{storage=typeof localStorage==='undefined'?null:localStorage,fetchImpl=fetch,moduleUrl=import.meta.url}={}) {

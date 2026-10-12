@@ -1,13 +1,13 @@
 {
-  "version": "3.3.0",
-  "title": "Download standalone Windows Node Server EXE",
-  "publishedAt": "2026-10-11",
+  "version": "3.4.0",
+  "title": "Expanded Auto Require and smarter module IntelliSense",
+  "publishedAt": "2026-10-12",
   "changes": [
-    "Download LuauForge-Server-Windows-x64.exe directly from the website, no ZIP",
-    "Self-contained Windows Node server; no separate Node installation on user devices",
-    "New dedicated Windows server download and setup page",
-    "Persistent workspace and feedback data in %LOCALAPPDATA%\\LuauForgeServer",
-    "Local-only by default; configurable host, port and server-only Discord token",
-    "Automated Windows native EXE build, startup and real API smoke tests before GitHub Release"
+    "Auto Require recognizes seven Roblox Studio modules: NexusDataStore, ZonePlusNext, BufferUtil, Compression, Signal, Promise and NetStream",
+    "Scoped commands /studio/, /github/, /wasm/ and /file/ find the correct module type faster",
+    "Studio imports insert appropriate game:GetService ModuleScript paths and warn about Studio-only execution and dependencies",
+    "New standalone SignalLite and TableKit modules are included in the public Luau catalog and runnable in browser WASM",
+    "Public GitHub module previews record compact reviewed function signatures and comments for autocomplete and hover without storing downloaded source",
+    "Additional compatibility, data validation and real WASM tests protect existing editor and import behavior"
   ]
 }
