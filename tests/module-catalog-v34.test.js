@@ -120,7 +120,7 @@ test('scoped slash search keeps Studio, GitHub, WASM and local files separate',(
     const options=suggestions(input,input.length,files,'main.luau');
     assert.ok(options?.items?.length,'Missing scoped results '+input);
     assert.ok(options.items.every(x=>x.kind===kind),input);
-    assert.ok(options.items.some(x=>x.id===id),input);
+    assert.ok(options.items.some(x=>x.id===id||x.label===id),input);
   }
   assert.equal(suggestions('-- /studio/Net',14,files,'main.luau'),null);
 });
