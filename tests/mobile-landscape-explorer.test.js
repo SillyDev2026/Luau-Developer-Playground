@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { MOBILE_NAV_QUERY, usesMobileNavigation } from '../src/v1.js';
+import { MOBILE_NAV_QUERY, usesMobileNavigation } from '../src/mobile-layout.js';
 
 const read=name=>readFile(new URL('../'+name,import.meta.url),'utf8');
 
