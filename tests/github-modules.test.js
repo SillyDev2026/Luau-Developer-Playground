@@ -64,7 +64,7 @@ test('approved external modules fetch only pinned SHA and resolve relative depen
   assert.equal(Object.keys(ready.files).length,3);
   assert.equal(bundleProject(ready).dependencies.length,2);
   assert.ok(seen.every(url=>url.includes(fakeSha)));
-  assert.equal(githubModuleTargets(db).length,4);
+  assert.equal(githubModuleTargets(db).length,6); // five local examples plus one reviewed pin
 });
 test('dependency traversal cannot escape a public repository root',async()=>{
   const db=storage();saveGithubPin({specifier:'@Alice/Repo/Math.luau',sha:fakeSha},db);
