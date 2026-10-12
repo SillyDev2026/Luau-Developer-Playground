@@ -48,5 +48,5 @@ test('direct executable download link and bundled Windows build workflow are pre
  assert.match(script,/--build-sea/);
  assert.match(script,/esbuild/);
  assert.match(docs,/Windows.*EXE/i);
- assert.match(sw,/3\.4\.0/);
+ assert.match(sw,/3\.4\.1/);
 });
