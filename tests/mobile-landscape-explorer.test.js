@@ -16,7 +16,7 @@ test('responsive phone-landscape media query is shared by mobile JavaScript and 
   assert.match(css,/\.sidebar\.is-mobile-open[^}]*transform:translateX\(0\)/);
   assert.match(css,/\.side-shade:not\(\.hidden\)[^{]*\{[^}]*display:block/);
   assert.match(css,/\.mobile-dock\{display:grid/);
-  assert.match(css,/\.mobile-dock\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
+  assert.match(css,/\.mobile-dock\{grid-template-columns:repeat\(9,minmax\(0,1fr\)\)!important/);
 });
 
 test('Explorer control stays available on desktop and phone landscape and opens Files',async()=>{
@@ -31,19 +31,20 @@ test('Explorer control stays available on desktop and phone landscape and opens 
   assert.match(js,/function openExplorer\(\) \{/);
   assert.match(js,/setSide\('files'\)/);
   assert.match(js,/if \(usesMobileNavigation\(\)\) \{/);
-  assert.match(js,/matchMedia\(MOBILE_NAV_QUERY\)\.addEventListener\?\.\('change', closeMobile\)/);
+  assert.match(js,/matchMedia\(MOBILE_NAV_QUERY\)\.addEventListener\?\.\('change',\(\)=>\{closeMobile\(\);setOutputExpanded\(false\);\}\)/);
   assert.match(css,/\.explorer-header-btn\s*\{display:inline-flex/);
   assert.match(css,/\.explorer-header-btn:focus-visible/);
   assert.match(js,/\$\('side-shade'\)\.addEventListener\('click', closeMobile\)/);
   assert.match(js,/\$\('hide-sidebar'\)\.addEventListener\('click', closeMobile\)/);
 });
 
-test('mobile bottom navigation fits eight destinations including Files in portrait',async()=>{
+test('mobile bottom navigation fits nine destinations including Files and Output in portrait',async()=>{
   const [html,css]=await Promise.all(['index.html','src/v1.css'].map(read));
   const match=html.match(/<nav class="mobile-dock"[^>]*>([\s\S]*?)<\/nav>/);
   assert.ok(match);
-  assert.equal((match[1].match(/<button\s/g)||[]).length,8);
-  assert.ok(match[1].indexOf('id="mobile-files"')<match[1].indexOf('id="mobile-run"'));
+  assert.equal((match[1].match(/<button\s/g)||[]).length,9);
+  assert.ok(match[1].indexOf('id="mobile-files"')<match[1].indexOf('id="mobile-output"'));
+  assert.ok(match[1].indexOf('id="mobile-output"')<match[1].indexOf('id="mobile-run"'));
   assert.match(css,/@media \(max-width:480px\) and \(pointer:coarse\)/);
   assert.match(css,/\.mobile-dock \{display:flex;overflow-x:auto/);
   assert.match(css,/\.mobile-dock button \{flex:0 0 54px/);
@@ -52,7 +53,7 @@ test('mobile bottom navigation fits eight destinations including Files in portra
 test('mobile changes do not remove editor actions or modify project persistence',async()=>{
   const [html,js]=await Promise.all(['index.html','src/v1.js'].map(read));
   for(const id of ['run-btn','stop-btn','new-file','import-file','file-filter','code-input','mobile-library','mobile-run','mobile-dashboard','mobile-settings'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(js,/function openFile\(path\).*if \(usesMobileNavigation\(\)\) closeMobile\(\)/);
+  assert.match(js,/function openFile\(path\).*workspace\.open\(path\); closeMobile\(\); setOutputExpanded\(false\); if\(!usesMobileNavigation\(\)\)editor\.input\.focus\(\)/);
   assert.match(js,/workspace\.open\(path\)/);
   assert.match(js,/workspace\.project/);
 });

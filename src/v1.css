@@ -26,7 +26,7 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
 }
 @media(max-width:360px){.location-suffix,.header-secondary{display:none;} .tabs{min-width:0;} .tab{max-width:min(150px,44vw);}}
 
-@media (max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px) {.mobile-dock{grid-template-columns:repeat(8,minmax(0,1fr))!important;}.mobile-dock button span{font-size:clamp(9px,2vw,11px)!important;}}
+@media (max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px) {.mobile-dock{grid-template-columns:repeat(9,minmax(0,1fr))!important;}.mobile-dock button span{font-size:clamp(9px,2vw,11px)!important;}}
 
 /* v1.7 public GitHub source preview: readable at every viewport width. */
 .github-source-preview { display:block; max-height:36dvh; overflow:auto; white-space:pre; max-width:100%; padding:10px; font:12px/1.45 ui-monospace,monospace; background:#0f1729; color:#e2e8f0; border:1px solid #465474; border-radius:9px; }
@@ -42,7 +42,7 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
 @media (max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px) {
   .top-actions .collab-header-link,.top-actions .feedback-top-link,.top-actions .server-exe-top {display:none!important;}
   .explorer-header-btn{min-height:39px;padding:7px 11px;font-size:12px;}
-  .mobile-dock {grid-template-columns:repeat(8,minmax(0,1fr))!important;min-height:calc(60px + env(safe-area-inset-bottom,0px));}
+  .mobile-dock {grid-template-columns:repeat(9,minmax(0,1fr))!important;min-height:calc(60px + env(safe-area-inset-bottom,0px));}
   .mobile-dock button {min-height:48px;}
   #sidebar.is-mobile-open {visibility:visible;}
   .sidebar.is-mobile-open:not(.is-hidden) {transform:translateX(0);}
@@ -60,4 +60,36 @@ body[data-theme="light"] {color-scheme:light;--bg:#eff3fa;--panel:#f7f9fd;--pane
   .brand-titles small{display:none;}
   .output-panel{flex-basis:clamp(72px,21dvh,130px);height:clamp(72px,21dvh,130px);min-height:72px;max-height:28%;}
   .editor-status {min-height:22px;}
+}
+
+/* v3.4.2: Output focus is independent of Files/Explorer on touch screens.
+   Both top-toolbar and bottom-dock Output buttons switch to a usable full
+   output view without clobbering console logs or stored code. */
+.output-header-btn{background:#1c2e42;}
+.output-header-btn[aria-expanded="true"]{border-color:#a5b5ff;background:#354a89;color:#fff;}
+.output-focus-heading{display:none;flex:0 0 auto;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:7px 13px;border-bottom:1px solid #354866;background:#152239;}
+.output-focus-heading strong{font-size:13px;letter-spacing:.2px;color:#e4ebff;}
+.output-focus-heading button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;border:1px solid #4e6485;border-radius:7px;background:#293b56;color:#eef4ff;padding:6px 13px;font-weight:750;font-size:12px;}
+.output-focus-heading button:hover{background:#3d5380;}
+.workspace-main.output-expanded .editor-header,
+.workspace-main.output-expanded .tabs,
+.workspace-main.output-expanded .find-panel,
+.workspace-main.output-expanded .editor-panel,
+.workspace-main.output-expanded .output-resizer{display:none!important;}
+.workspace-main.output-expanded .editor-and-output{flex:1 1 auto;min-height:0;overflow:hidden;}
+.workspace-main.output-expanded .output-panel{display:flex!important;flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden;}
+.workspace-main.output-expanded .output-focus-heading{display:flex;}
+.workspace-main.output-expanded .output-content{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;}
+.workspace-main.output-expanded .output-tabs{flex:0 0 42px;min-height:42px;scrollbar-width:thin;}
+.workspace-main.output-expanded .output-tabs button{min-height:40px;font-size:12px;}
+@media (max-width:820px), (hover:none) and (pointer:coarse) and (max-height:700px){
+  .top-actions .output-header-btn{display:inline-flex!important;min-height:39px;padding:7px 11px;font-size:12px;}
+  .output-panel{scrollbar-width:thin;}
+}
+@media(max-width:480px){
+  .brand-titles small{display:none;}
+  .top-actions{gap:3px;}
+  .top-actions .explorer-header-btn{gap:3px;min-height:35px;padding:5px 7px;font-size:11px;}
+  .top-actions .secondary-btn.stop-btn{font-size:0!important;padding-inline:3px!important;min-width:30px;max-width:30px;}
+  .top-actions .secondary-btn.stop-btn:before{content:"■";font-size:13px;}
 }

@@ -1,12 +1,13 @@
 {
-  "version": "3.4.1",
-  "title": "Android landscape Explorer and mobile navigation fix",
+  "version": "3.4.2",
+  "title": "Mobile Output panel and Explorer switching fix",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Restore mobile bottom navigation on landscape touch-screen phones even when browser CSS width exceeds 820px",
-    "Add a prominent Files button in the editor toolbar to open Explorer directly on desktop and mobile",
-    "Correct mobile dock layout for all eight destinations and make it horizontally scroll on narrow screens",
-    "Synchronize mobile drawer visibility, backdrop, Escape key, orientation changes and accessibility state",
-    "Keep the existing Luau editor, Auto Require, workspace projects and server downloads unchanged"
+    "Add Output button beside Files in the top toolbar, plus dedicated mobile dock Output destination",
+    "Give execution output, problems, bytecode, benchmarks and tests a full-height view on short landscape phones",
+    "Make Output close the Explorer overlay cleanly, and add a return-to-editor button",
+    "Keep code and logs intact when switching between Explorer, editor and Output",
+    "Stop file selection from automatically opening the Android keyboard and hiding Output",
+    "When running or checking Luau code on mobile, automatically open the appropriate output tab"
   ]
 }

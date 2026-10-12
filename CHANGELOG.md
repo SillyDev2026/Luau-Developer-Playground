@@ -1,3 +1,11 @@
+## 3.4.2 — 2026-10-12
+
+- Fix inability to access output after opening Explorer on Android landscape phones. Add direct **Output** buttons in toolbar and mobile dock.
+- Make Output a full-height focused panel with Console/Problems/Bytecode/Benchmarks/Tests and a **← Editor** return control.
+- Automatically close mobile Files/Inspector drawers before showing Output; return to the editor when a file is opened without automatically triggering the Android keyboard.
+- Automatically show matching mobile result panels after Run, Check, bytecode, benchmark, and tests; preserve console logs across file switches.
+- Add navigation and CSS regression checks; update app cache and release version without changing project data or the Windows server executable.
+
 ## 3.4.1 — 2026-10-12
 
 - Fix missing Explorer and mobile dock on Android landscape phones whose CSS viewport is wider than the previous 820px breakpoint.

@@ -7,31 +7,32 @@
   <meta name="description" content="LuauForge 3: self-hosted Luau WASM IDE, modules, code intelligence, benchmarks, tests, project export and offline workspace." />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./src/v1.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/auto-require.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/v15.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/dashboard.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/community.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/v3/ui.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/collab.css?v=3.4.1" />
-  <link rel="stylesheet" href="./src/feedback.css?v=3.4.1" />
-  <title>LuauForge 3.4.1 — Luau Developer IDE</title>
+  <link rel="stylesheet" href="./src/v1.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/auto-require.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/v15.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/dashboard.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/community.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/v3/ui.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/collab.css?v=3.4.2" />
+  <link rel="stylesheet" href="./src/feedback.css?v=3.4.2" />
+  <title>LuauForge 3.4.2 — Luau Developer IDE</title>
 </head>
 <body data-theme="dark">
 <div id="app" class="shell">
   <header class="topbar">
-    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.4.1</b></small></span></button>
+    <button class="brand" id="brand-home" title="LuauForge home"><span class="brand-symbol">{ }</span><span class="brand-titles"><strong>Luau<span>Forge</span></strong><small>LUAU DEVELOPER IDE <b>3.4.2</b></small></span></button>
     <div class="project-location"><span class="status-led"></span><span id="project-title">My Workspace</span><span class="location-suffix">/ <span id="current-file">main.luau</span></span></div>
     <div class="top-actions">
       <button class="icon-btn" id="dashboard-btn" title="Developer dashboard" aria-label="Developer dashboard">⌂</button>
       <button class="explorer-header-btn" id="explorer-toggle" type="button" aria-label="Open file explorer" aria-controls="sidebar" aria-expanded="false" title="Open files and folders">▤ <span>Files</span></button>
+      <button class="explorer-header-btn output-header-btn" id="output-toggle" type="button" aria-label="Expand output panel" aria-controls="output-panel" aria-expanded="false" title="Open console, problems and execution output">▣ <span>Output</span></button>
       <button class="secondary-btn collab-header-link" id="collab-page-btn" type="button" title="Shared script workspace">◇ Scripts</button>
       <button class="secondary-btn feedback-top-link" id="feedback-page-btn" type="button" title="Suggestions and bug reports">◉ Feedback</button>
       <a class="secondary-btn server-exe-top" id="server-exe-download" href="https://github.com/SillyDev2026/Luau-Developer-Playground/releases/download/v3.3.0/LuauForge-Server-Windows-x64.exe" title="Download standalone Windows Node server EXE — no ZIP">↓ Server .exe</a>
       <button class="icon-btn header-secondary" id="palette-btn" title="Command palette · Ctrl+P" aria-label="Command palette">⌕</button>
       <button class="icon-btn header-secondary" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
       <button class="secondary-btn header-secondary" id="check-btn" title="Check Luau types">✓ Check</button>
-      <button class="secondary-btn stop-btn" id="stop-btn" disabled>■ Stop</button>
+      <button class="secondary-btn stop-btn" id="stop-btn" aria-label="Stop code execution" title="Stop running script" disabled>■ Stop</button>
       <button class="primary-btn" id="run-btn" title="Run current file · Ctrl+Enter">▶ <span>Run</span></button>
     </div>
   </header>
@@ -125,7 +126,7 @@
       <div class="sidebar-footer"><span class="profile-dot">LF</span><div><strong>Local workspace</strong><small id="save-status" role="status">Ready</small></div><span class="saved-check">✓</span></div>
       <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Resize explorer" tabindex="0"></div>
     </aside>
-    <main class="workspace-main">
+    <main class="workspace-main" id="workspace-main">
       <div class="editor-header"><div class="editor-heading"><span class="path-label">workspace</span><span class="breadcrumb-arrow">›</span><strong id="breadcrumb-file">main.luau</strong></div><div class="editor-tools"><button id="find-btn" title="Find and replace">⌕ <span>Find</span></button><button id="outline-btn" title="Symbol outline">☷ <span>Outline</span></button><button id="wrap-btn" title="Toggle word wrap">⇥ <span>Wrap</span></button><button id="settings-btn" title="Inspector and settings">⚙</button></div></div>
       <div id="tabs" class="tabs" role="tablist" aria-label="Open files"></div>
       <div id="find-panel" class="find-panel hidden"><input id="find-input" placeholder="Find in file" aria-label="Find" type="search"/><span id="find-counter">0 results</span><button id="find-next" title="Next match">↓</button><input id="replace-input" placeholder="Replace with" aria-label="Replacement text"/><button id="replace-all">Replace all</button><button id="find-close" aria-label="Close search">✕</button></div>
@@ -143,6 +144,7 @@
         </section>
         <div id="output-resizer" class="output-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabindex="0"></div>
         <section class="output-panel" id="output-panel" aria-label="Execution output and developer tools">
+          <div class="output-focus-heading"><strong>Execution output</strong><button id="output-back" type="button" aria-label="Return to code editor">← Editor</button></div>
           <div class="output-tabs" role="tablist" aria-label="Output panels"><button class="active" data-output="console">Console</button><button data-output="problems">Problems <span id="problem-count">0</span></button><button data-output="bytecode">Bytecode</button><button data-output="benchmarks">Benchmarks</button><button data-output="tests">Tests</button><button class="clear-output" id="clear-output" aria-label="Clear console" title="Clear output">⌫</button></div>
           <div class="output-content" id="output-content" aria-live="polite"></div>
         </section>
@@ -228,13 +230,13 @@
       </div>
     </aside>
   </div>
-  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button><button id="mobile-feedback" aria-label="Community feedback">◉<span>Feedback</span></button></nav>
+  <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation"><button id="mobile-dashboard" aria-label="Dashboard">⌂<span>Home</span></button><button id="mobile-files" aria-label="Files">▤<span>Files</span></button><button id="mobile-output" aria-label="Open output" aria-controls="output-panel" aria-expanded="false">▣<span>Output</span></button><button id="mobile-library" aria-label="Libraries">◇<span>Libraries</span></button><button id="mobile-run" class="active" aria-label="Run current file">▶<span>Run</span></button><button id="mobile-tools" aria-label="Developer tools">☷<span>Tools</span></button><button id="mobile-settings" aria-label="Settings">⚙<span>Settings</span></button><button id="mobile-collab" aria-label="Shared scripts">◇<span>Scripts</span></button><button id="mobile-feedback" aria-label="Community feedback">◉<span>Feedback</span></button></nav>
 </div>
 <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
   <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">Quick command</h2><button id="dialog-close" aria-label="Close dialog">✕</button></div><div id="dialog-body" class="dialog-body"></div></section>
 </div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <input id="file-picker" type="file" accept=".lua,.luau,.json,.txt,.zip" multiple hidden/>
-<script type="module" src="./src/v1.js?v=3.4.1"></script>
+<script type="module" src="./src/v1.js?v=3.4.2"></script>
 </body>
 </html>

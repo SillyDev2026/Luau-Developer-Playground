@@ -302,6 +302,7 @@ function openMobile(which) {
   updateExplorerToggle();
 }
 function openExplorer() {
+  setOutputExpanded(false);
   if (dashboard?.isOpen()) dashboard.close();
   collabUI?.close();
   feedbackUI?.close();
@@ -315,8 +316,29 @@ function openExplorer() {
     updateExplorerToggle();
   }
 }
-function openFile(path) { try { workspace.open(path); if (usesMobileNavigation()) closeMobile(); editor.input.focus(); } catch (error) { notify(error.message, true); } }
-function switchOutput(view) {
+// Output focus is independent from console data: logs remain when changing files.
+function setOutputExpanded(expanded) {
+  $('workspace-main').classList.toggle('output-expanded',expanded);
+  for(const id of ['output-toggle','mobile-output']) $(''+id).setAttribute('aria-expanded',String(expanded));
+  $('output-toggle').setAttribute('aria-label',expanded?'Return to code editor':'Expand output panel');
+  $('mobile-output').setAttribute('aria-label',expanded?'Return to code editor':'Open output');
+}
+function openOutput() {
+  if (dashboard?.isOpen()) dashboard.close();
+  collabUI?.close();
+  feedbackUI?.close();
+  closeMobile();
+  if (document.activeElement === editor.input) editor.input.blur();
+  setOutputExpanded(true);
+  $('output-back').focus();
+}
+function toggleOutput() {
+  if ($('workspace-main').classList.contains('output-expanded')) setOutputExpanded(false);
+  else openOutput();
+}
+function openFile(path) { try { workspace.open(path); closeMobile(); setOutputExpanded(false); if(!usesMobileNavigation())editor.input.focus(); } catch (error) { notify(error.message, true); } }
+function switchOutput(view, focusOnMobile=false) {
+  if(focusOnMobile && usesMobileNavigation())openOutput();
   state.output = view; preserveSettings();
   document.querySelectorAll('[data-output]').forEach(button => button.classList.toggle('active', button.dataset.output === view));
   renderOutputPanel();
@@ -366,7 +388,7 @@ function showRunError(error) { consoleLog(`Runtime: ${error instanceof Error ? e
 async function runCurrent() {
   if (state.busy) return;
   const token = ++state.runToken;
-  workspace.flush(); setBusy(true); switchOutput('console'); consoleLog(`▶ Running ${workspace.project.active} with Luau WASM...`, 'system');
+  workspace.flush(); setBusy(true); switchOutput('console',true); consoleLog(`▶ Running ${workspace.project.active} with Luau WASM...`, 'system');
   try {
     const { result, elapsed } = await runtime.run({ ...workspace.project, files: { ...workspace.project.files } });
     if (token !== state.runToken) return;
@@ -387,12 +409,12 @@ async function checkCurrent({ silent = false } = {}) {
     if (generation !== state.checking || workspace.revision !== revision || workspace.project.active !== filename) return;
     state.problems = normalizeDiagnostics(diagnostics); $('problem-count').textContent = String(state.problems.length);
     if (state.output === 'problems') renderOutputPanel();
-    if (!silent) { switchOutput('problems'); notify(state.problems.length ? `${state.problems.length} diagnostics` : 'No Luau diagnostics'); }
+    if (!silent) { switchOutput('problems',true); notify(state.problems.length ? `${state.problems.length} diagnostics` : 'No Luau diagnostics'); }
   } catch (error) { if (generation === state.checking && !silent) notify('Type check: ' + error.message, true); }
 }
 function liveDiagnostics() { clearTimeout(state.liveTimer); ++state.checking; if (state.liveCheck) state.liveTimer = setTimeout(() => checkCurrent({ silent: true }), 1200); }
 async function bytecodeCurrent() {
-  switchOutput('bytecode'); $('output-content').replaceChildren(createElement('div', 'Compiling Luau bytecode…', 'output-empty'));
+  switchOutput('bytecode',true); $('output-content').replaceChildren(createElement('div', 'Compiling Luau bytecode…', 'output-empty'));
   try { const { result } = await runtime.bytecode(workspace.project); state.bytecode = result.success ? result.bytecode : 'Compilation failed: ' + (result.error || 'Unknown error'); }
   catch (error) { state.bytecode = error.message; }
   renderOutputPanel();
@@ -406,7 +428,7 @@ function benchmarkPicker() {
 }
 async function runModuleBenchmark(name) {
   if (state.busy) return;
-  const token = ++state.runToken; setBusy(true); switchOutput('benchmarks');
+  const token = ++state.runToken; setBusy(true); switchOutput('benchmarks',true);
   $('output-content').replaceChildren(createElement('div', 'Benchmarking ' + name + ' inside Luau WASM…', 'output-empty'));
   try { const result = await runtime.benchmarkModule(workspace.project, name); if (token === state.runToken) { state.bench = result; renderOutputPanel(); } }
   catch (error) { if (token === state.runToken) notify('Benchmark: ' + error.message, true); }
@@ -416,7 +438,7 @@ async function runTests() {
   const files = findProjectTests(workspace.project);
   if (!files.length) { notify('Add a tests/*.luau or *.test.luau file first.', true); return; }
   if (state.busy) return;
-  const token = ++state.runToken; setBusy(true); state.tests = { passed: 0, failed: 0, results: [] }; switchOutput('tests');
+  const token = ++state.runToken; setBusy(true); state.tests = { passed: 0, failed: 0, results: [] }; switchOutput('tests',true);
   for (const path of files) {
     if (token !== state.runToken) return;
     try {
@@ -578,7 +600,7 @@ function initialize() {
   $('benchmark-btn').addEventListener('click', benchmarkPicker); $('test-btn').addEventListener('click', runTests); $('graph-btn').addEventListener('click', dependencyGraph);
   $('palette-btn').addEventListener('click', palette); $('outline-btn').addEventListener('click', () => { setSide('symbols'); openMobile('sidebar'); });
   $('theme-btn').addEventListener('click', toggleTheme); $('brand-home').addEventListener('click', () => dashboard?.open()); $('wrap-btn').addEventListener('click', toggleWrap);
-  $('settings-btn').addEventListener('click', () => openMobile('inspector')); $('hide-inspector').addEventListener('click', () => { closeMobile(); $('inspector').classList.add('is-hidden'); });
+  $('settings-btn').addEventListener('click', () => {setOutputExpanded(false);openMobile('inspector');}); $('hide-inspector').addEventListener('click', () => { closeMobile(); $('inspector').classList.add('is-hidden'); });
   $('mode-select').addEventListener('change', event => workspace.update({ mode: event.target.value }));
   $('optimization-select').addEventListener('change', event => workspace.update({ optimization: Number(event.target.value) }));
   $('font-slider').addEventListener('input', event => workspace.update({ fontSize: Number(event.target.value) }));
@@ -600,9 +622,12 @@ function initialize() {
   $('clear-output').addEventListener('click', () => { state.outputLogs = []; renderOutputPanel(); });
   $('mobile-files').addEventListener('click', openExplorer);
   $('explorer-toggle').addEventListener('click', openExplorer);
+  $('mobile-output').addEventListener('click', toggleOutput);
+  $('output-toggle').addEventListener('click', toggleOutput);
+  $('output-back').addEventListener('click',()=>setOutputExpanded(false));
   // Rotating a phone while a drawer is open must never leave a trapped shade.
-  matchMedia(MOBILE_NAV_QUERY).addEventListener?.('change', closeMobile);
-  $('mobile-library').addEventListener('click', () => { setSide('libraries'); openMobile('sidebar'); });
+  matchMedia(MOBILE_NAV_QUERY).addEventListener?.('change',()=>{closeMobile();setOutputExpanded(false);});
+  $('mobile-library').addEventListener('click', () => { setOutputExpanded(false); setSide('libraries'); openMobile('sidebar'); });
   $('mobile-tools').addEventListener('click', () => { switchOutput('benchmarks'); openMobile('inspector'); });
   $('mobile-settings').addEventListener('click', () => openMobile('inspector')); $('mobile-dashboard').addEventListener('click',()=>dashboard?.open());
   $('hide-sidebar').addEventListener('click', closeMobile); $('side-shade').addEventListener('click', closeMobile);
