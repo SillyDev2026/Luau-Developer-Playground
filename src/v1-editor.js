@@ -1,6 +1,7 @@
 import { highlightLuau } from './highlight.js';
 import { indentSelection, currentLineAndColumn, positionForLine } from './editor-utils.js';
 import { maskLuau } from './v15-analysis.js';
+import { sourceLines, gutterHeights, isWrappingInput } from './editor-line-layout.js';
 
 const PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
 export function newlineIndent(source, cursor) {
@@ -35,12 +36,22 @@ export class CodeEditor {
     this.source = null;
     this.raf = 0;
     this.lastGutterCount = -1;
+    this.lastGutterMode = 'plain';
+    this.wrapMirror = null;
+    this.lastWrapWidth = 0;
     input.addEventListener('input', () => { this.render(); this.onChange(input.value); this.onCursor(); });
     input.addEventListener('scroll', () => { highlight.parentElement.scrollTop = input.scrollTop; highlight.parentElement.scrollLeft = input.scrollLeft; gutter.scrollTop = input.scrollTop; });
     for (const type of ['click', 'keyup', 'select']) input.addEventListener(type, () => this.onCursor());
     input.addEventListener('keydown', event => this.keydown(event));
     // Android virtual keyboards may emit beforeinput without a reliable
     // keydown Enter. Use the same newline insertion as hardware keyboards.
+    // Resize may change how many screen rows a single source line occupies.
+    if(typeof ResizeObserver==='function'){
+      this.resizeObserver=new ResizeObserver(()=>{
+        if(isWrappingInput(this.input)&&this.input.clientWidth!==this.lastWrapWidth)this.syncLineNumbers();
+      });
+      this.resizeObserver.observe(input);
+    }
     input.addEventListener('beforeinput', event => {
       if ((event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph') && event.cancelable && !event.isComposing) {
         event.preventDefault();
@@ -62,12 +73,59 @@ export class CodeEditor {
   // Update the gutter before painting highlighted tokens. This also handles
   // Android IME events where the line count changes between animation frames.
   syncLineNumbers() {
-    const count = Math.min(this.input.value.split('\n').length, 10000);
-    if (count !== this.lastGutterCount) {
-      this.lastGutterCount = count;
-      this.gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+    const lines=sourceLines(this.input.value);
+    const count=lines.length;
+    const wrapping=isWrappingInput(this.input) && this.input.clientWidth>0 &&
+      typeof getComputedStyle==='function' && !!this.input.ownerDocument;
+    if(wrapping){
+      const doc=this.input.ownerDocument,computed=getComputedStyle(this.input);
+      if(!this.wrapMirror){
+        this.wrapMirror=doc.createElement('div');
+        this.wrapMirror.className='editor-wrap-mirror';
+        this.input.parentElement.append(this.wrapMirror);
+      }
+      const mirror=this.wrapMirror;
+      mirror.style.width=this.input.clientWidth+'px';
+      mirror.style.font=computed.font;
+      mirror.style.lineHeight=computed.lineHeight;
+      mirror.style.letterSpacing=computed.letterSpacing;
+      mirror.style.paddingLeft=computed.paddingLeft;
+      mirror.style.paddingRight=computed.paddingRight;
+      mirror.style.tabSize=computed.tabSize;
+      mirror.style.whiteSpace=computed.whiteSpace;
+      mirror.style.overflowWrap='anywhere';
+      this.lastWrapWidth=this.input.clientWidth;
+      // A div per logical line measures its actual wrapped row height. Blank
+      // lines still need one full line-height of vertical space.
+      const fragment=doc.createDocumentFragment();
+      for(const text of lines){
+        const row=doc.createElement('div');
+        row.textContent=text||'\u200b';
+        fragment.append(row);
+      }
+      mirror.replaceChildren(fragment);
+      const lineHeight=parseFloat(computed.lineHeight)||22;
+      const heights=gutterHeights(lines,(_,i)=>mirror.children[i].getBoundingClientRect().height,lineHeight);
+      const gutterFragment=doc.createDocumentFragment();
+      for(let i=0;i<count;i++){
+        const row=doc.createElement('div');
+        row.className='gutter-number-row';
+        row.textContent=String(i+1);
+        row.style.height=heights[i]+'px';
+        gutterFragment.append(row);
+      }
+      this.gutter.replaceChildren(gutterFragment);
+      this.lastGutterCount=count;
+      this.lastGutterMode='wrapped';
+    }else{
+      if(this.lastGutterMode!=='plain'||count!==this.lastGutterCount){
+        this.lastGutterCount=count;
+        this.gutter.textContent=Array.from({length:count},(_,i)=>i+1).join('\n');
+      }
+      this.lastGutterMode='plain';
+      if(this.wrapMirror)this.wrapMirror.replaceChildren();
     }
-    this.gutter.scrollTop = this.input.scrollTop;
+    this.gutter.scrollTop=this.input.scrollTop;
   }
   render() {
     this.syncLineNumbers();
