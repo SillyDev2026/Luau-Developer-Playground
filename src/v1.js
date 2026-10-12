@@ -237,7 +237,7 @@ function importLibrary(lib) {
 function metrics() {
   const p = workspace.project;
   $('project-metrics').textContent = `${Object.keys(p.files).length} files · ${formatBytes(projectSize(p))} · ${p.mode.toUpperCase()} · O${p.optimization}`;
-  $('font-value').textContent = p.fontSize + 'px'; $('font-label').textContent = (matchMedia('(max-width:820px)').matches ? Math.max(16,p.fontSize) : p.fontSize) + 'px';
+  $('font-value').textContent = p.fontSize + 'px'; $('font-label').textContent = (usesMobileNavigation() ? Math.max(16,p.fontSize) : p.fontSize) + 'px';
 }
 function refresh() {
   const p = workspace.project;
