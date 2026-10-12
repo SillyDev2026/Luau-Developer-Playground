@@ -1,3 +1,13 @@
+# LuauForge v3.4.2 — Mobile Explorer and Output navigation
+
+LuauForge now has **Files** and **Output** controls side by side in the top toolbar, as well as both destinations in the mobile bottom dock. This fixes a short-landscape Android issue where the Files drawer covered the editor and the Output console was too small to reach.
+
+Tap **Files** to browse scripts. Tap a file to return to the code editor without automatically opening Android's keyboard. Tap **Output** to dismiss the Explorer drawer and open a full-height result viewer with Console, Problems, Bytecode, Benchmarks and Tests. Tap **← Editor** or Output again to return to code. Running scripts, checking types, inspecting bytecode or executing benchmarks/tests on mobile automatically opens their matching results tab. Switching views does not clear output logs or modify saved code.
+
+This fix works in portrait and touch-device landscape. The v3.3.0 Windows Node server EXE download is unchanged.
+
+---
+
 # LuauForge v3.4.1 — Android phone Explorer fix
 
 When Chrome on a phone switches to landscape, the CSS viewport can be wider than 820px and the original mobile bottom navigation disappears. The responsive layout now detects short, coarse-pointer, touch-device landscape viewports as mobile, even if they are wide. The **Files** button in the top toolbar is a persistent second way to open Explorer; the bottom Files navigation opens the same panel. The full eight-button dock fits in landscape and scrolls horizontally on small portrait screens, with Files near the beginning.
