@@ -1,13 +1,11 @@
 {
-  "version": "3.4.5",
-  "title": "Fix incorrect line numbers when Luau code wraps on phone",
+  "version": "3.4.6",
+  "title": "Editor navigation, scrollbar alignment and large-module fixes",
   "publishedAt": "2026-10-12",
   "changes": [
-    "Fix Android editor gutter displaying line 6 beside the seventh actual source line when a long line wraps",
-    "Measure per-source-line visual height so wrapped statements reserve their extra rows before the next line number",
-    "Keep line counts based on real newlines: a seven-line script is numbered 1 through 7 even with soft wrapping",
-    "Automatically recalculate numbered gutter positions when the editor width, word wrap or font settings change",
-    "Synchronize Luau syntax highlighting and editable textarea wrap behavior while preserving all saved script contents",
-    "Add regression tests for wrapped lines, phone width changes and disabled word wrap"
+    "Go to line now reveals the correct source line after wrapped statements on narrow screens",
+    "Keep syntax highlighting aligned with the editable text when a desktop scrollbar occupies space",
+    "Show line numbers beyond line 10000 in large Luau modules",
+    "Add Chromium desktop and phone layout regressions plus large-file navigation tests"
   ]
 }
