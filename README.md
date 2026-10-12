@@ -1,3 +1,13 @@
+# LuauForge v3.4.4 — Android Enter and line numbers
+
+A soft-wrapped Luau line can appear on multiple screen rows even though it is still a single source line; its number should **not** increase until the source actually contains a newline. On Android phones, use your keyboard's Enter key or the new **↵ Enter** code-toolbar button to insert a real newline. The editor applies Luau indentation and immediately updates the line numbers and cursor indicator.
+
+This update handles Android's `insertParagraph` and `insertLineBreak` input events as well as hardware Enter, keeps the syntax highlighting and textarea in the same word-wrap mode, and shows **↪ Wrap on** when visual word wrapping is enabled. Use **Wrap** in the editor toolbar to switch between wrapping and horizontal scrolling. The code itself is not silently reflowed or changed when turning wrapping on or off.
+
+Your saved scripts, Files/Output navigation, imported Luau modules and published Windows server EXE are unchanged. Refresh the LuauForge website to load v3.4.4 and press ↵ Enter before the next statement if you want it to be a separate numbered line.
+
+---
+
 # LuauForge v3.4.3 — Mobile code-line alignment fix
 
 This patch synchronizes the line-number gutter, syntax-highlighted code, and actual Luau editor text using the same CSS line-height and top/bottom padding. On Android Chrome, portrait and landscape both use 16px minimum editor text to prevent unwanted browser zoom, along with consistent 11px top and 18px bottom padding and keyboard-friendly scroll padding. The previous mismatched 120px and 45px bottom padding values are removed, improving line positioning near the bottom of the editor.
