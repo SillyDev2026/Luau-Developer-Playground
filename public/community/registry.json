@@ -19,6 +19,18 @@
       "name": "MathKitTests",
       "environment": "wasm",
       "source": "community/tests/MathKitTests.luau"
+    },
+    {
+      "specifier": "@SillyDev2026/Luau-Developer-Playground/community/SignalLite.luau",
+      "name": "SignalLite",
+      "environment": "wasm",
+      "source": "community/SignalLite.luau"
+    },
+    {
+      "specifier": "@SillyDev2026/Luau-Developer-Playground/community/TableKit.luau",
+      "name": "TableKit",
+      "environment": "wasm",
+      "source": "community/TableKit.luau"
     }
   ]
 }
